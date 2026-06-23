@@ -30,10 +30,16 @@ public class MissionController {
         this.posteRepo = posteRepo;
     }
 
+    private void garnir(Model model) {
+        model.addAttribute("postes", posteRepo.findAll());
+        model.addAttribute("informaticiens", missionService.informaticiens());
+        model.addAttribute("tprData", missionService.tprData());
+    }
+
     @GetMapping("/missions/nouvelle")
     public String formulaire(Model model) {
         model.addAttribute("form", new CreationMissionForm());
-        model.addAttribute("postes", posteRepo.findAll());
+        garnir(model);
         return "mission-nouvelle";
     }
 
@@ -42,10 +48,10 @@ public class MissionController {
         try {
             Mission m = missionService.creer(form);
             return "redirect:/missions/" + m.getId();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | java.util.NoSuchElementException e) {
             model.addAttribute("form", form);
-            model.addAttribute("postes", posteRepo.findAll());
-            model.addAttribute("erreur", e.getMessage());
+            model.addAttribute("erreur", e.getMessage() != null ? e.getMessage() : "Données invalides.");
+            garnir(model);
             return "mission-nouvelle";
         }
     }

@@ -14,24 +14,47 @@
     <div class="card">
         <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
+
             <div class="form-row">
                 <label>TPR (poste) <span class="req">*</span></label>
-                <select id="posteId" th:field="*{posteId}" onchange="toggleNouveauTpr()">
+                <select th:field="*{posteId}">
                     <option value="">➕ Créer un nouveau TPR…</option>
                     <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.code + ' — ' + p.nom}"></option>
                 </select>
             </div>
-
             <div id="nouveau-tpr">
-                <div class="form-row"><label>Code du nouveau TPR <span class="req">*</span></label><input type="text" id="codePoste" th:field="*{codePoste}"/></div>
+                <div class="form-row"><label>Code du nouveau TPR <span class="req">*</span></label><input type="text" th:field="*{codePoste}"/></div>
                 <div class="form-row"><label>Nom du nouveau TPR</label><input type="text" th:field="*{nomPoste}"/></div>
             </div>
 
+            <div class="form-row">
+                <label>Chef de mission <span class="req">*</span></label>
+                <select th:field="*{chefMissionSel}">
+                    <option value="">➕ Ajouter un informaticien…</option>
+                    <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
+                </select>
+            </div>
+            <div id="nouveau-chefmission">
+                <div class="form-row"><label>Matricule (informaticien) <span class="req">*</span></label><input type="text" th:field="*{chefMissionMat}"/></div>
+                <div class="form-row"><label>Nom</label><input type="text" th:field="*{chefMissionNom}"/></div>
+                <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefMissionPrenom}"/></div>
+            </div>
+
+            <div class="form-row">
+                <label>Chef de poste (du TPR) <span class="req">*</span></label>
+                <select th:field="*{chefPosteSel}">
+                    <option value="">➕ Ajouter un agent…</option>
+                </select>
+            </div>
+            <div id="nouveau-chefposte">
+                <div class="form-row"><label>Matricule (agent du TPR) <span class="req">*</span></label><input type="text" th:field="*{chefPosteMat}"/></div>
+                <div class="form-row"><label>Nom</label><input type="text" th:field="*{chefPosteNom}"/></div>
+                <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefPostePrenom}"/></div>
+            </div>
+
             <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
-            <div class="form-row"><label>Date de début</label><input type="date" id="dateDebut" th:field="*{dateDebut}"/></div>
-            <div class="form-row"><label>Date de fin</label><input type="date" id="dateFin" th:field="*{dateFin}"/></div>
-            <div class="form-row"><label>Chef de mission (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefMission}" required/></div>
-            <div class="form-row"><label>Chef de poste (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefPoste}" required/></div>
+            <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
+            <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>
 
             <div class="toolbar" style="margin-top:1rem">
                 <button class="btn" type="submit">Créer la mission</button>
@@ -40,26 +63,36 @@
         </form>
     </div>
 
-    <script>
-        function toggleNouveauTpr() {
-            var sel = document.getElementById('posteId');
-            var div = document.getElementById('nouveau-tpr');
-            var code = document.getElementById('codePoste');
-            var creation = (sel.value === '' || sel.value == null);
-            div.style.display = creation ? 'block' : 'none';
-            if (code) code.required = creation;
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var TPR_DATA = /*[[${tprData}]]*/ {};
+        function _show(id, on){ var d=document.getElementById(id); if(d) d.style.display = on ? 'block' : 'none'; }
+        function _req(id, on){ var e=document.getElementById(id); if(e) e.required = on; }
+        function toggleNouveauTpr(){ var v=document.getElementById('posteId').value; _show('nouveau-tpr', v===''); _req('codePoste', v===''); }
+        function toggleChefMission(){ var v=document.getElementById('chefMissionSel').value; _show('nouveau-chefmission', v===''); _req('chefMissionMat', v===''); }
+        function toggleChefPoste(){ var v=document.getElementById('chefPosteSel').value; _show('nouveau-chefposte', v===''); _req('chefPosteMat', v===''); }
+        function majChefPoste(){
+            var posteId = document.getElementById('posteId').value;
+            var sel = document.getElementById('chefPosteSel');
+            sel.innerHTML = '';
+            var o0 = document.createElement('option'); o0.value=''; o0.textContent='➕ Ajouter un agent…'; sel.appendChild(o0);
+            var info = TPR_DATA[posteId];
+            if (info && info.agents) {
+                info.agents.forEach(function(a){
+                    var o=document.createElement('option'); o.value=a.matricule; o.textContent=a.libelle;
+                    if (info.dernierChef && a.matricule === info.dernierChef) { o.selected = true; }
+                    sel.appendChild(o);
+                });
+            }
+            toggleChefPoste();
         }
-        function majDateFinMin() {
-            var dd = document.getElementById('dateDebut');
-            var df = document.getElementById('dateFin');
-            if (dd && df) df.min = dd.value || '';
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            toggleNouveauTpr();
-            majDateFinMin();
-            var dd = document.getElementById('dateDebut');
-            if (dd) dd.addEventListener('change', majDateFinMin);
+        function majDateFinMin(){ var dd=document.getElementById('dateDebut'), df=document.getElementById('dateFin'); if(dd&&df) df.min = dd.value || ''; }
+        document.addEventListener('DOMContentLoaded', function(){
+            toggleNouveauTpr(); toggleChefMission(); majChefPoste(); majDateFinMin();
+            document.getElementById('posteId').addEventListener('change', function(){ toggleNouveauTpr(); majChefPoste(); });
+            var dd=document.getElementById('dateDebut'); if(dd) dd.addEventListener('change', majDateFinMin);
         });
+        /*]]>*/
     </script>
 </main>
 </body>
