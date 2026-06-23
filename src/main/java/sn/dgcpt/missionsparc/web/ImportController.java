@@ -1,5 +1,10 @@
 package sn.dgcpt.missionsparc.web;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +21,9 @@ import java.io.InputStream;
 @RequestMapping("/import")
 public class ImportController {
 
+    private static final String TYPE_XLSX =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
     private final ImportService importService;
 
     public ImportController(ImportService importService) {
@@ -25,6 +33,22 @@ public class ImportController {
     @GetMapping
     public String formulaire() {
         return "import";
+    }
+
+    @GetMapping("/guide")
+    public String guide() {
+        return "guide";
+    }
+
+    /** Télécharge un canevas vierge embarqué dans l'application. */
+    @GetMapping("/canevas")
+    public ResponseEntity<Resource> telechargerCanevas() {
+        Resource canevas = new ClassPathResource("canevas/canevas-vierge.xlsx");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"Canevas-Saisie-Mission-Parc.xlsx\"")
+                .contentType(MediaType.parseMediaType(TYPE_XLSX))
+                .body(canevas);
     }
 
     @PostMapping

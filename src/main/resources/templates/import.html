@@ -5,20 +5,30 @@
     <title>Import d'un canevas</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1 { color: #806000; }
-        .err { background: #fde0e0; border: 1px solid #c00; padding: .6rem;
-               border-radius: 4px; color: #900; }
+        h1, h2 { color: #806000; }
+        .err { background: #fde0e0; border: 1px solid #c00; padding: .6rem; border-radius: 4px; color: #900; }
+        .actions { margin: 1rem 0; }
+        a.btn { display: inline-block; background: #B8860B; color: #fff; padding: .5rem .9rem;
+                border-radius: 4px; text-decoration: none; margin-right: .6rem; }
         button { background: #B8860B; color: #fff; border: 0; padding: .6rem 1rem;
                  border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
     <h1>Importer un canevas</h1>
+
+    <div class="actions">
+        <a class="btn" th:href="@{/import/canevas}">Telecharger un canevas vierge</a>
+        <a th:href="@{/import/guide}">Guide d'utilisation</a>
+    </div>
+
+    <h2>Analyser un canevas rempli</h2>
     <p th:if="${erreur}" class="err" th:text="${erreur}">erreur</p>
     <form method="post" th:action="@{/import}" enctype="multipart/form-data">
         <p><input type="file" name="fichier" accept=".xlsx" required/></p>
         <p><button type="submit">Analyser</button></p>
     </form>
+
     <p><a th:href="@{/}">Retour a l'accueil</a></p>
 </body>
 </html>
