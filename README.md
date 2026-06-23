@@ -28,3 +28,26 @@ Un **mode hors-ligne** (canevas Excel) permet la saisie en cas de coupure résea
 ## Statut
 
 Phase de conception terminée. Prochaine étape : développement (squelette Spring Boot, entités JPA).
+
+## Développement
+
+Projet Spring Boot (Java 17, Maven).
+
+### Pré-requis
+- JDK 17+
+- Maven 3.9+
+- PostgreSQL 12+ (base `missions_parc`)
+
+### Configuration
+Adapter `src/main/resources/application.properties` (URL, utilisateur et mot de passe de la base).
+
+### Lancer
+    mvn spring-boot:run
+
+Au démarrage, **Flyway** applique la migration `db/migration/V1__schema_initial.sql` (tables et référentiels), puis l'application est disponible sur http://localhost:8080.
+
+### Structure
+- `domain/` — entités JPA et énumérations
+- `repository/` — accès aux données (Spring Data JPA)
+- `web/` — contrôleurs
+- `config/` — configuration (sécurité)
