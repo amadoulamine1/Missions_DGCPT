@@ -76,9 +76,9 @@
     <table th:if="${!canevas.equipementsReseau.isEmpty()}">
         <thead><tr><th>N° inv.</th><th>Type</th><th>Nom</th><th>Modèle</th><th>MAC</th><th>IP</th></tr></thead>
         <tbody>
-            <tr th:each="eq : ${canevas.equipementsReseau}">
-                <td th:text="${eq.numeroInventaire}"></td><td th:text="${eq.type}"></td><td th:text="${eq.nom}"></td>
-                <td th:text="${eq.modele}"></td><td th:text="${eq.mac}"></td><td th:text="${eq.ip}"></td>
+            <tr th:each="er : ${canevas.equipementsReseau}">
+                <td th:text="${er.numeroInventaire}"></td><td th:text="${er.type}"></td><td th:text="${er.nom}"></td>
+                <td th:text="${er.modele}"></td><td th:text="${er.mac}"></td><td th:text="${er.ip}"></td>
             </tr>
         </tbody>
     </table>
