@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Gestion des missions et du parc - DGCPT</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1 { color: #806000; }
+        a.btn { display: inline-block; background: #B8860B; color: #fff;
+                padding: .6rem 1rem; border-radius: 4px; text-decoration: none; }
+    </style>
 </head>
 <body>
     <h1>Gestion des missions et du parc informatique - DGCPT</h1>
     <p>Application en cours de developpement.</p>
+    <p><a class="btn" th:href="@{/import}">Importer un canevas</a></p>
 </body>
 </html>
