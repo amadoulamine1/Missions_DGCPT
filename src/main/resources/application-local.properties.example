@@ -1,0 +1,6 @@
+# Copiez ce fichier en "application-local.properties" (meme dossier) et adaptez.
+# Ce fichier-la n'est PAS versionne et ne sera jamais ecrase.
+spring.datasource.url=jdbc:postgresql://localhost:5432/missions_parc
+spring.datasource.username=postgres
+spring.datasource.password=VOTRE_MOT_DE_PASSE
+server.port=8089

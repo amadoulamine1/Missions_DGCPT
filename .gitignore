@@ -19,3 +19,7 @@ target/
 .settings/
 .project
 .classpath
+
+# Configuration locale (non versionnee)
+application-local.properties
+*copy*.properties
