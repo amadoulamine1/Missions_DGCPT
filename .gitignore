@@ -7,3 +7,15 @@ Thumbs.db
 
 # Dossier de configuration locale
 .claude/
+
+# Build Java / Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
