@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import sn.dgcpt.missionsparc.domain.Mission;
 import sn.dgcpt.missionsparc.mission.CreationMissionForm;
 import sn.dgcpt.missionsparc.mission.MissionService;
+import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 import java.io.IOException;
 
@@ -22,14 +23,17 @@ public class MissionController {
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     private final MissionService missionService;
+    private final PosteRepository posteRepo;
 
-    public MissionController(MissionService missionService) {
+    public MissionController(MissionService missionService, PosteRepository posteRepo) {
         this.missionService = missionService;
+        this.posteRepo = posteRepo;
     }
 
     @GetMapping("/missions/nouvelle")
     public String formulaire(Model model) {
         model.addAttribute("form", new CreationMissionForm());
+        model.addAttribute("postes", posteRepo.findAll());
         return "mission-nouvelle";
     }
 

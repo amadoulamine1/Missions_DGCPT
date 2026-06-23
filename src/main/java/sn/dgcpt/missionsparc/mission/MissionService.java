@@ -7,6 +7,7 @@ import sn.dgcpt.missionsparc.domain.Poste;
 import sn.dgcpt.missionsparc.domain.StatutMission;
 import sn.dgcpt.missionsparc.domain.TypeAgent;
 import sn.dgcpt.missionsparc.repository.MissionRepository;
+import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -24,18 +25,24 @@ public class MissionService {
     };
 
     private final MissionRepository missionRepo;
+    private final PosteRepository posteRepo;
     private final ReferentielService referentiel;
     private final CanevasWriter canevasWriter;
 
-    public MissionService(MissionRepository missionRepo, ReferentielService referentiel, CanevasWriter canevasWriter) {
+    public MissionService(MissionRepository missionRepo, PosteRepository posteRepo,
+                          ReferentielService referentiel, CanevasWriter canevasWriter) {
         this.missionRepo = missionRepo;
+        this.posteRepo = posteRepo;
         this.referentiel = referentiel;
         this.canevasWriter = canevasWriter;
     }
 
     @Transactional
     public Mission creer(CreationMissionForm f) {
-        Poste poste = referentiel.resoudrePoste(f.getCodePoste(), f.getNomPoste());
+        Poste poste = (f.getPosteId() != null)
+                ? posteRepo.findById(f.getPosteId()).orElseThrow()
+                : referentiel.resoudrePoste(f.getCodePoste(), f.getNomPoste());
+
         Mission m = new Mission();
         m.setReference(genererReference());
         m.setObjet((f.getObjet() == null || f.getObjet().isBlank()) ? "(mission)" : f.getObjet().trim());

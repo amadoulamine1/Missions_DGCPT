@@ -1,7 +1,12 @@
 package sn.dgcpt.missionsparc.mission;
 
 public class CreationMissionForm {
-    private String codePoste, nomPoste, objet, dateDebut, dateFin, chefMission, chefPoste;
+    private Integer posteId;            // TPR existant choisi (null = créer un nouveau)
+    private String codePoste, nomPoste; // nouveau TPR
+    private String objet, dateDebut, dateFin, chefMission, chefPoste;
+
+    public Integer getPosteId() { return posteId; }
+    public void setPosteId(Integer posteId) { this.posteId = posteId; }
     public String getCodePoste() { return codePoste; }
     public void setCodePoste(String codePoste) { this.codePoste = codePoste; }
     public String getNomPoste() { return nomPoste; }

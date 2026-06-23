@@ -13,19 +13,43 @@
     <p class="muted">Le N° de mission est généré automatiquement. Vous pourrez ensuite télécharger le canevas pré-rempli à distribuer aux agents.</p>
     <div class="card">
         <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
-            <div class="form-row"><label>Code poste <span class="req">*</span></label><input type="text" th:field="*{codePoste}" required/></div>
-            <div class="form-row"><label>Nom du poste</label><input type="text" th:field="*{nomPoste}"/></div>
+            <div class="form-row">
+                <label>TPR (poste) <span class="req">*</span></label>
+                <select id="posteId" th:field="*{posteId}" onchange="toggleNouveauTpr()">
+                    <option value="">➕ Créer un nouveau TPR…</option>
+                    <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.code + ' — ' + p.nom}"></option>
+                </select>
+            </div>
+
+            <div id="nouveau-tpr">
+                <div class="form-row"><label>Code du nouveau TPR <span class="req">*</span></label><input type="text" id="codePoste" th:field="*{codePoste}"/></div>
+                <div class="form-row"><label>Nom du nouveau TPR</label><input type="text" th:field="*{nomPoste}"/></div>
+            </div>
+
             <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
             <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
             <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>
             <div class="form-row"><label>Chef de mission (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefMission}" required/></div>
             <div class="form-row"><label>Chef de poste (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefPoste}" required/></div>
+
             <div class="toolbar" style="margin-top:1rem">
                 <button class="btn" type="submit">Créer la mission</button>
                 <a class="btn secondary" th:href="@{/missions}">Annuler</a>
             </div>
         </form>
     </div>
+
+    <script>
+        function toggleNouveauTpr() {
+            var sel = document.getElementById('posteId');
+            var div = document.getElementById('nouveau-tpr');
+            var code = document.getElementById('codePoste');
+            var creation = (sel.value === '' || sel.value == null);
+            div.style.display = creation ? 'block' : 'none';
+            if (code) code.required = creation;
+        }
+        document.addEventListener('DOMContentLoaded', toggleNouveauTpr);
+    </script>
 </main>
 </body>
 </html>
