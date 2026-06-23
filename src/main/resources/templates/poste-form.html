@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Poste</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1 th:text="${mode == 'creation'} ? 'Nouveau poste' : 'Modifier le poste'">Poste</h1>
+    <div class="card">
+        <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
+        <form method="post"
+              th:action="${form.id != null} ? @{/postes/{id}(id=${form.id})} : @{/postes}"
+              th:object="${form}">
+            <div class="form-row"><label>Code <span class="req">*</span></label><input type="text" th:field="*{code}" required/></div>
+            <div class="form-row"><label>Nom <span class="req">*</span></label><input type="text" th:field="*{nom}" required/></div>
+            <div class="form-row"><label>Région</label><input type="text" th:field="*{region}"/></div>
+            <div class="toolbar" style="margin-top:1rem">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn secondary" th:href="@{/postes}">Annuler</a>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

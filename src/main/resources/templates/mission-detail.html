@@ -1,54 +1,48 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head><meta charset="UTF-8"/><title>Mission</title>
-<style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1, h2 { color: #806000; }
-        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
-        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
-        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
-        th { background: #B8860B; color: #fff; }
-        a { color: #806000; }
-        nav a { margin-right: 1rem; }
-        .meta { color: #555; }
-    </style>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Mission</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
-    <h1 th:text="${d.mission.reference}">Mission</h1>
-    <p class="meta">
-        Objet : <span th:text="${d.mission.objet}"></span> —
-        Poste : <span th:text="${d.mission.posteNom}"></span> —
-        Période : <span th:text="${d.mission.periode}"></span> —
-        Statut : <strong th:text="${d.mission.statut}"></strong>
-    </p>
-    <p class="meta">
-        Chef de mission : <span th:text="${d.chefMission}"></span> —
-        Chef de poste (figé) : <span th:text="${d.chefPoste}"></span>
-    </p>
-
-    <p><a th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger le canevas pré-rempli de cette mission</a></p>
-
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <div class="toolbar">
+        <h1 style="margin:0" th:text="${d.mission.reference}">Mission</h1>
+        <span class="spacer"></span>
+        <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Canevas pré-rempli</a>
+    </div>
+    <div class="card">
+        <table class="kv">
+            <tr><td class="k">Objet</td><td th:text="${d.mission.objet}"></td></tr>
+            <tr><td class="k">Poste</td><td th:text="${d.mission.posteNom}"></td></tr>
+            <tr><td class="k">Période</td><td th:text="${d.mission.periode}"></td></tr>
+            <tr><td class="k">Statut</td><td><span class="badge" th:classappend="${d.mission.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${d.mission.statut}"></span></td></tr>
+            <tr><td class="k">Chef de mission</td><td th:text="${d.chefMission}"></td></tr>
+            <tr><td class="k">Chef de poste (figé)</td><td th:text="${d.chefPoste}"></td></tr>
+        </table>
+    </div>
     <h2>Relevé réseau</h2>
-    <p>
-        État du câblage : <strong th:text="${d.etatCablage}"></strong> —
-        Catégorie de câble : <strong th:text="${d.categorieCable}"></strong>
-    </p>
-
+    <div class="card">
+        <table class="kv">
+            <tr><td class="k">État du câblage</td><td th:text="${d.etatCablage}"></td></tr>
+            <tr><td class="k">Catégorie de câble</td><td th:text="${d.categorieCable}"></td></tr>
+        </table>
+    </div>
     <h2>Inventaire relevé (photo datée)</h2>
-    <table>
+    <table class="table">
         <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Saisi par</th><th>Zone</th><th>Date</th></tr></thead>
         <tbody>
             <tr th:each="r : ${d.releves}">
-                <td th:text="${r.numeroInventaire}"></td>
-                <td th:text="${r.typeMateriel}"></td>
-                <td th:text="${r.nomMateriel}"></td>
-                <td th:text="${r.agentSaisisseur}"></td>
-                <td th:text="${r.zone}"></td>
-                <td th:text="${r.dateReleve}"></td>
+                <td th:text="${r.numeroInventaire}"></td><td th:text="${r.typeMateriel}"></td><td th:text="${r.nomMateriel}"></td>
+                <td th:text="${r.agentSaisisseur}"></td><td th:text="${r.zone}"></td><td th:text="${r.dateReleve}"></td>
             </tr>
-            <tr th:if="${d.releves.isEmpty()}"><td colspan="6">Aucun relevé.</td></tr>
+            <tr th:if="${d.releves.isEmpty()}"><td colspan="6" class="empty">Aucun relevé.</td></tr>
         </tbody>
     </table>
-    <p><a th:href="@{/missions}">Liste des missions</a> · <a th:href="@{/}">Accueil</a></p>
+    <p style="margin-top:1rem"><a th:href="@{/missions}">← Liste des missions</a></p>
+</main>
 </body>
 </html>

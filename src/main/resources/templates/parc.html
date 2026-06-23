@@ -1,34 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head><meta charset="UTF-8"/><title>Parc</title>
-<style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1, h2 { color: #806000; }
-        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
-        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
-        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
-        th { background: #B8860B; color: #fff; }
-        a { color: #806000; }
-        nav a { margin-right: 1rem; }
-        .meta { color: #555; }
-    </style>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Parc</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
     <h1>Inventaire du parc</h1>
-    <p class="meta">Total : <span th:text="${materiels.size()}"></span> matériel(s)</p>
-    <table>
+    <p class="muted">Total : <span th:text="${materiels.size()}">0</span> matériel(s)</p>
+    <table class="table">
         <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th></tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
-                <td th:text="${m.numeroInventaire}"></td>
-                <td th:text="${m.type}"></td>
-                <td th:text="${m.nom}"></td>
-                <td th:text="${m.modele}"></td>
-                <td th:text="${m.posteNom}"></td>
+                <td th:text="${m.numeroInventaire}"></td><td th:text="${m.type}"></td>
+                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td>
             </tr>
-            <tr th:if="${materiels.isEmpty()}"><td colspan="5">Parc vide.</td></tr>
+            <tr th:if="${materiels.isEmpty()}"><td colspan="5" class="empty">Parc vide.</td></tr>
         </tbody>
     </table>
-    <p><a th:href="@{/}">Accueil</a></p>
+</main>
 </body>
 </html>

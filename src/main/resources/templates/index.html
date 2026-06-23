@@ -2,31 +2,23 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8"/>
-    <title>Gestion des missions et du parc - DGCPT</title>
-<style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1, h2 { color: #806000; }
-        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
-        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
-        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
-        th { background: #B8860B; color: #fff; }
-        a { color: #806000; }
-        nav a { margin-right: 1rem; }
-        .meta { color: #555; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Accueil</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
-    <h1>Gestion des missions et du parc informatique - DGCPT</h1>
-    <h2>Consultation</h2>
-    <nav>
-        <a th:href="@{/postes}">Postes</a>
-        <a th:href="@{/parc}">Parc</a>
-        <a th:href="@{/missions}">Missions</a>
-    </nav>
-    <h2>Import</h2>
-    <nav>
-        <a th:href="@{/import}">Importer un canevas</a>
-        <a th:href="@{/import/guide}">Guide d'utilisation</a>
-    </nav>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>Gestion des missions et du parc informatique</h1>
+    <p class="muted">Direction Générale de la Comptabilité Publique et du Trésor (DGCPT)</p>
+    <div class="grid" style="margin-top:1rem">
+        <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
+        <a class="tile" th:href="@{/parc}"><h3>Parc</h3><p>Inventaire complet du matériel.</p></a>
+        <a class="tile" th:href="@{/missions}"><h3>Missions</h3><p>Missions et relevés datés.</p></a>
+        <a class="tile" th:href="@{/missions/nouvelle}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
+        <a class="tile" th:href="@{/import}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
+        <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
+    </div>
+</main>
 </body>
 </html>

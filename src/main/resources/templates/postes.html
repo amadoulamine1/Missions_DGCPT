@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head><meta charset="UTF-8"/><title>Postes</title>
-<style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1, h2 { color: #806000; }
-        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
-        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
-        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
-        th { background: #B8860B; color: #fff; }
-        a { color: #806000; }
-        nav a { margin-right: 1rem; }
-        .meta { color: #555; }
-    </style>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Postes</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
-    <h1>Postes régionaux</h1>
-    <table>
-        <thead><tr><th>Code</th><th>Nom</th><th>Région</th><th>Nb matériel</th></tr></thead>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <div class="toolbar">
+        <h1 style="margin:0">Postes régionaux</h1>
+        <span class="spacer"></span>
+        <a class="btn" th:href="@{/postes/nouveau}">+ Nouveau poste</a>
+    </div>
+    <table class="table">
+        <thead><tr><th>Code</th><th>Nom</th><th>Région</th><th>Matériel</th><th>Actions</th></tr></thead>
         <tbody>
             <tr th:each="p : ${postes}">
                 <td th:text="${p.code}"></td>
                 <td><a th:href="@{/postes/{id}(id=${p.id})}" th:text="${p.nom}"></a></td>
                 <td th:text="${p.region}"></td>
-                <td th:text="${p.nbMateriel}"></td>
+                <td><span class="badge gold" th:text="${p.nbMateriel}">0</span></td>
+                <td><a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}">Modifier</a></td>
             </tr>
-            <tr th:if="${postes.isEmpty()}"><td colspan="4">Aucun poste.</td></tr>
+            <tr th:if="${postes.isEmpty()}"><td colspan="5" class="empty">Aucun poste enregistré.</td></tr>
         </tbody>
     </table>
-    <p><a th:href="@{/}">Accueil</a></p>
+</main>
 </body>
 </html>

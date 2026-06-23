@@ -2,30 +2,30 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Nouvelle mission</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1 { color: #806000; }
-        label { display: inline-block; width: 240px; }
-        input { padding: .3rem; width: 260px; }
-        p { margin: .5rem 0; }
-        button { background: #B8860B; color: #fff; border: 0; padding: .6rem 1.2rem; border-radius: 4px; cursor: pointer; margin-top: .6rem; }
-        .req { color: #c00; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
     <h1>Nouvelle mission</h1>
-    <p>Le <strong>N° de mission</strong> est généré automatiquement. Vous pourrez ensuite télécharger le canevas pré-rempli à distribuer aux agents.</p>
-    <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
-        <p><label>Code poste <span class="req">*</span></label><input type="text" th:field="*{codePoste}" required/></p>
-        <p><label>Nom du poste</label><input type="text" th:field="*{nomPoste}"/></p>
-        <p><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></p>
-        <p><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></p>
-        <p><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></p>
-        <p><label>Chef de mission (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefMission}" required/></p>
-        <p><label>Chef de poste (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefPoste}" required/></p>
-        <button type="submit">Créer la mission</button>
-    </form>
-    <p><a th:href="@{/missions}">Liste des missions</a> · <a th:href="@{/}">Accueil</a></p>
+    <p class="muted">Le N° de mission est généré automatiquement. Vous pourrez ensuite télécharger le canevas pré-rempli à distribuer aux agents.</p>
+    <div class="card">
+        <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
+            <div class="form-row"><label>Code poste <span class="req">*</span></label><input type="text" th:field="*{codePoste}" required/></div>
+            <div class="form-row"><label>Nom du poste</label><input type="text" th:field="*{nomPoste}"/></div>
+            <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
+            <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
+            <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>
+            <div class="form-row"><label>Chef de mission (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefMission}" required/></div>
+            <div class="form-row"><label>Chef de poste (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefPoste}" required/></div>
+            <div class="toolbar" style="margin-top:1rem">
+                <button class="btn" type="submit">Créer la mission</button>
+                <a class="btn secondary" th:href="@{/missions}">Annuler</a>
+            </div>
+        </form>
+    </div>
+</main>
 </body>
 </html>

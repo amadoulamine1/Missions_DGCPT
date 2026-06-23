@@ -2,139 +2,104 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Aperçu de l'import</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
-        h1, h2 { color: #806000; }
-        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.6rem; }
-        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
-        th, td { border: 1px solid #d6b656; padding: .35rem .55rem; text-align: left; font-size: .88rem; }
-        th { background: #B8860B; color: #fff; }
-        table.kv th { width: 220px; }
-        .err { background: #fde0e0; border: 1px solid #c00; padding: .6rem; border-radius: 4px; color: #900; }
-        .ok { background: #e6f4e6; border: 1px solid #3a3; padding: .6rem; border-radius: 4px; color: #161; }
-        .ko { background: #fdf0d0; border: 1px solid #B8860B; padding: .6rem; border-radius: 4px; }
-        .BLOQUANT { color: #c00; font-weight: bold; }
-        .AVERTISSEMENT { color: #B8860B; font-weight: bold; }
-        button { background: #B8860B; color: #fff; border: 0; padding: .6rem 1.2rem; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-        a.lien { margin-left: 1rem; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
     <h1>Aperçu de l'import</h1>
-    <p th:if="${erreur}" class="err" th:text="${erreur}">erreur</p>
-    <p>Fichier : <strong th:text="${nomFichier}">fichier.xlsx</strong></p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
+    <p class="muted">Fichier : <strong th:text="${nomFichier}">fichier.xlsx</strong></p>
 
     <h2>En-tête de la mission</h2>
-    <table class="kv">
-        <tr><th>N° de mission</th><td th:text="${canevas.entete.reference}"></td></tr>
-        <tr><th>Code poste</th><td th:text="${canevas.entete.codePoste}"></td></tr>
-        <tr><th>Objet</th><td th:text="${canevas.entete.objet}"></td></tr>
-        <tr><th>Agent saisisseur</th><td th:text="${canevas.entete.agentSaisisseur}"></td></tr>
-        <tr><th>Zone</th><td th:text="${canevas.entete.zone}"></td></tr>
-        <tr><th>État du câblage</th><td th:text="${canevas.entete.etatCablage}"></td></tr>
-        <tr><th>Catégorie de câble</th><td th:text="${canevas.entete.categorieCable}"></td></tr>
-    </table>
+    <div class="card"><table class="kv">
+        <tr><td class="k">N° de mission</td><td th:text="${canevas.entete.reference}"></td></tr>
+        <tr><td class="k">Code poste</td><td th:text="${canevas.entete.codePoste}"></td></tr>
+        <tr><td class="k">Objet</td><td th:text="${canevas.entete.objet}"></td></tr>
+        <tr><td class="k">Agent saisisseur</td><td th:text="${canevas.entete.agentSaisisseur}"></td></tr>
+        <tr><td class="k">Zone</td><td th:text="${canevas.entete.zone}"></td></tr>
+        <tr><td class="k">État du câblage</td><td th:text="${canevas.entete.etatCablage}"></td></tr>
+        <tr><td class="k">Catégorie de câble</td><td th:text="${canevas.entete.categorieCable}"></td></tr>
+    </table></div>
 
     <h2>Données à charger</h2>
-    <p>
-        Ordinateurs : <strong th:text="${canevas.ordinateurs.size()}">0</strong> &middot;
-        Imprimantes : <strong th:text="${canevas.imprimantes.size()}">0</strong> &middot;
-        Switchs/AP : <strong th:text="${canevas.equipementsReseau.size()}">0</strong> &middot;
-        Scanners : <strong th:text="${canevas.scanners.size()}">0</strong> &middot;
-        Membres : <strong th:text="${canevas.membres.size()}">0</strong>
+    <p class="muted">
+        Ordinateurs <strong th:text="${canevas.ordinateurs.size()}">0</strong> ·
+        Imprimantes <strong th:text="${canevas.imprimantes.size()}">0</strong> ·
+        Switchs/AP <strong th:text="${canevas.equipementsReseau.size()}">0</strong> ·
+        Scanners <strong th:text="${canevas.scanners.size()}">0</strong> ·
+        Membres <strong th:text="${canevas.membres.size()}">0</strong>
     </p>
 
     <h3 th:if="${!canevas.ordinateurs.isEmpty()}">Ordinateurs</h3>
-    <table th:if="${!canevas.ordinateurs.isEmpty()}">
+    <table class="table" th:if="${!canevas.ordinateurs.isEmpty()}">
         <thead><tr><th>N° inv.</th><th>Nom machine</th><th>Modèle</th><th>MAC eth.</th><th>MAC wifi</th><th>Attributaire</th><th>Installateur</th></tr></thead>
-        <tbody>
-            <tr th:each="o : ${canevas.ordinateurs}">
-                <td th:text="${o.numeroInventaire}"></td>
-                <td th:text="${o.nomMachine}"></td>
-                <td th:text="${o.modele}"></td>
-                <td th:text="${o.macEthernet}"></td>
-                <td th:text="${o.macWifi}"></td>
-                <td th:text="${o.agentAttributaire}"></td>
-                <td th:text="${o.agentInstallateur}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="o : ${canevas.ordinateurs}">
+            <td th:text="${o.numeroInventaire}"></td><td th:text="${o.nomMachine}"></td><td th:text="${o.modele}"></td>
+            <td th:text="${o.macEthernet}"></td><td th:text="${o.macWifi}"></td><td th:text="${o.agentAttributaire}"></td><td th:text="${o.agentInstallateur}"></td>
+        </tr></tbody>
     </table>
 
     <h3 th:if="${!canevas.imprimantes.isEmpty()}">Imprimantes</h3>
-    <table th:if="${!canevas.imprimantes.isEmpty()}">
+    <table class="table" th:if="${!canevas.imprimantes.isEmpty()}">
         <thead><tr><th>N° inv.</th><th>Nom</th><th>Modèle</th><th>MAC</th><th>IP</th></tr></thead>
-        <tbody>
-            <tr th:each="i : ${canevas.imprimantes}">
-                <td th:text="${i.numeroInventaire}"></td><td th:text="${i.nom}"></td><td th:text="${i.modele}"></td>
-                <td th:text="${i.mac}"></td><td th:text="${i.ip}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="i : ${canevas.imprimantes}">
+            <td th:text="${i.numeroInventaire}"></td><td th:text="${i.nom}"></td><td th:text="${i.modele}"></td><td th:text="${i.mac}"></td><td th:text="${i.ip}"></td>
+        </tr></tbody>
     </table>
 
     <h3 th:if="${!canevas.equipementsReseau.isEmpty()}">Switchs et access points</h3>
-    <table th:if="${!canevas.equipementsReseau.isEmpty()}">
+    <table class="table" th:if="${!canevas.equipementsReseau.isEmpty()}">
         <thead><tr><th>N° inv.</th><th>Type</th><th>Nom</th><th>Modèle</th><th>MAC</th><th>IP</th></tr></thead>
-        <tbody>
-            <tr th:each="er : ${canevas.equipementsReseau}">
-                <td th:text="${er.numeroInventaire}"></td><td th:text="${er.type}"></td><td th:text="${er.nom}"></td>
-                <td th:text="${er.modele}"></td><td th:text="${er.mac}"></td><td th:text="${er.ip}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="er : ${canevas.equipementsReseau}">
+            <td th:text="${er.numeroInventaire}"></td><td th:text="${er.type}"></td><td th:text="${er.nom}"></td><td th:text="${er.modele}"></td><td th:text="${er.mac}"></td><td th:text="${er.ip}"></td>
+        </tr></tbody>
     </table>
 
     <h3 th:if="${!canevas.scanners.isEmpty()}">Scanners de chèque</h3>
-    <table th:if="${!canevas.scanners.isEmpty()}">
+    <table class="table" th:if="${!canevas.scanners.isEmpty()}">
         <thead><tr><th>N° inv.</th><th>Numéro de série</th><th>Marque</th><th>Modèle</th></tr></thead>
-        <tbody>
-            <tr th:each="s : ${canevas.scanners}">
-                <td th:text="${s.numeroInventaire}"></td><td th:text="${s.numeroSerie}"></td>
-                <td th:text="${s.marque}"></td><td th:text="${s.modele}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="s : ${canevas.scanners}">
+            <td th:text="${s.numeroInventaire}"></td><td th:text="${s.numeroSerie}"></td><td th:text="${s.marque}"></td><td th:text="${s.modele}"></td>
+        </tr></tbody>
     </table>
 
     <h3 th:if="${!canevas.membres.isEmpty()}">Membres de la mission</h3>
-    <table th:if="${!canevas.membres.isEmpty()}">
+    <table class="table" th:if="${!canevas.membres.isEmpty()}">
         <thead><tr><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Fonction</th></tr></thead>
-        <tbody>
-            <tr th:each="m : ${canevas.membres}">
-                <td th:text="${m.matricule}"></td><td th:text="${m.nom}"></td>
-                <td th:text="${m.prenom}"></td><td th:text="${m.fonction}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="m : ${canevas.membres}">
+            <td th:text="${m.matricule}"></td><td th:text="${m.nom}"></td><td th:text="${m.prenom}"></td><td th:text="${m.fonction}"></td>
+        </tr></tbody>
     </table>
 
     <h2>Contrôles</h2>
-    <p>
-        Lignes lues : <span th:text="${rapport.lignesLues}">0</span> &mdash;
-        Bloquants : <span th:text="${rapport.nbBloquants()}">0</span> &mdash;
-        Avertissements : <span th:text="${rapport.nbAvertissements()}">0</span>
+    <p class="muted">
+        Lignes lues <strong th:text="${rapport.lignesLues}">0</strong> ·
+        Bloquants <strong th:text="${rapport.nbBloquants()}">0</strong> ·
+        Avertissements <strong th:text="${rapport.nbAvertissements()}">0</strong>
     </p>
-    <table th:if="${!rapport.anomalies.isEmpty()}">
+    <table class="table" th:if="${!rapport.anomalies.isEmpty()}">
         <thead><tr><th>Sévérité</th><th>Onglet</th><th>Ligne</th><th>Message</th></tr></thead>
-        <tbody>
-            <tr th:each="a : ${rapport.anomalies}">
-                <td th:text="${a.severite}" th:classappend="${a.severite}"></td>
-                <td th:text="${a.onglet}"></td>
-                <td th:text="${a.ligne}"></td>
-                <td th:text="${a.message}"></td>
-            </tr>
-        </tbody>
+        <tbody><tr th:each="a : ${rapport.anomalies}">
+            <td th:text="${a.severite}" th:classappend="${a.severite}"></td><td th:text="${a.onglet}"></td><td th:text="${a.ligne}"></td><td th:text="${a.message}"></td>
+        </tr></tbody>
     </table>
-    <p th:if="${rapport.anomalies.isEmpty()}">Aucune anomalie détectée.</p>
+    <p th:if="${rapport.anomalies.isEmpty()}" class="muted">Aucune anomalie.</p>
 
     <h2>Validation</h2>
     <div th:if="${rapport.estIntegrable()}">
-        <p class="ok">Aucune anomalie bloquante. Vous pouvez valider la prise en compte de ces données.</p>
-        <form method="post" th:action="@{/import/valider}">
-            <button type="submit">Valider l'import</button>
-            <a class="lien" th:href="@{/import}">Annuler</a>
+        <p class="alert ok">Aucune anomalie bloquante. Vous pouvez valider la prise en compte de ces données.</p>
+        <form method="post" th:action="@{/import/valider}" class="toolbar">
+            <button class="btn" type="submit">Valider l'import</button>
+            <a class="btn secondary" th:href="@{/import}">Annuler</a>
         </form>
     </div>
     <div th:unless="${rapport.estIntegrable()}">
-        <p class="ko">Des anomalies bloquantes empêchent la validation. Corrigez le canevas puis rechargez-le.</p>
-        <p><a th:href="@{/import}">Importer un autre fichier</a></p>
+        <p class="alert warn">Des anomalies bloquantes empêchent la validation. Corrigez le canevas puis rechargez-le.</p>
+        <a class="btn secondary" th:href="@{/import}">Importer un autre fichier</a>
     </div>
+</main>
 </body>
 </html>

@@ -2,65 +2,45 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <meta charset="UTF-8"/>
-    <title>Guide d'utilisation - Canevas et import</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; max-width: 900px; color: #222; line-height: 1.5; }
-        h1 { color: #806000; }
-        h2 { color: #806000; border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.6rem; }
-        code { background: #f4ecd0; padding: .1rem .3rem; border-radius: 3px; }
-        .note { background: #fdf0d0; border: 1px solid #B8860B; padding: .6rem; border-radius: 4px; }
-        a.btn { display: inline-block; background: #B8860B; color: #fff; padding: .5rem .9rem;
-                border-radius: 4px; text-decoration: none; }
-        ol, ul { margin: .4rem 0 .8rem 1.2rem; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Guide</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
 </head>
 <body>
-    <h1>Guide d'utilisation - Canevas et import</h1>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>Guide d'utilisation — Canevas et import</h1>
+    <p class="muted">L'application fonctionne en ligne. En cas de coupure réseau, la saisie se fait hors-ligne dans un canevas Excel, rechargé ensuite.</p>
+    <p><a class="btn" th:href="@{/import/canevas}">⬇ Télécharger un canevas vierge</a></p>
 
-    <p>L'application fonctionne normalement en ligne. En cas de coupure reseau, la saisie se fait
-       hors-ligne dans un <strong>canevas Excel</strong>, recharge ensuite dans l'application.</p>
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Les étapes</h2>
+        <ol>
+            <li><strong>Télécharger</strong> le canevas (idéalement le canevas pré-rempli d'une mission créée en ligne).</li>
+            <li><strong>Remplir</strong> le canevas hors-ligne.</li>
+            <li><strong>Recharger</strong> le fichier : l'application le contrôle et affiche un aperçu.</li>
+            <li><strong>Corriger</strong> les anomalies bloquantes, puis recharger.</li>
+            <li>Le <strong>chef de mission</strong> vérifie et valide la consolidation.</li>
+        </ol>
+    </div>
 
-    <p><a class="btn" th:href="@{/import/canevas}">Telecharger un canevas vierge</a></p>
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Règles de saisie</h2>
+        <ul>
+            <li>Les champs suivis d'un <strong>astérisque (*)</strong> sont obligatoires.</li>
+            <li><strong>N° d'inventaire</strong> : laissez-le vide pour un matériel nouveau (l'app attribue un numéro) ; sinon reportez l'étiquette.</li>
+            <li>Utilisez les <strong>menus déroulants</strong> (agents, catégorie, type, Oui/Non).</li>
+            <li>Adresses <strong>MAC</strong> au format <code>AA:BB:CC:DD:EE:FF</code>.</li>
+            <li><strong>Scanners de chèque</strong> : numéro de série (pas de MAC).</li>
+            <li>Le <strong>relevé réseau</strong> se renseigne une seule fois.</li>
+        </ul>
+    </div>
 
-    <h2>Les etapes</h2>
-    <ol>
-        <li><strong>Telecharger</strong> le canevas depuis la page d'import.</li>
-        <li><strong>Remplir</strong> le canevas hors-ligne (voir ci-dessous).</li>
-        <li><strong>Recharger</strong> le fichier dans l'application : elle le controle et affiche un rapport.</li>
-        <li><strong>Corriger</strong> les eventuelles anomalies bloquantes, puis recharger.</li>
-        <li>Le <strong>chef de mission</strong> verifie, arbitre les doublons et valide la consolidation.</li>
-    </ol>
-
-    <h2>Remplir le canevas</h2>
-    <p>Le canevas contient un onglet &laquo;&nbsp;Lisez-moi&nbsp;&raquo;, un onglet en-tete
-       &laquo;&nbsp;1-Mission et Reseau&nbsp;&raquo;, un onglet &laquo;&nbsp;2-Membres mission&nbsp;&raquo;,
-       et un onglet par type de materiel.</p>
-    <ul>
-        <li>L'<strong>en-tete</strong> (N&deg; de mission, poste, dates, chefs) est <strong>pre-remplie</strong>
-            par l'application. Ajoutez votre <strong>matricule de saisisseur</strong> et, si besoin, votre <strong>zone</strong>.</li>
-        <li>Les champs suivis d'un <strong>asterisque (*)</strong> sont <strong>obligatoires</strong>.</li>
-        <li><strong>N&deg; d'inventaire</strong> : laissez-le <strong>vide</strong> pour un materiel nouveau
-            (l'application lui attribuera un numero) ; sinon reportez le numero de l'etiquette.</li>
-        <li>Utilisez les <strong>menus deroulants</strong> (agents, categorie de cable, type, Oui/Non).</li>
-        <li>Adresses <strong>MAC</strong> au format <code>AA:BB:CC:DD:EE:FF</code>.</li>
-        <li><strong>Scanners de cheque</strong> : numero de serie (pas d'adresse MAC).</li>
-        <li>Le <strong>releve reseau</strong> (etat du cablage, categorie de cable) se renseigne une seule fois.</li>
-    </ul>
-
-    <h2>Plusieurs agents sur une meme mission</h2>
-    <p>Chaque agent peut remplir son propre fichier pour la meme mission : l'application les
-       <strong>consolide</strong> grace au N&deg; de mission commun. Pour eviter les doublons, repartissez
-       le travail <strong>par type de materiel</strong> et/ou <strong>par zone</strong>.</p>
-
-    <h2>Apres le chargement</h2>
-    <p>L'application produit un <strong>rapport</strong> : nombre de lignes lues, anomalies
-       <span style="color:#c00">bloquantes</span> et <span style="color:#B8860B">avertissements</span>.
-       Les lignes valides peuvent etre consolidees ; les lignes en erreur sont a corriger puis recharger.
-       Le materiel rapproche par numero d'inventaire (ou, a defaut, par MAC / numero de serie) n'est jamais duplique.</p>
-
-    <p class="note">A la validation, l'application fige une photo datee de l'inventaire et ressort la liste
-       des nouveaux materiels avec leur numero attribue - a imprimer pour etiqueter les machines.</p>
-
-    <p style="margin-top:1.4rem"><a th:href="@{/import}">Retour a l'import</a></p>
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Plusieurs agents sur une même mission</h2>
+        <p>Chaque agent remplit son propre fichier : l'application les consolide grâce au N° de mission commun. Répartissez le travail par type de matériel ou par zone pour éviter les doublons.</p>
+    </div>
+    <p><a th:href="@{/import}">← Retour à l'import</a></p>
+</main>
 </body>
 </html>
