@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><title>Mission</title>
+<style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1, h2 { color: #806000; }
+        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
+        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
+        th { background: #B8860B; color: #fff; }
+        a { color: #806000; }
+        nav a { margin-right: 1rem; }
+        .meta { color: #555; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${d.mission.reference}">Mission</h1>
+    <p class="meta">
+        Objet : <span th:text="${d.mission.objet}"></span> —
+        Poste : <span th:text="${d.mission.posteNom}"></span> —
+        Période : <span th:text="${d.mission.periode}"></span> —
+        Statut : <strong th:text="${d.mission.statut}"></strong>
+    </p>
+    <p class="meta">
+        Chef de mission : <span th:text="${d.chefMission}"></span> —
+        Chef de poste (figé) : <span th:text="${d.chefPoste}"></span>
+    </p>
+
+    <h2>Relevé réseau</h2>
+    <p>
+        État du câblage : <strong th:text="${d.etatCablage}"></strong> —
+        Catégorie de câble : <strong th:text="${d.categorieCable}"></strong>
+    </p>
+
+    <h2>Inventaire relevé (photo datée)</h2>
+    <table>
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Saisi par</th><th>Zone</th><th>Date</th></tr></thead>
+        <tbody>
+            <tr th:each="r : ${d.releves}">
+                <td th:text="${r.numeroInventaire}"></td>
+                <td th:text="${r.typeMateriel}"></td>
+                <td th:text="${r.nomMateriel}"></td>
+                <td th:text="${r.agentSaisisseur}"></td>
+                <td th:text="${r.zone}"></td>
+                <td th:text="${r.dateReleve}"></td>
+            </tr>
+            <tr th:if="${d.releves.isEmpty()}"><td colspan="6">Aucun relevé.</td></tr>
+        </tbody>
+    </table>
+    <p><a th:href="@{/missions}">Liste des missions</a> · <a th:href="@{/}">Accueil</a></p>
+</body>
+</html>

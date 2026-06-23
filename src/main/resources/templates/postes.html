@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><title>Postes</title>
+<style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1, h2 { color: #806000; }
+        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
+        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
+        th { background: #B8860B; color: #fff; }
+        a { color: #806000; }
+        nav a { margin-right: 1rem; }
+        .meta { color: #555; }
+    </style>
+</head>
+<body>
+    <h1>Postes régionaux</h1>
+    <table>
+        <thead><tr><th>Code</th><th>Nom</th><th>Région</th><th>Nb matériel</th></tr></thead>
+        <tbody>
+            <tr th:each="p : ${postes}">
+                <td th:text="${p.code}"></td>
+                <td><a th:href="@{/postes/{id}(id=${p.id})}" th:text="${p.nom}"></a></td>
+                <td th:text="${p.region}"></td>
+                <td th:text="${p.nbMateriel}"></td>
+            </tr>
+            <tr th:if="${postes.isEmpty()}"><td colspan="4">Aucun poste.</td></tr>
+        </tbody>
+    </table>
+    <p><a th:href="@{/}">Accueil</a></p>
+</body>
+</html>

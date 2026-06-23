@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><title>Poste</title>
+<style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1, h2 { color: #806000; }
+        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
+        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
+        th { background: #B8860B; color: #fff; }
+        a { color: #806000; }
+        nav a { margin-right: 1rem; }
+        .meta { color: #555; }
+    </style>
+</head>
+<body>
+    <h1 th:text="${d.poste.nom}">Poste</h1>
+    <p class="meta">
+        Code : <span th:text="${d.poste.code}"></span> —
+        Région : <span th:text="${d.poste.region}"></span> —
+        Chef de poste actuel : <strong th:text="${d.chefActuel}"></strong>
+    </p>
+
+    <h2>Agents du poste</h2>
+    <table>
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Téléphone</th></tr></thead>
+        <tbody>
+            <tr th:each="a : ${d.agents}">
+                <td th:text="${a.matricule}"></td>
+                <td th:text="${a.nomComplet}"></td>
+                <td th:text="${a.fonction}"></td>
+                <td th:text="${a.telephone}"></td>
+            </tr>
+            <tr th:if="${d.agents.isEmpty()}"><td colspan="4">Aucun agent.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Matériel du poste</h2>
+    <table>
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th></tr></thead>
+        <tbody>
+            <tr th:each="m : ${d.materiels}">
+                <td th:text="${m.numeroInventaire}"></td>
+                <td th:text="${m.type}"></td>
+                <td th:text="${m.nom}"></td>
+                <td th:text="${m.modele}"></td>
+            </tr>
+            <tr th:if="${d.materiels.isEmpty()}"><td colspan="4">Aucun matériel.</td></tr>
+        </tbody>
+    </table>
+    <p><a th:href="@{/postes}">Liste des postes</a> · <a th:href="@{/}">Accueil</a></p>
+</body>
+</html>

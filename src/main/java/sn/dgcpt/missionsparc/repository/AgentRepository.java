@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface AgentRepository extends JpaRepository<Agent, String> {
     List<Agent> findByTypeAgent(TypeAgent typeAgent);
+    List<Agent> findByPoste_Id(Integer posteId);
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><title>Missions</title>
+<style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1, h2 { color: #806000; }
+        h2 { border-bottom: 2px solid #FFE699; padding-bottom: .2rem; margin-top: 1.4rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: .6rem; }
+        th, td { border: 1px solid #d6b656; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
+        th { background: #B8860B; color: #fff; }
+        a { color: #806000; }
+        nav a { margin-right: 1rem; }
+        .meta { color: #555; }
+    </style>
+</head>
+<body>
+    <h1>Missions</h1>
+    <table>
+        <thead><tr><th>N° mission</th><th>Objet</th><th>Poste</th><th>Période</th><th>Statut</th></tr></thead>
+        <tbody>
+            <tr th:each="m : ${missions}">
+                <td><a th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
+                <td th:text="${m.objet}"></td>
+                <td th:text="${m.posteNom}"></td>
+                <td th:text="${m.periode}"></td>
+                <td th:text="${m.statut}"></td>
+            </tr>
+            <tr th:if="${missions.isEmpty()}"><td colspan="5">Aucune mission.</td></tr>
+        </tbody>
+    </table>
+    <p><a th:href="@{/}">Accueil</a></p>
+</body>
+</html>
