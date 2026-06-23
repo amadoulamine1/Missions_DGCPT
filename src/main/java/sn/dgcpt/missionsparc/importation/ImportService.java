@@ -22,20 +22,36 @@ public class ImportService {
         this.controle = controle;
     }
 
-    /** Étapes 4-5 de la spec : lecture du canevas puis contrôles automatiques. */
-    public RapportImport analyser(InputStream fichier) throws IOException {
-        CanevasImporte canevas = reader.lire(fichier);
+    /** Lecture du canevas (sans rien enregistrer). */
+    public CanevasImporte lire(InputStream fichier) throws IOException {
+        return reader.lire(fichier);
+    }
+
+    /** Contrôles automatiques (formats, champs obligatoires). */
+    public RapportImport controler(CanevasImporte canevas) {
         RapportImport rapport = controle.controler(canevas);
-        log.info("Canevas mission={} : {} ligne(s) lue(s), {} bloquant(s), {} avertissement(s)",
+        log.info("Canevas mission={} : {} ligne(s), {} bloquant(s), {} avertissement(s)",
                 canevas.getEntete().getReference(), rapport.getLignesLues(),
                 rapport.nbBloquants(), rapport.nbAvertissements());
         return rapport;
     }
 
-    // TODO étapes 6-9 de la spec :
-    //  - rapprochement par numéro d'inventaire, sinon MAC / numéro de série ;
-    //  - consolidation dans le relevé unique de la mission (statut EN_CONSOLIDATION) ;
-    //  - arbitrage des doublons / conflits par le chef de mission ;
-    //  - intégration transactionnelle : matériel + sous-type, affectations historisées,
-    //    relevés (photo datée), attribution des numéros d'inventaire aux nouveaux matériels.
+    /**
+     * Intégration après validation du chef de mission.
+     * Renvoie le nombre de matériels concernés.
+     *
+     * TODO (cf. spec §6-9) : écriture transactionnelle en base —
+     *  rapprochement par numéro d'inventaire puis MAC / numéro de série,
+     *  consolidation dans le relevé unique de la mission, attribution des
+     *  numéros d'inventaire aux nouveaux matériels, photo datée.
+     */
+    public int integrer(CanevasImporte canevas) {
+        int nbMateriels = canevas.getOrdinateurs().size()
+                + canevas.getImprimantes().size()
+                + canevas.getEquipementsReseau().size()
+                + canevas.getScanners().size();
+        log.info("Import validé mission={} : {} matériel(s) prêt(s) à intégrer",
+                canevas.getEntete().getReference(), nbMateriels);
+        return nbMateriels;
+    }
 }

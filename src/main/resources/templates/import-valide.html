@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Import validé</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; color: #222; }
+        h1 { color: #806000; }
+        .ok { background: #e6f4e6; border: 1px solid #3a3; padding: .6rem; border-radius: 4px; color: #161; }
+        .note { background: #fdf0d0; border: 1px solid #B8860B; padding: .6rem; border-radius: 4px; }
+        a.btn { display: inline-block; background: #B8860B; color: #fff; padding: .5rem .9rem;
+                border-radius: 4px; text-decoration: none; margin-right: .6rem; }
+    </style>
+</head>
+<body>
+    <h1>Import validé</h1>
+    <p class="ok">Le canevas de la mission <strong th:text="${reference}">M-...</strong> a été validé.</p>
+    <p><strong th:text="${nbMateriels}">0</strong> matériel(s) et <strong th:text="${nbMembres}">0</strong> membre(s) pris en compte.</p>
+    <p class="note">L'écriture définitive en base (rapprochement par numéro d'inventaire puis MAC / numéro de série,
+        consolidation et photo datée) est assurée par le <strong>module d'intégration</strong> — prochaine étape du développement.</p>
+    <p style="margin-top:1rem">
+        <a class="btn" th:href="@{/import}">Nouvel import</a>
+        <a th:href="@{/}">Accueil</a>
+    </p>
+</body>
+</html>
