@@ -1,10 +1,12 @@
 package sn.dgcpt.missionsparc.importation;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,9 +19,22 @@ import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test du pipeline d'import contre une vraie PostgreSQL (Testcontainers).
+ * Ignoré automatiquement si Docker n'est pas disponible (démarrez Docker Desktop pour l'exécuter).
+ */
 @SpringBootTest
 @Testcontainers
+@EnabledIf("dockerDisponible")
 class ImportIntegrationTest {
+
+    static boolean dockerDisponible() {
+        try {
+            return DockerClientFactory.instance().isDockerAvailable();
+        } catch (Throwable t) {
+            return false;
+        }
+    }
 
     @Container
     @ServiceConnection
@@ -54,26 +69,21 @@ class ImportIntegrationTest {
         int nb = importService.integrer(canevas);
         assertThat(nb).isEqualTo(5);
 
-        // matériel et sous-types
         assertThat(materielRepo.count()).isEqualTo(5);
         assertThat(ordinateurRepo.count()).isEqualTo(2);
         assertThat(imprimanteRepo.count()).isEqualTo(1);
         assertThat(reseauRepo.count()).isEqualTo(1);
         assertThat(scannerRepo.count()).isEqualTo(1);
 
-        // relevés (photo datée) et affectations (un par matériel)
         assertThat(releveRepo.count()).isEqualTo(5);
         assertThat(affectationRepo.count()).isEqualTo(5);
 
-        // mission créée, en consolidation
         Mission mission = missionRepo.findByReference("MIS-2026-001").orElseThrow();
         assertThat(mission.getStatut()).isEqualTo(StatutMission.EN_CONSOLIDATION);
 
-        // numéros d'inventaire générés pour les nouveaux ordinateurs
         assertThat(ordinateurRepo.findAll())
                 .allSatisfy(o -> assertThat(o.getNumeroInventaire()).startsWith("DKR-PC-"));
 
-        // agents résolus / créés à la volée
         assertThat(agentRepo.findById("AG001")).isPresent();
         assertThat(agentRepo.findById("IN001")).isPresent();
 
@@ -81,7 +91,6 @@ class ImportIntegrationTest {
         long releves = releveRepo.count();
         long affectations = affectationRepo.count();
 
-        // second import du même fichier : rapprochement par MAC / n° de série -> aucun doublon
         importService.integrer(lireExemple());
         assertThat(materielRepo.count()).as("pas de doublon de matériel").isEqualTo(materiels);
         assertThat(releveRepo.count()).as("relevés mis à jour, pas dupliqués").isEqualTo(releves);
