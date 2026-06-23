@@ -16,8 +16,9 @@
     <h1>Import validé</h1>
     <p class="ok">Le canevas de la mission <strong th:text="${reference}">M-...</strong> a été validé.</p>
     <p><strong th:text="${nbMateriels}">0</strong> matériel(s) et <strong th:text="${nbMembres}">0</strong> membre(s) pris en compte.</p>
-    <p class="note">L'écriture définitive en base (rapprochement par numéro d'inventaire puis MAC / numéro de série,
-        consolidation et photo datée) est assurée par le <strong>module d'intégration</strong> — prochaine étape du développement.</p>
+    <p class="note">Les données ont été <strong>intégrées en base</strong> : matériel créé ou mis à jour (avec attribution
+        des numéros d'inventaire aux nouveaux), affectations historisées et relevé daté rattaché à la mission.
+        Module d'intégration récent — à valider sur votre base de données.</p>
     <p style="margin-top:1rem">
         <a class="btn" th:href="@{/import}">Nouvel import</a>
         <a th:href="@{/}">Accueil</a>

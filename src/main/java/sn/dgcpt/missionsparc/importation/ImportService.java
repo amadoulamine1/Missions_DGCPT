@@ -16,10 +16,12 @@ public class ImportService {
 
     private final CanevasReader reader;
     private final ControleImport controle;
+    private final IntegrationService integration;
 
-    public ImportService(CanevasReader reader, ControleImport controle) {
+    public ImportService(CanevasReader reader, ControleImport controle, IntegrationService integration) {
         this.reader = reader;
         this.controle = controle;
+        this.integration = integration;
     }
 
     /** Lecture du canevas (sans rien enregistrer). */
@@ -36,22 +38,8 @@ public class ImportService {
         return rapport;
     }
 
-    /**
-     * Intégration après validation du chef de mission.
-     * Renvoie le nombre de matériels concernés.
-     *
-     * TODO (cf. spec §6-9) : écriture transactionnelle en base —
-     *  rapprochement par numéro d'inventaire puis MAC / numéro de série,
-     *  consolidation dans le relevé unique de la mission, attribution des
-     *  numéros d'inventaire aux nouveaux matériels, photo datée.
-     */
+    /** Intégration en base après validation. Renvoie le nombre de matériels traités. */
     public int integrer(CanevasImporte canevas) {
-        int nbMateriels = canevas.getOrdinateurs().size()
-                + canevas.getImprimantes().size()
-                + canevas.getEquipementsReseau().size()
-                + canevas.getScanners().size();
-        log.info("Import validé mission={} : {} matériel(s) prêt(s) à intégrer",
-                canevas.getEntete().getReference(), nbMateriels);
-        return nbMateriels;
+        return integration.integrer(canevas);
     }
 }

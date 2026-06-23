@@ -4,4 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import sn.dgcpt.missionsparc.domain.Materiel;
 
 public interface MaterielRepository extends JpaRepository<Materiel, String> {
+    long countByNumeroInventaireStartingWith(String prefixe);
 }

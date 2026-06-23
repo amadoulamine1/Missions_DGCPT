@@ -1,0 +1,320 @@
+package sn.dgcpt.missionsparc.importation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sn.dgcpt.missionsparc.domain.*;
+import sn.dgcpt.missionsparc.importation.dto.*;
+import sn.dgcpt.missionsparc.repository.*;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+
+/**
+ * Intégration en base d'un canevas validé (cf. Specification-import-canevas.md, §6-9).
+ * Rapprochement par numéro d'inventaire puis par MAC / numéro de série ;
+ * création ou mise à jour du matériel et de son sous-type ; affectations historisées ;
+ * relevé daté rattaché à la mission.
+ *
+ * NB : pour rester testable de bout en bout, les entités référencées absentes
+ * (poste, mission, agents, catégorie) sont créées à la volée. En production,
+ * leur absence devrait constituer un contrôle bloquant.
+ */
+@Service
+public class IntegrationService {
+
+    private static final Logger log = LoggerFactory.getLogger(IntegrationService.class);
+    private static final DateTimeFormatter[] FORMATS_DATE = {
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("d/M/yyyy"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    };
+
+    private final PosteRepository posteRepo;
+    private final AgentRepository agentRepo;
+    private final MissionRepository missionRepo;
+    private final MaterielRepository materielRepo;
+    private final OrdinateurRepository ordinateurRepo;
+    private final ImprimanteRepository imprimanteRepo;
+    private final EquipementReseauRepository reseauRepo;
+    private final ScannerChequeRepository scannerRepo;
+    private final AffectationMaterielRepository affectationRepo;
+    private final ReleveMaterielRepository releveRepo;
+    private final LogicielRepository logicielRepo;
+    private final CategorieCableRepository categorieRepo;
+
+    public IntegrationService(PosteRepository posteRepo, AgentRepository agentRepo, MissionRepository missionRepo,
+                              MaterielRepository materielRepo, OrdinateurRepository ordinateurRepo,
+                              ImprimanteRepository imprimanteRepo, EquipementReseauRepository reseauRepo,
+                              ScannerChequeRepository scannerRepo, AffectationMaterielRepository affectationRepo,
+                              ReleveMaterielRepository releveRepo, LogicielRepository logicielRepo,
+                              CategorieCableRepository categorieRepo) {
+        this.posteRepo = posteRepo;
+        this.agentRepo = agentRepo;
+        this.missionRepo = missionRepo;
+        this.materielRepo = materielRepo;
+        this.ordinateurRepo = ordinateurRepo;
+        this.imprimanteRepo = imprimanteRepo;
+        this.reseauRepo = reseauRepo;
+        this.scannerRepo = scannerRepo;
+        this.affectationRepo = affectationRepo;
+        this.releveRepo = releveRepo;
+        this.logicielRepo = logicielRepo;
+        this.categorieRepo = categorieRepo;
+    }
+
+    @Transactional
+    public int integrer(CanevasImporte canevas) {
+        EnteteMission e = canevas.getEntete();
+        LocalDate jour = LocalDate.now();
+
+        Poste poste = resoudrePoste(e.getCodePoste(), e.getNomPoste());
+        Mission mission = resoudreMission(e, poste, jour);
+        Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
+        String zone = vide(e.getZone()) ? null : e.getZone();
+
+        int nb = 0;
+        for (LigneOrdinateur o : canevas.getOrdinateurs()) { integrerOrdinateur(o, poste, mission, saisisseur, zone, jour); nb++; }
+        for (LigneImprimante i : canevas.getImprimantes()) { integrerImprimante(i, poste, mission, saisisseur, zone, jour); nb++; }
+        for (LigneEquipementReseau eq : canevas.getEquipementsReseau()) { integrerReseau(eq, poste, mission, saisisseur, zone, jour); nb++; }
+        for (LigneScanner s : canevas.getScanners()) { integrerScanner(s, poste, mission, saisisseur, zone, jour); nb++; }
+
+        for (LigneMembre m : canevas.getMembres()) {
+            Agent a = resoudreAgent(m.getMatricule(), TypeAgent.INFORMATICIEN, null);
+            if (a != null) mission.getMembres().add(a);
+        }
+        missionRepo.save(mission);
+
+        log.info("Intégration mission={} : {} matériel(s), {} membre(s)",
+                mission.getReference(), nb, canevas.getMembres().size());
+        return nb;
+    }
+
+    // ---------- résolutions ----------
+
+    private Poste resoudrePoste(String code, String nom) {
+        String c = trim(code);
+        if (c.isEmpty()) throw new IllegalStateException("Code poste manquant dans l'en-tête.");
+        return posteRepo.findByCode(c).orElseGet(() -> {
+            Poste p = new Poste();
+            p.setCode(c);
+            p.setNom(vide(nom) ? c : nom.trim());
+            return posteRepo.save(p);
+        });
+    }
+
+    private Mission resoudreMission(EnteteMission e, Poste poste, LocalDate jour) {
+        String ref = trim(e.getReference());
+        return missionRepo.findByReference(ref).orElseGet(() -> {
+            Mission m = new Mission();
+            m.setReference(ref);
+            m.setObjet(vide(e.getObjet()) ? "(import)" : e.getObjet());
+            m.setDateDebut(parseDate(e.getDateDebut(), jour));
+            m.setDateFin(parseDate(e.getDateFin(), null));
+            m.setPoste(poste);
+            m.setChefMission(resoudreAgent(e.getChefMission(), TypeAgent.INFORMATICIEN, null));
+            m.setChefPosteFige(resoudreAgent(e.getChefPoste(), TypeAgent.POSTE, poste));
+            m.setEtatCablage(vide(e.getEtatCablage()) ? null : e.getEtatCablage());
+            m.setCategorieCable(resoudreCategorie(e.getCategorieCable()));
+            m.setStatut(StatutMission.EN_CONSOLIDATION);
+            return missionRepo.save(m);
+        });
+    }
+
+    private Agent resoudreAgent(String matricule, TypeAgent type, Poste poste) {
+        if (vide(matricule)) return null;
+        String mat = matricule.trim();
+        return agentRepo.findById(mat).orElseGet(() -> {
+            Agent a = new Agent();
+            a.setMatricule(mat);
+            a.setNom(mat);
+            a.setPrenom("-");
+            a.setTypeAgent(type);
+            a.setPoste(type == TypeAgent.POSTE ? poste : null);
+            return agentRepo.save(a);
+        });
+    }
+
+    private CategorieCable resoudreCategorie(String libelle) {
+        if (vide(libelle)) return null;
+        String lib = libelle.trim();
+        return categorieRepo.findByLibelle(lib).orElseGet(() -> {
+            CategorieCable c = new CategorieCable();
+            c.setLibelle(lib);
+            return categorieRepo.save(c);
+        });
+    }
+
+    // ---------- intégration par type ----------
+
+    private void integrerOrdinateur(LigneOrdinateur o, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
+        Materiel mat = rapprocher(o.getNumeroInventaire(), TypeMateriel.ORDINATEUR, o.getNomMachine(), o.getModele(), poste,
+                () -> vide(o.getMacEthernet()) ? Optional.empty()
+                        : ordinateurRepo.findByMacEthernet(o.getMacEthernet()).map(Ordinateur::getMateriel));
+        Ordinateur ord = ordinateurRepo.findById(mat.getNumeroInventaire()).orElseGet(Ordinateur::new);
+        ord.setMateriel(mat);
+        ord.setMacEthernet(nullSiVide(o.getMacEthernet()));
+        ord.setMacWifi(nullSiVide(o.getMacWifi()));
+        ord.setNomMachine(o.getNomMachine());
+        ord.setAgentInstallateur(resoudreAgent(o.getAgentInstallateur(), TypeAgent.INFORMATICIEN, null));
+        ord.setLogiciels(logicielsDe(o));
+        ordinateurRepo.save(ord);
+
+        Agent attributaire = resoudreAgent(o.getAgentAttributaire(), TypeAgent.POSTE, poste);
+        majAffectation(mat, attributaire, poste, jour);
+        majReleve(mission, mat, saisisseur, zone, jour);
+    }
+
+    private void integrerImprimante(LigneImprimante i, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
+        Materiel mat = rapprocher(i.getNumeroInventaire(), TypeMateriel.IMPRIMANTE, i.getNom(), i.getModele(), poste,
+                () -> vide(i.getMac()) ? Optional.empty()
+                        : imprimanteRepo.findByMac(i.getMac()).map(Imprimante::getMateriel));
+        Imprimante imp = imprimanteRepo.findById(mat.getNumeroInventaire()).orElseGet(Imprimante::new);
+        imp.setMateriel(mat);
+        imp.setMac(nullSiVide(i.getMac()));
+        imp.setMacWifi(nullSiVide(i.getMacWifi()));
+        imp.setIp(nullSiVide(i.getIp()));
+        imprimanteRepo.save(imp);
+        majAffectation(mat, null, poste, jour);
+        majReleve(mission, mat, saisisseur, zone, jour);
+    }
+
+    private void integrerReseau(LigneEquipementReseau eq, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
+        TypeMateriel type = "Access point".equalsIgnoreCase(trim(eq.getType())) ? TypeMateriel.ACCESS_POINT : TypeMateriel.SWITCH;
+        Materiel mat = rapprocher(eq.getNumeroInventaire(), type, eq.getNom(), eq.getModele(), poste,
+                () -> vide(eq.getMac()) ? Optional.empty()
+                        : reseauRepo.findByMac(eq.getMac()).map(EquipementReseau::getMateriel));
+        EquipementReseau er = reseauRepo.findById(mat.getNumeroInventaire()).orElseGet(EquipementReseau::new);
+        er.setMateriel(mat);
+        er.setMac(nullSiVide(eq.getMac()));
+        er.setIp(nullSiVide(eq.getIp()));
+        reseauRepo.save(er);
+        majAffectation(mat, null, poste, jour);
+        majReleve(mission, mat, saisisseur, zone, jour);
+    }
+
+    private void integrerScanner(LigneScanner s, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
+        Materiel mat = rapprocher(s.getNumeroInventaire(), TypeMateriel.SCANNER_CHEQUE, null, s.getModele(), poste,
+                () -> vide(s.getNumeroSerie()) ? Optional.empty()
+                        : scannerRepo.findByNumeroSerie(s.getNumeroSerie()).map(ScannerCheque::getMateriel));
+        ScannerCheque sc = scannerRepo.findById(mat.getNumeroInventaire()).orElseGet(ScannerCheque::new);
+        sc.setMateriel(mat);
+        sc.setNumeroSerie(nullSiVide(s.getNumeroSerie()));
+        sc.setMarque(nullSiVide(s.getMarque()));
+        scannerRepo.save(sc);
+        majAffectation(mat, null, poste, jour);
+        majReleve(mission, mat, saisisseur, zone, jour);
+    }
+
+    // ---------- noyau ----------
+
+    private Materiel rapprocher(String numero, TypeMateriel type, String nom, String modele, Poste poste,
+                                Supplier<Optional<Materiel>> parCleNaturelle) {
+        Materiel mat;
+        if (!vide(numero)) {
+            mat = materielRepo.findById(numero.trim()).orElse(null);
+            if (mat == null) {
+                mat = new Materiel();
+                mat.setNumeroInventaire(numero.trim());
+                mat.setDateCreation(Instant.now());
+            }
+        } else {
+            mat = parCleNaturelle.get().orElse(null);
+            if (mat == null) {
+                mat = new Materiel();
+                mat.setNumeroInventaire(genererNumero(poste, type));
+                mat.setDateCreation(Instant.now());
+            }
+        }
+        mat.setType(type);
+        if (!vide(nom)) mat.setNom(nom);
+        if (!vide(modele)) mat.setModele(modele);
+        mat.setPoste(poste);
+        return materielRepo.save(mat);
+    }
+
+    private String genererNumero(Poste poste, TypeMateriel type) {
+        String prefixe = poste.getCode() + "-" + codeType(type) + "-";
+        long n = materielRepo.countByNumeroInventaireStartingWith(prefixe) + 1;
+        return prefixe + String.format("%04d", n);
+    }
+
+    private String codeType(TypeMateriel type) {
+        return switch (type) {
+            case ORDINATEUR -> "PC";
+            case IMPRIMANTE -> "IMP";
+            case SWITCH -> "SW";
+            case ACCESS_POINT -> "AP";
+            case SCANNER_CHEQUE -> "SCN";
+            case AUTRE -> "AUT";
+        };
+    }
+
+    private void majAffectation(Materiel mat, Agent agent, Poste poste, LocalDate jour) {
+        String matriculeNouveau = (agent == null) ? null : agent.getMatricule();
+        Optional<AffectationMateriel> courante = affectationRepo.findByMaterielAndDateFinIsNull(mat);
+        if (courante.isPresent()) {
+            AffectationMateriel a = courante.get();
+            String matriculeActuel = (a.getAgent() == null) ? null : a.getAgent().getMatricule();
+            Integer posteActuel = (a.getPoste() == null) ? null : a.getPoste().getId();
+            if (Objects.equals(matriculeActuel, matriculeNouveau) && Objects.equals(posteActuel, poste.getId())) {
+                return; // affectation inchangée
+            }
+            a.setDateFin(jour);
+            affectationRepo.saveAndFlush(a); // libère l'unicité "une seule affectation courante"
+        }
+        AffectationMateriel nouvelle = new AffectationMateriel();
+        nouvelle.setMateriel(mat);
+        nouvelle.setAgent(agent);
+        nouvelle.setPoste(poste);
+        nouvelle.setDateDebut(jour);
+        affectationRepo.save(nouvelle);
+    }
+
+    private void majReleve(Mission mission, Materiel mat, Agent saisisseur, String zone, LocalDate jour) {
+        ReleveMateriel r = releveRepo.findByMissionAndMateriel(mission, mat).orElseGet(ReleveMateriel::new);
+        r.setMission(mission);
+        r.setMateriel(mat);
+        r.setAgentSaisisseur(saisisseur);
+        r.setZone(zone);
+        r.setDateReleve(jour);
+        releveRepo.save(r);
+    }
+
+    private Set<Logiciel> logicielsDe(LigneOrdinateur o) {
+        Set<Logiciel> set = new HashSet<>();
+        ajouterLogiciel(set, o.isAster(), "Aster");
+        ajouterLogiciel(set, o.isAntivirus(), "Antivirus");
+        ajouterLogiciel(set, o.isSicCDD(), "SicCDD");
+        ajouterLogiciel(set, o.isCic(), "CIC");
+        ajouterLogiciel(set, o.isSysbudget(), "Sysbudget");
+        return set;
+    }
+
+    private void ajouterLogiciel(Set<Logiciel> set, boolean present, String nom) {
+        if (present) logicielRepo.findByNom(nom).ifPresent(set::add);
+    }
+
+    // ---------- utilitaires ----------
+
+    private LocalDate parseDate(String s, LocalDate defaut) {
+        if (vide(s)) return defaut;
+        String v = s.trim();
+        for (DateTimeFormatter f : FORMATS_DATE) {
+            try { return LocalDate.parse(v, f); } catch (DateTimeParseException ignored) { }
+        }
+        return defaut;
+    }
+
+    private boolean vide(String s) { return s == null || s.isBlank(); }
+    private String trim(String s) { return s == null ? "" : s.trim(); }
+    private String nullSiVide(String s) { return vide(s) ? null : s.trim(); }
+}
