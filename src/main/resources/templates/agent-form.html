@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1 th:text="${mode == 'creation'} ? 'Nouvel agent' : 'Modifier un agent'">Agent</h1>
+    <div class="card">
+        <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
+        <form method="post"
+              th:action="${mode == 'creation'} ? @{/agents} : @{/agents/{m}(m=${form.matricule})}"
+              th:object="${form}">
+            <div class="form-row"><label>Matricule <span class="req">*</span></label>
+                <input type="text" th:field="*{matricule}" required th:readonly="${mode == 'modification'}"/></div>
+            <div class="form-row"><label>Nom <span class="req">*</span></label><input type="text" th:field="*{nom}" required/></div>
+            <div class="form-row"><label>Prénom</label><input type="text" th:field="*{prenom}"/></div>
+            <div class="form-row"><label>Fonction</label><input type="text" th:field="*{fonction}"/></div>
+            <div class="form-row"><label>Téléphone</label><input type="text" th:field="*{telephone}"/></div>
+            <div class="form-row"><label>E-mail</label><input type="email" th:field="*{email}"/></div>
+            <div class="form-row"><label>Type <span class="req">*</span></label>
+                <select id="typeAgent" th:field="*{typeAgent}" onchange="toggleTpr()">
+                    <option value="POSTE">Agent de poste (TPR)</option>
+                    <option value="INFORMATICIEN">Informaticien (Direction Informatique)</option>
+                </select></div>
+            <div id="tpr-bloc" class="form-row"><label>TPR (poste) <span class="req">*</span></label>
+                <select th:field="*{posteId}">
+                    <option value="">— Choisir —</option>
+                    <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.code + ' — ' + p.nom}"></option>
+                </select></div>
+            <div class="toolbar" style="margin-top:1rem">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn secondary" th:href="@{/agents}">Annuler</a>
+            </div>
+        </form>
+    </div>
+    <script>
+        function toggleTpr() {
+            var t = document.getElementById('typeAgent').value;
+            document.getElementById('tpr-bloc').style.display = (t === 'POSTE') ? 'flex' : 'none';
+        }
+        document.addEventListener('DOMContentLoaded', toggleTpr);
+    </script>
+</main>
+</body>
+</html>

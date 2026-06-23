@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agents</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <div class="toolbar">
+        <h1 style="margin:0">Agents</h1>
+        <span class="spacer"></span>
+        <a class="btn" th:href="@{/agents/nouveau}">+ Nouvel agent</a>
+    </div>
+    <table class="table">
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Type</th><th>TPR</th><th>Actions</th></tr></thead>
+        <tbody>
+            <tr th:each="a : ${agents}">
+                <td th:text="${a.matricule}"></td>
+                <td th:text="${a.nomComplet}"></td>
+                <td th:text="${a.fonction}"></td>
+                <td><span class="badge" th:classappend="${a.type == 'INFORMATICIEN'} ? 'gold' : 'green'" th:text="${a.type}"></span></td>
+                <td th:text="${a.posteNom}"></td>
+                <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
+            </tr>
+            <tr th:if="${agents.isEmpty()}"><td colspan="6" class="empty">Aucun agent.</td></tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
