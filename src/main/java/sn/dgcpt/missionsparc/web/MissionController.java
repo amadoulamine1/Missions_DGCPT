@@ -38,9 +38,16 @@ public class MissionController {
     }
 
     @PostMapping("/missions/nouvelle")
-    public String creer(@ModelAttribute("form") CreationMissionForm form) {
-        Mission m = missionService.creer(form);
-        return "redirect:/missions/" + m.getId();
+    public String creer(@ModelAttribute("form") CreationMissionForm form, Model model) {
+        try {
+            Mission m = missionService.creer(form);
+            return "redirect:/missions/" + m.getId();
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("form", form);
+            model.addAttribute("postes", posteRepo.findAll());
+            model.addAttribute("erreur", e.getMessage());
+            return "mission-nouvelle";
+        }
     }
 
     @GetMapping("/missions/{id}/canevas")

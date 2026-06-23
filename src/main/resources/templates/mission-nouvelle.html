@@ -12,6 +12,7 @@
     <h1>Nouvelle mission</h1>
     <p class="muted">Le N° de mission est généré automatiquement. Vous pourrez ensuite télécharger le canevas pré-rempli à distribuer aux agents.</p>
     <div class="card">
+        <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
             <div class="form-row">
                 <label>TPR (poste) <span class="req">*</span></label>
@@ -27,8 +28,8 @@
             </div>
 
             <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
-            <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
-            <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>
+            <div class="form-row"><label>Date de début</label><input type="date" id="dateDebut" th:field="*{dateDebut}"/></div>
+            <div class="form-row"><label>Date de fin</label><input type="date" id="dateFin" th:field="*{dateFin}"/></div>
             <div class="form-row"><label>Chef de mission (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefMission}" required/></div>
             <div class="form-row"><label>Chef de poste (matricule) <span class="req">*</span></label><input type="text" th:field="*{chefPoste}" required/></div>
 
@@ -48,7 +49,17 @@
             div.style.display = creation ? 'block' : 'none';
             if (code) code.required = creation;
         }
-        document.addEventListener('DOMContentLoaded', toggleNouveauTpr);
+        function majDateFinMin() {
+            var dd = document.getElementById('dateDebut');
+            var df = document.getElementById('dateFin');
+            if (dd && df) df.min = dd.value || '';
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleNouveauTpr();
+            majDateFinMin();
+            var dd = document.getElementById('dateDebut');
+            if (dd) dd.addEventListener('change', majDateFinMin);
+        });
     </script>
 </main>
 </body>

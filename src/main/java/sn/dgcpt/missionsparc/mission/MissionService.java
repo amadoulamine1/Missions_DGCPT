@@ -39,6 +39,12 @@ public class MissionService {
 
     @Transactional
     public Mission creer(CreationMissionForm f) {
+        LocalDate debut = parseDate(f.getDateDebut(), LocalDate.now());
+        LocalDate fin = parseDate(f.getDateFin(), null);
+        if (fin != null && fin.isBefore(debut)) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début.");
+        }
+
         Poste poste = (f.getPosteId() != null)
                 ? posteRepo.findById(f.getPosteId()).orElseThrow()
                 : referentiel.resoudrePoste(f.getCodePoste(), f.getNomPoste());
@@ -46,8 +52,8 @@ public class MissionService {
         Mission m = new Mission();
         m.setReference(genererReference());
         m.setObjet((f.getObjet() == null || f.getObjet().isBlank()) ? "(mission)" : f.getObjet().trim());
-        m.setDateDebut(parseDate(f.getDateDebut(), LocalDate.now()));
-        m.setDateFin(parseDate(f.getDateFin(), null));
+        m.setDateDebut(debut);
+        m.setDateFin(fin);
         m.setPoste(poste);
         m.setChefMission(referentiel.resoudreAgent(f.getChefMission(), TypeAgent.INFORMATICIEN, null));
         m.setChefPosteFige(referentiel.resoudreAgent(f.getChefPoste(), TypeAgent.POSTE, poste));
