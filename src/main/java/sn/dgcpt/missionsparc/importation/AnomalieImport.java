@@ -1,9 +1,7 @@
 package sn.dgcpt.missionsparc.importation;
 
-import lombok.Getter;
 
 /** Une anomalie détectée lors du contrôle d'un canevas. */
-@Getter
 public class AnomalieImport {
     private final Severite severite;
     private final String onglet;
@@ -22,4 +20,9 @@ public class AnomalieImport {
         String pos = (ligne != null) ? onglet + " ligne " + ligne : onglet;
         return "[" + severite + "] " + pos + " : " + message;
     }
+
+    public Severite getSeverite() { return severite; }
+    public String getOnglet() { return onglet; }
+    public Integer getLigne() { return ligne; }
+    public String getMessage() { return message; }
 }

@@ -1,15 +1,9 @@
 package sn.dgcpt.missionsparc.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "logiciel")
-@Getter
-@Setter
-@NoArgsConstructor
 public class Logiciel {
 
     @Id
@@ -21,4 +15,11 @@ public class Logiciel {
 
     @Column(nullable = false)
     private boolean actif = true;
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public boolean isActif() { return actif; }
+    public void setActif(boolean actif) { this.actif = actif; }
 }

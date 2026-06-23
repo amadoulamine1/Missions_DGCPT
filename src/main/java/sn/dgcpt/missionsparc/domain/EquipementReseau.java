@@ -1,15 +1,9 @@
 package sn.dgcpt.missionsparc.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "equipement_reseau")
-@Getter
-@Setter
-@NoArgsConstructor
 public class EquipementReseau {
 
     @Id
@@ -22,4 +16,13 @@ public class EquipementReseau {
 
     private String mac;
     private String ip;
+
+    public String getNumeroInventaire() { return numeroInventaire; }
+    public void setNumeroInventaire(String numeroInventaire) { this.numeroInventaire = numeroInventaire; }
+    public Materiel getMateriel() { return materiel; }
+    public void setMateriel(Materiel materiel) { this.materiel = materiel; }
+    public String getMac() { return mac; }
+    public void setMac(String mac) { this.mac = mac; }
+    public String getIp() { return ip; }
+    public void setIp(String ip) { this.ip = ip; }
 }

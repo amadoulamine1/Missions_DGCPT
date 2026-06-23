@@ -1,12 +1,10 @@
 package sn.dgcpt.missionsparc.importation;
 
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Résultat du contrôle d'un canevas : anomalies + compteurs. */
-@Getter
 public class RapportImport {
 
     private final List<AnomalieImport> anomalies = new ArrayList<>();
@@ -32,4 +30,7 @@ public class RapportImport {
     public boolean estIntegrable() {
         return nbBloquants() == 0;
     }
+
+    public List<AnomalieImport> getAnomalies() { return anomalies; }
+    public int getLignesLues() { return lignesLues; }
 }

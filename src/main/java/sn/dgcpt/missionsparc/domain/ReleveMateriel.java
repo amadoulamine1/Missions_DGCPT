@@ -1,17 +1,11 @@
 package sn.dgcpt.missionsparc.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "releve_materiel")
-@Getter
-@Setter
-@NoArgsConstructor
 public class ReleveMateriel {
 
     @Id
@@ -39,4 +33,19 @@ public class ReleveMateriel {
     private LocalDate dateReleve;
 
     // TODO: etat_observe (JSONB) — snapshot des attributs observes (photo datee)
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public Mission getMission() { return mission; }
+    public void setMission(Mission mission) { this.mission = mission; }
+    public Materiel getMateriel() { return materiel; }
+    public void setMateriel(Materiel materiel) { this.materiel = materiel; }
+    public Agent getAgentSaisisseur() { return agentSaisisseur; }
+    public void setAgentSaisisseur(Agent agentSaisisseur) { this.agentSaisisseur = agentSaisisseur; }
+    public String getZone() { return zone; }
+    public void setZone(String zone) { this.zone = zone; }
+    public String getSourceFichier() { return sourceFichier; }
+    public void setSourceFichier(String sourceFichier) { this.sourceFichier = sourceFichier; }
+    public LocalDate getDateReleve() { return dateReleve; }
+    public void setDateReleve(LocalDate dateReleve) { this.dateReleve = dateReleve; }
 }

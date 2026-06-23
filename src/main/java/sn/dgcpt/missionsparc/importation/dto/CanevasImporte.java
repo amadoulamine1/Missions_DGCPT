@@ -1,14 +1,10 @@
 package sn.dgcpt.missionsparc.importation.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Contenu complet d'un canevas chargé (un fichier d'un agent). */
-@Getter
-@Setter
 public class CanevasImporte {
     private EnteteMission entete = new EnteteMission();
     private List<LigneMembre> membres = new ArrayList<>();
@@ -16,4 +12,17 @@ public class CanevasImporte {
     private List<LigneImprimante> imprimantes = new ArrayList<>();
     private List<LigneEquipementReseau> equipementsReseau = new ArrayList<>();
     private List<LigneScanner> scanners = new ArrayList<>();
+
+    public EnteteMission getEntete() { return entete; }
+    public void setEntete(EnteteMission entete) { this.entete = entete; }
+    public List<LigneMembre> getMembres() { return membres; }
+    public void setMembres(List<LigneMembre> membres) { this.membres = membres; }
+    public List<LigneOrdinateur> getOrdinateurs() { return ordinateurs; }
+    public void setOrdinateurs(List<LigneOrdinateur> ordinateurs) { this.ordinateurs = ordinateurs; }
+    public List<LigneImprimante> getImprimantes() { return imprimantes; }
+    public void setImprimantes(List<LigneImprimante> imprimantes) { this.imprimantes = imprimantes; }
+    public List<LigneEquipementReseau> getEquipementsReseau() { return equipementsReseau; }
+    public void setEquipementsReseau(List<LigneEquipementReseau> equipementsReseau) { this.equipementsReseau = equipementsReseau; }
+    public List<LigneScanner> getScanners() { return scanners; }
+    public void setScanners(List<LigneScanner> scanners) { this.scanners = scanners; }
 }

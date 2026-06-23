@@ -1,15 +1,9 @@
 package sn.dgcpt.missionsparc.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "scanner_cheque")
-@Getter
-@Setter
-@NoArgsConstructor
 public class ScannerCheque {
 
     @Id
@@ -24,4 +18,13 @@ public class ScannerCheque {
     private String numeroSerie;
 
     private String marque;
+
+    public String getNumeroInventaire() { return numeroInventaire; }
+    public void setNumeroInventaire(String numeroInventaire) { this.numeroInventaire = numeroInventaire; }
+    public Materiel getMateriel() { return materiel; }
+    public void setMateriel(Materiel materiel) { this.materiel = materiel; }
+    public String getNumeroSerie() { return numeroSerie; }
+    public void setNumeroSerie(String numeroSerie) { this.numeroSerie = numeroSerie; }
+    public String getMarque() { return marque; }
+    public void setMarque(String marque) { this.marque = marque; }
 }
