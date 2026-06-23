@@ -26,6 +26,8 @@
         Chef de poste (figé) : <span th:text="${d.chefPoste}"></span>
     </p>
 
+    <p><a th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger le canevas pré-rempli de cette mission</a></p>
+
     <h2>Relevé réseau</h2>
     <p>
         État du câblage : <strong th:text="${d.etatCablage}"></strong> —
