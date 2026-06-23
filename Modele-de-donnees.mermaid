@@ -1,0 +1,121 @@
+erDiagram
+    POSTE ||--o{ AGENT : "rattache"
+    POSTE ||--o{ CHEF_POSTE : "dirige (historique)"
+    AGENT ||--o{ CHEF_POSTE : "chef de poste"
+    POSTE ||--o{ MISSION : "accueille"
+    POSTE ||--o{ MATERIEL : "heberge"
+    CATEGORIE_CABLE ||--o{ MISSION : "cable releve"
+    AGENT ||--o{ MISSION : "chef de mission"
+    AGENT ||--o{ MISSION : "chef de poste fige"
+    MISSION ||--o{ MISSION_MEMBRE : "compte"
+    AGENT ||--o{ MISSION_MEMBRE : "membre"
+    MISSION ||--o{ RELEVE_MATERIEL : "inventorie"
+    MATERIEL ||--o{ RELEVE_MATERIEL : "releve"
+    MATERIEL ||--o| ORDINATEUR : "specialise en"
+    MATERIEL ||--o| IMPRIMANTE : "specialise en"
+    MATERIEL ||--o| EQUIPEMENT_RESEAU : "specialise en"
+    MATERIEL ||--o| SCANNER_CHEQUE : "specialise en"
+    MATERIEL ||--o{ AFFECTATION_MATERIEL : "affecte (historique)"
+    AGENT ||--o{ AFFECTATION_MATERIEL : "attributaire"
+    POSTE ||--o{ AFFECTATION_MATERIEL : "localisation"
+    AGENT ||--o{ ORDINATEUR : "installe par"
+    ORDINATEUR ||--o{ ORDINATEUR_LOGICIEL : "a installe"
+    LOGICIEL ||--o{ ORDINATEUR_LOGICIEL : "present dans"
+
+    POSTE {
+        int id PK
+        string code
+        string nom
+        string region
+    }
+    AGENT {
+        string matricule PK
+        string nom
+        string prenom
+        string fonction
+        string telephone
+        string email
+        string type_agent "POSTE ou INFORMATICIEN"
+        int poste_id FK "si agent de poste"
+    }
+    CHEF_POSTE {
+        int id PK
+        int poste_id FK
+        string agent_matricule FK
+        date date_debut
+        date date_fin "null si en cours"
+    }
+    MISSION {
+        int id PK "N° de mission"
+        string objet
+        date date_debut
+        date date_fin
+        int poste_id FK
+        string chef_mission_matricule FK
+        string chef_poste_fige_matricule FK
+        string etat_cablage
+        int categorie_cable_id FK
+        string statut "en consolidation / cloturee"
+    }
+    MISSION_MEMBRE {
+        int mission_id FK
+        string agent_matricule FK
+    }
+    CATEGORIE_CABLE {
+        int id PK
+        string libelle "Cat5e, Cat6..."
+    }
+    MATERIEL {
+        string numero_inventaire PK
+        string type
+        string nom
+        string modele
+        int poste_id FK
+    }
+    ORDINATEUR {
+        string numero_inventaire PK
+        string mac_ethernet
+        string mac_wifi
+        string nom_machine
+        string agent_installateur FK
+    }
+    IMPRIMANTE {
+        string numero_inventaire PK
+        string mac
+        string mac_wifi
+        string ip
+    }
+    EQUIPEMENT_RESEAU {
+        string numero_inventaire PK
+        string mac
+        string ip
+    }
+    SCANNER_CHEQUE {
+        string numero_inventaire PK
+        string numero_serie
+        string marque
+    }
+    AFFECTATION_MATERIEL {
+        int id PK
+        string materiel_numero FK
+        string agent_matricule FK "ordinateurs"
+        int poste_id FK
+        date date_debut
+        date date_fin "null si en cours"
+    }
+    LOGICIEL {
+        int id PK
+        string nom "Aster, Antivirus, SicCDD, CIC..."
+    }
+    ORDINATEUR_LOGICIEL {
+        string ordinateur_numero FK
+        int logiciel_id FK
+    }
+    RELEVE_MATERIEL {
+        int id PK
+        int mission_id FK
+        string materiel_numero FK
+        string agent_saisisseur FK
+        string zone
+        date date_releve
+    }
