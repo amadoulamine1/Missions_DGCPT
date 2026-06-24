@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Compte</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container" style="max-width:560px">
+    <h1 th:text="${mode == 'creation'} ? 'Nouveau compte' : 'Modifier le compte'">Compte</h1>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">err</p>
+    <form method="post"
+          th:action="${mode == 'creation'} ? @{/utilisateurs} : @{/utilisateurs/{id}(id=${form.id})}"
+          th:object="${form}">
+        <div class="card">
+            <div class="form-row">
+                <label>Identifiant <span class="req">*</span></label>
+                <input th:field="*{username}" th:readonly="${mode != 'creation'}" required/>
+            </div>
+            <div class="form-row">
+                <label>Nom complet</label>
+                <input th:field="*{nomComplet}"/>
+            </div>
+            <div class="form-row">
+                <label>Rôle <span class="req">*</span></label>
+                <select th:field="*{role}">
+                    <option value="ADMIN">Administrateur</option>
+                    <option value="CHEF_MISSION">Chef de mission</option>
+                    <option value="AGENT">Agent</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label th:text="${mode == 'creation'} ? 'Mot de passe *' : 'Nouveau mot de passe (laisser vide pour conserver)'">Mot de passe</label>
+                <input th:field="*{motDePasse}" type="password" th:required="${mode == 'creation'}"/>
+            </div>
+            <div class="form-row" th:if="${mode != 'creation'}">
+                <label><input type="checkbox" th:field="*{actif}"/> Compte actif</label>
+            </div>
+        </div>
+        <div style="margin-top:1rem">
+            <button class="btn" type="submit">Enregistrer</button>
+            <a class="btn secondary" th:href="@{/utilisateurs}">Annuler</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
