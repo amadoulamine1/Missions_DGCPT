@@ -27,7 +27,7 @@ Un **mode hors-ligne** (canevas Excel) permet la saisie en cas de coupure résea
 
 ## Statut
 
-Phase de conception terminée. Prochaine étape : développement (squelette Spring Boot, entités JPA).
+Application **en cours de développement** (Spring Boot/PostgreSQL). Réalisés : gestion des TPR et des agents, création de missions (avec chefs, membres et contrôles), import des canevas (aperçu → validation → intégration), et consultation (parc, postes, missions). Reste notamment l'**authentification avec les rôles**. Voir le §9 du cahier des charges pour le détail des évolutions.
 
 ## Développement
 

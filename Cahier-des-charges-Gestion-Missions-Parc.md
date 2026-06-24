@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Document de travail — version 1 (récapitulatif de cadrage)*
+*Version 2 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -23,8 +23,8 @@ Trois principes commandent toute la conception :
 
 ## 3. Modèle de données
 
-### 3.1 Poste régional
-Entité de base. Possède un code, un nom/une région, une liste d'agents, un parc de matériel, et un chef de poste (historisé).
+### 3.1 Poste régional (TPR)
+Entité de base, désignée **TPR** dans l'application. Possède un code, un nom/une région, une liste d'agents, un parc de matériel, et un chef de poste (historisé).
 *(« poste de service » dans une mission = ce poste régional.)*
 
 ### 3.2 Agent
@@ -49,6 +49,8 @@ Conséquence : le **chef de mission et les membres d'une mission sont toujours d
 ### 3.3 Chef de poste *(historisé)*
 Un poste a un chef de poste sur une **période** (date de début → date de fin). Il peut être remplacé à tout moment : on clôture la période en cours et on en ouvre une nouvelle. Le rôle « chef de service » mentionné en cours de cadrage est le **même** que chef de poste (un seul rôle).
 
+Dans l'application, le chef de poste se **désigne ou se change directement depuis la page du TPR** (avec une date d'effet) : l'app clôt la période précédente et ouvre la nouvelle. À la création d'une mission, le **dernier chef connu du TPR est reconduit par défaut** et figé sur la mission.
+
 ### 3.4 Mission
 Contient :
 
@@ -60,6 +62,8 @@ Contient :
 - le **chef de poste en fonction au moment de la mission**, figé dans la mission (même si le chef change plus tard, la mission garde le bon nom).
 
 La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission.
+
+Les **membres** sont choisis parmi les informaticiens (sélection multiple). **Règle :** un agent ne peut pas être membre de deux missions dont les **périodes se chevauchent** — l'application le bloque et signale la mission en conflit ; il faut d'abord l'en retirer.
 
 ### 3.5 Relevé de mission *(photo datée)*
 Produit pendant la mission, rattaché au poste et à la mission, daté :
@@ -157,3 +161,34 @@ Décidés lors du cadrage :
 - **Volumétrie** : ~20 postes régionaux ; ~2 000 agents au total (Trésor), dont ~700 en poste (≈ 35 par poste en moyenne), le reste au niveau central (dont la Direction Informatique). Le **parc n'est pas encore connu** — son inventaire est précisément l'un des objectifs de l'application ; estimé à l'ordre du millier d'équipements. Volume modéré : la stack retenue est largement dimensionnée, sans enjeu de performance.
 
 À préciser en phase technique : le nombre de postes régionaux et le volume du parc matériel ; la politique de sauvegarde et de sécurité.
+
+
+## 9. Évolutions et état de réalisation
+
+Section ajoutée pendant le développement, en complément du cadrage initial.
+
+### 9.1 Terminologie
+- **TPR** = poste régional, terme employé dans toute l'application.
+
+### 9.2 Cycle de vie d'une mission
+- Le chef de mission **crée la mission en ligne** : choix du TPR (existant ou nouveau), objet, période, chef de mission, chef de poste et membres. L'application **génère le N° de mission** (format `MIS-AAAA-NNN`) puis un **canevas pré-estampillé** (en-tête déjà rempli) à distribuer aux agents.
+- **Chef de poste** : reconduit par défaut (dernier chef connu du TPR), ou changé directement depuis la page du TPR avec date d'effet et historisation des périodes.
+- **Membres** : choisis parmi les informaticiens (sélection multiple) ; **contrôle de chevauchement** (un agent ne peut pas être sur deux missions simultanées) ; retrait possible depuis le détail de la mission.
+- **Contrôle des dates** : la date de fin ne peut pas être antérieure à la date de début.
+
+### 9.3 Référentiels et création à la volée
+- Écrans dédiés de **gestion des TPR** (créer/modifier) et des **agents** (créer/modifier, type informaticien ou agent de poste).
+- Pour fluidifier la saisie, les entités absentes (TPR, agents) peuvent être **créées à la volée** à la création d'une mission, à la désignation d'un chef ou à l'import. En production, ces créations implicites pourront être durcies en contrôles bloquants selon la politique d'administration.
+
+### 9.4 Application réalisée
+- **Web** : Spring Boot + Thymeleaf + Spring Data JPA + PostgreSQL (schéma appliqué par Flyway). Accesseurs Java explicites (sans Lombok) pour un build robuste sur tout JDK.
+- **Écrans** : Accueil, Postes (TPR), Agents, Parc, Missions (liste, création, détail avec membres et relevés datés), Import (télécharger un canevas, aperçu, validation, intégration).
+- **Import** : lecture du canevas (Apache POI), contrôles (formats, champs obligatoires), aperçu, **validation explicite** avant prise en compte, puis intégration en base (rapprochement, affectations historisées, relevés datés).
+- **Configuration locale** non versionnée (`application-local.properties`) pour la connexion à la base.
+- **Tests** : test d'intégration du pipeline d'import sur PostgreSQL (Testcontainers).
+
+### 9.5 Reste à faire
+- **Authentification et rôles** (admin / chef de mission / agent) — la sécurité est aujourd'hui ouverte en développement.
+- **Arbitrage des conflits** de consolidation entre fichiers (valeurs divergentes).
+- **Inventaire à une date précise** (reconstitution fine au-delà du relevé par mission).
+- Politique de **sauvegarde et de sécurité**.
