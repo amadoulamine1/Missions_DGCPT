@@ -13,6 +13,12 @@
             .grid { display:block; }
             .grid .card { margin-bottom:1rem; }
         }
+        .cap{color:var(--muted);font-size:.82rem;margin:.15rem 0 .85rem;line-height:1.45}
+        .typeblock{margin-bottom:.7rem}
+        .scount{font-size:.79rem;color:var(--muted);margin:.2rem 0 0;padding-left:.1rem}
+        .scount b{font-weight:700}
+        .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:baseline}
+        .lgd{display:inline-block;margin-right:.1rem}
     </style>
 </head>
 <body>
@@ -29,8 +35,8 @@
     <div class="kpis">
         <a class="kpi" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
         <a class="kpi" th:href="@{/parc}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
-        <div class="kpi"><div class="n" th:text="|${tauxDispo} %|">0</div><div class="l">Disponibilité</div></div>
-        <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte</div></a>
+        <div class="kpi"><div class="n" th:text="|${tauxDispo} %|">0</div><div class="l">Disponibilité (en service)</div></div>
+        <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
         <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
         <div class="kpi"><div class="n" th:text="|${nbInfo} / ${nbAgentsPoste}|">0</div><div class="l">Agents (info. / poste)</div></div>
     </div>
@@ -38,42 +44,59 @@
     <div class="grid">
         <div class="card">
             <h3 style="margin-top:0;border:none">Matériel par statut</h3>
+            <p class="cap">Tout le parc réparti par état. La barre indique la part du total ; le chiffre à droite, le nombre d'équipements.</p>
             <div class="bars">
-                <div class="bar-row"><span>En service</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnService} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnService}">0</span></div>
-                <div class="bar-row"><span>En panne</span><span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnPanne} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnPanne}">0</span></div>
-                <div class="bar-row"><span>À changer</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${nbMateriel} > 0 ? ${matAChanger} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matAChanger}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#4f9d50"></span>En service</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnService} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnService}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#cf4a3f"></span>En panne</span><span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnPanne} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnPanne}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#e0972f"></span>À changer</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${nbMateriel} > 0 ? ${matAChanger} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matAChanger}">0</span></div>
             </div>
         </div>
         <div class="card">
             <h3 style="margin-top:0;border:none">Missions par état</h3>
+            <p class="cap">Missions réparties selon leur avancement (calculé à partir des dates).</p>
             <div class="bars">
-                <div class="bar-row"><span>Planifiées</span><span class="bar-track"><span class="bar-fill blue" th:style="'width:' + (${nbMissions} > 0 ? ${misPlan} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misPlan}">0</span></div>
-                <div class="bar-row"><span>En cours</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${nbMissions} > 0 ? ${misEnCours} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misEnCours}">0</span></div>
-                <div class="bar-row"><span>Terminées</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMissions} > 0 ? ${misTerm} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misTerm}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#3f74b0"></span>Planifiées</span><span class="bar-track"><span class="bar-fill blue" th:style="'width:' + (${nbMissions} > 0 ? ${misPlan} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misPlan}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#e0972f"></span>En cours</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${nbMissions} > 0 ? ${misEnCours} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misEnCours}">0</span></div>
+                <div class="bar-row"><span><span class="dot" style="background:#4f9d50"></span>Terminées</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMissions} > 0 ? ${misTerm} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misTerm}">0</span></div>
             </div>
         </div>
         <div class="card">
             <h3 style="margin-top:0;border:none">Matériel par type</h3>
-            <p class="muted" style="margin:.2rem 0 .55rem;font-size:.8rem">
-                <span class="badge green">En service</span> <span class="badge red">En panne</span> <span class="badge orange">À changer</span>
-            </p>
+            <p class="cap">Pour chaque type d'équipement : le <b>total</b> (à droite) et sa répartition par état.
+                <span style="white-space:nowrap"><span class="dot" style="background:#4f9d50"></span>en service</span>
+                <span style="white-space:nowrap"><span class="dot" style="background:#cf4a3f"></span>en panne</span>
+                <span style="white-space:nowrap"><span class="dot" style="background:#e0972f"></span>à changer</span>.
+                Chaque barre est à l'échelle de son propre type (elle vaut 100 % de ce type).</p>
             <div class="bars">
-                <div class="bar-row"><span>Ordinateurs</span>
-                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbOrdi} > 0 ? ${ordSvc} * 100 / ${nbOrdi} : 0) + '%'" th:title="|Ordinateurs · En service : ${ordSvc} (${nbOrdi > 0 ? ordSvc * 100 / nbOrdi : 0} %)|"></span><span class="seg red" th:style="'width:' + (${nbOrdi} > 0 ? ${ordPan} * 100 / ${nbOrdi} : 0) + '%'" th:title="|Ordinateurs · En panne : ${ordPan} (${nbOrdi > 0 ? ordPan * 100 / nbOrdi : 0} %)|"></span><span class="seg orange" th:style="'width:' + (${nbOrdi} > 0 ? ${ordChg} * 100 / ${nbOrdi} : 0) + '%'" th:title="|Ordinateurs · À changer : ${ordChg} (${nbOrdi > 0 ? ordChg * 100 / nbOrdi : 0} %)|"></span></span>
-                    <span class="v" th:text="${nbOrdi}">0</span></div>
-                <div class="bar-row"><span>Imprimantes</span>
-                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbImp} > 0 ? ${impSvc} * 100 / ${nbImp} : 0) + '%'" th:title="|Imprimantes · En service : ${impSvc} (${nbImp > 0 ? impSvc * 100 / nbImp : 0} %)|"></span><span class="seg red" th:style="'width:' + (${nbImp} > 0 ? ${impPan} * 100 / ${nbImp} : 0) + '%'" th:title="|Imprimantes · En panne : ${impPan} (${nbImp > 0 ? impPan * 100 / nbImp : 0} %)|"></span><span class="seg orange" th:style="'width:' + (${nbImp} > 0 ? ${impChg} * 100 / ${nbImp} : 0) + '%'" th:title="|Imprimantes · À changer : ${impChg} (${nbImp > 0 ? impChg * 100 / nbImp : 0} %)|"></span></span>
-                    <span class="v" th:text="${nbImp}">0</span></div>
-                <div class="bar-row"><span>Switchs / AP</span>
-                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbReseau} > 0 ? ${resSvc} * 100 / ${nbReseau} : 0) + '%'" th:title="|Switchs / AP · En service : ${resSvc} (${nbReseau > 0 ? resSvc * 100 / nbReseau : 0} %)|"></span><span class="seg red" th:style="'width:' + (${nbReseau} > 0 ? ${resPan} * 100 / ${nbReseau} : 0) + '%'" th:title="|Switchs / AP · En panne : ${resPan} (${nbReseau > 0 ? resPan * 100 / nbReseau : 0} %)|"></span><span class="seg orange" th:style="'width:' + (${nbReseau} > 0 ? ${resChg} * 100 / ${nbReseau} : 0) + '%'" th:title="|Switchs / AP · À changer : ${resChg} (${nbReseau > 0 ? resChg * 100 / nbReseau : 0} %)|"></span></span>
-                    <span class="v" th:text="${nbReseau}">0</span></div>
-                <div class="bar-row"><span>Scanners</span>
-                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbScan} > 0 ? ${scnSvc} * 100 / ${nbScan} : 0) + '%'" th:title="|Scanners · En service : ${scnSvc} (${nbScan > 0 ? scnSvc * 100 / nbScan : 0} %)|"></span><span class="seg red" th:style="'width:' + (${nbScan} > 0 ? ${scnPan} * 100 / ${nbScan} : 0) + '%'" th:title="|Scanners · En panne : ${scnPan} (${nbScan > 0 ? scnPan * 100 / nbScan : 0} %)|"></span><span class="seg orange" th:style="'width:' + (${nbScan} > 0 ? ${scnChg} * 100 / ${nbScan} : 0) + '%'" th:title="|Scanners · À changer : ${scnChg} (${nbScan > 0 ? scnChg * 100 / nbScan : 0} %)|"></span></span>
-                    <span class="v" th:text="${nbScan}">0</span></div>
+                <div class="typeblock">
+                    <div class="bar-row"><span>Ordinateurs</span>
+                        <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbOrdi} > 0 ? ${ordSvc} * 100 / ${nbOrdi} : 0) + '%'" th:title="|En service : ${ordSvc}|"></span><span class="seg red" th:style="'width:' + (${nbOrdi} > 0 ? ${ordPan} * 100 / ${nbOrdi} : 0) + '%'" th:title="|En panne : ${ordPan}|"></span><span class="seg orange" th:style="'width:' + (${nbOrdi} > 0 ? ${ordChg} * 100 / ${nbOrdi} : 0) + '%'" th:title="|À changer : ${ordChg}|"></span></span>
+                        <span class="v" th:text="${nbOrdi}">0</span></div>
+                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${ordSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${ordPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${ordChg}">0</b> à changer</span></div>
+                </div>
+                <div class="typeblock">
+                    <div class="bar-row"><span>Imprimantes</span>
+                        <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbImp} > 0 ? ${impSvc} * 100 / ${nbImp} : 0) + '%'" th:title="|En service : ${impSvc}|"></span><span class="seg red" th:style="'width:' + (${nbImp} > 0 ? ${impPan} * 100 / ${nbImp} : 0) + '%'" th:title="|En panne : ${impPan}|"></span><span class="seg orange" th:style="'width:' + (${nbImp} > 0 ? ${impChg} * 100 / ${nbImp} : 0) + '%'" th:title="|À changer : ${impChg}|"></span></span>
+                        <span class="v" th:text="${nbImp}">0</span></div>
+                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${impSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${impPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${impChg}">0</b> à changer</span></div>
+                </div>
+                <div class="typeblock">
+                    <div class="bar-row"><span>Switchs / AP</span>
+                        <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbReseau} > 0 ? ${resSvc} * 100 / ${nbReseau} : 0) + '%'" th:title="|En service : ${resSvc}|"></span><span class="seg red" th:style="'width:' + (${nbReseau} > 0 ? ${resPan} * 100 / ${nbReseau} : 0) + '%'" th:title="|En panne : ${resPan}|"></span><span class="seg orange" th:style="'width:' + (${nbReseau} > 0 ? ${resChg} * 100 / ${nbReseau} : 0) + '%'" th:title="|À changer : ${resChg}|"></span></span>
+                        <span class="v" th:text="${nbReseau}">0</span></div>
+                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${resSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${resPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${resChg}">0</b> à changer</span></div>
+                </div>
+                <div class="typeblock">
+                    <div class="bar-row"><span>Scanners</span>
+                        <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbScan} > 0 ? ${scnSvc} * 100 / ${nbScan} : 0) + '%'" th:title="|En service : ${scnSvc}|"></span><span class="seg red" th:style="'width:' + (${nbScan} > 0 ? ${scnPan} * 100 / ${nbScan} : 0) + '%'" th:title="|En panne : ${scnPan}|"></span><span class="seg orange" th:style="'width:' + (${nbScan} > 0 ? ${scnChg} * 100 / ${nbScan} : 0) + '%'" th:title="|À changer : ${scnChg}|"></span></span>
+                        <span class="v" th:text="${nbScan}">0</span></div>
+                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${scnSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${scnPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${scnChg}">0</b> à changer</span></div>
+                </div>
             </div>
         </div>
         <div class="card">
             <h3 style="margin-top:0;border:none">Matériel par poste</h3>
+            <p class="cap">Nombre d'équipements rattachés à chaque poste (TPR), du plus fourni au moins fourni.</p>
             <div class="bars">
                 <div class="bar-row" th:each="sp : ${parPoste}" th:title="|${sp.total} matériel(s) · ${sp.enPanne} en panne|">
                     <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" th:text="${sp.nom}">Poste</span>
