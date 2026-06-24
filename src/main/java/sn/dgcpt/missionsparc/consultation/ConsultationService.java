@@ -144,8 +144,14 @@ public class ConsultationService {
                         r.getAgentSaisisseur() == null ? "" : r.getAgentSaisisseur().getMatricule(),
                         nz(r.getZone())
                 }).toList();
+        List<String[]> histo = affectationRepo.findByMaterielOrderByDateDebutDesc(m).stream()
+                .map(a -> new String[]{
+                        a.getAgent() == null ? "(poste)" : a.getAgent().getMatricule() + " — " + a.getAgent().getNom() + " " + a.getAgent().getPrenom(),
+                        a.getDateDebut() == null ? "" : a.getDateDebut().toString(),
+                        a.getDateFin() == null ? "En cours" : a.getDateFin().toString()
+                }).toList();
         String cree = m.getDateCreation() == null ? "" : m.getDateCreation().toString().substring(0, 10);
-        return new MaterielDetailVue(versMaterielVue(m), cree, attrs, affA, affP, affD, rel);
+        return new MaterielDetailVue(versMaterielVue(m), cree, attrs, affA, affP, affD, rel, histo);
     }
 
     private String nz(String s) { return s == null ? "" : s; }
@@ -224,6 +230,14 @@ public class ConsultationService {
             sb.append(x.trim());
         }
         return sb.toString();
+    }
+
+    public List<AgentVue> candidatsAffectation(String numero) {
+        Materiel m = materielRepo.findById(numero).orElse(null);
+        if (m == null || m.getPoste() == null) return List.of();
+        return agentRepo.findByPoste_Id(m.getPoste().getId()).stream()
+                .map(a -> new AgentVue(a.getMatricule(), a.getNom() + " " + a.getPrenom(), a.getFonction(), a.getTelephone()))
+                .toList();
     }
 
     private MaterielVue versMaterielVue(Materiel m) {

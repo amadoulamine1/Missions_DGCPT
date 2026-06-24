@@ -14,6 +14,10 @@
         <span class="spacer"></span>
         <span class="badge" th:classappend="${d.base.type}" th:text="${d.base.type}"></span>
     </div>
+
+    <p th:if="${message}" class="alert ok" th:text="${message}"></p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}"></p>
+
     <div class="card">
         <table class="kv">
             <tr><td class="k">Nom</td><td th:text="${d.base.nom}"></td></tr>
@@ -40,7 +44,37 @@
             <tr><td class="k">Poste</td><td th:text="${d.affectePoste}"></td></tr>
             <tr><td class="k">Depuis</td><td th:text="${d.affecteDepuis}"></td></tr>
         </table>
+
+        <div class="subform" th:if="${currentRole == 'ADMIN'}">
+            <div class="legend">Réaffecter à un autre agent</div>
+            <div class="hint" th:if="${candidats.isEmpty()}">Aucun agent rattaché à ce poste. Ajoutez d'abord des agents au TPR.</div>
+            <form method="post" th:action="@{/parc/{n}/affectation(n=${d.base.numeroInventaire})}" th:if="${!candidats.isEmpty()}">
+                <div class="form-row">
+                    <label>Nouvel agent</label>
+                    <select name="agent" required>
+                        <option value="">— choisir —</option>
+                        <option th:each="c : ${candidats}" th:value="${c.matricule}" th:text="${c.matricule + ' — ' + c.nomComplet}"></option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Date d'effet</label>
+                    <input type="date" name="date"/>
+                </div>
+                <button class="btn" type="submit">Réaffecter</button>
+            </form>
+        </div>
     </div>
+
+    <h2>Historique des propriétaires</h2>
+    <table class="table">
+        <thead><tr><th>Agent</th><th>Depuis</th><th>Jusqu'à</th></tr></thead>
+        <tbody>
+            <tr th:each="h : ${d.historique}">
+                <td th:text="${h[0]}"></td><td th:text="${h[1]}"></td><td th:text="${h[2]}"></td>
+            </tr>
+            <tr th:if="${d.historique.isEmpty()}"><td colspan="3" class="empty">Aucune affectation enregistrée.</td></tr>
+        </tbody>
+    </table>
 
     <h2>Relevés (missions)</h2>
     <table class="table">

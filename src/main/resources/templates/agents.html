@@ -18,17 +18,17 @@
             <button type="button" class="chip" data-cat="poste">Agents de poste</button>
         </div>
         <span class="spacer"></span>
-        <form method="get" th:action="@{/agents}" style="display:flex;align-items:center;gap:.5rem">
-            <span class="search">
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
-                <input type="text" name="q" th:value="${q}" placeholder="Rechercher un agent…"/>
-            </span>
-            <select name="poste" id="posteFilter" onchange="this.form.submit()"
-                    style="display:none;border:1px solid var(--line);border-radius:8px;padding:.48rem .6rem;font-size:.88rem;background:#fff;color:var(--ink);font-family:inherit">
-                <option value="">Tous les postes (TPR)</option>
-                <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
-            </select>
+        <form class="search" method="get" th:action="@{/agents}">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="text" name="q" th:value="${q}" placeholder="Rechercher un agent…"/>
         </form>
+    </div>
+
+    <div class="chips" id="posteChips" th:attr="data-active=${fPoste != null}" style="display:none;margin:-.1rem 0 1rem">
+        <span class="muted" style="align-self:center;margin-right:.2rem">TPR :</span>
+        <a class="chip sm" th:classappend="${fPoste == null} ? 'active'" th:href="@{/agents(q=${q})}">Tous les TPR</a>
+        <a class="chip sm" th:each="p : ${postes}" th:classappend="${fPoste != null and fPoste == p.id} ? 'active'"
+           th:href="@{/agents(q=${q},poste=${p.id})}" th:text="${p.nom}"></a>
     </div>
 
     <section data-sec="info">
@@ -94,15 +94,15 @@
       var chips=document.querySelectorAll('#catChips .chip');
       var secInfo=document.querySelector('section[data-sec="info"]');
       var secPoste=document.querySelector('section[data-sec="poste"]');
-      var posteFilter=document.getElementById('posteFilter');
+      var posteChips=document.getElementById('posteChips');
       function apply(cat){
         chips.forEach(function(x){x.classList.toggle('active', x.getAttribute('data-cat')===cat);});
         if(secInfo) secInfo.style.display=(cat==='poste')?'none':'';
         if(secPoste) secPoste.style.display=(cat==='info')?'none':'';
-        if(posteFilter) posteFilter.style.display=(cat==='poste')?'':'none';
+        if(posteChips) posteChips.style.display=(cat==='poste')?'flex':'none';
       }
       chips.forEach(function(c){ c.addEventListener('click',function(){apply(c.getAttribute('data-cat'));}); });
-      var hasPoste = posteFilter && posteFilter.value && posteFilter.value!=='';
+      var hasPoste = posteChips && posteChips.getAttribute('data-active')==='true';
       apply(hasPoste ? 'poste' : 'tous');
     })();
     </script>

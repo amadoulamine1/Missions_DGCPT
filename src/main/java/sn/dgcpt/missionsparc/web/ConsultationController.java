@@ -7,7 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.consultation.ConsultationService;
 import sn.dgcpt.missionsparc.consultation.Pagination;
 import sn.dgcpt.missionsparc.consultation.dto.MaterielVue;
@@ -15,6 +17,7 @@ import sn.dgcpt.missionsparc.consultation.dto.MissionVue;
 import sn.dgcpt.missionsparc.consultation.dto.PageVue;
 import sn.dgcpt.missionsparc.consultation.dto.PosteVue;
 import sn.dgcpt.missionsparc.consultation.ParcExporter;
+import sn.dgcpt.missionsparc.affectation.AffectationService;
 import sn.dgcpt.missionsparc.domain.TypeMateriel;
 
 import java.io.IOException;
@@ -30,10 +33,13 @@ public class ConsultationController {
 
     private final ConsultationService consultation;
     private final ParcExporter parcExporter;
+    private final AffectationService affectationService;
 
-    public ConsultationController(ConsultationService consultation, ParcExporter parcExporter) {
+    public ConsultationController(ConsultationService consultation, ParcExporter parcExporter,
+                                  AffectationService affectationService) {
         this.consultation = consultation;
         this.parcExporter = parcExporter;
+        this.affectationService = affectationService;
     }
 
     @GetMapping("/postes")
@@ -141,7 +147,23 @@ public class ConsultationController {
     @GetMapping("/parc/{numero}")
     public String materiel(@PathVariable String numero, Model model) {
         model.addAttribute("d", consultation.detailMateriel(numero));
+        model.addAttribute("candidats", consultation.candidatsAffectation(numero));
         return "materiel-detail";
+    }
+
+    @PostMapping("/parc/{numero}/affectation")
+    public String reaffecter(@PathVariable String numero,
+                             @RequestParam String agent,
+                             @RequestParam(required = false) String date,
+                             RedirectAttributes ra) {
+        try {
+            LocalDate d = (date == null || date.isBlank()) ? LocalDate.now() : LocalDate.parse(date);
+            affectationService.reaffecter(numero, agent, d);
+            ra.addFlashAttribute("message", "Matériel réaffecté.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/parc/" + numero;
     }
 
     @GetMapping("/missions")

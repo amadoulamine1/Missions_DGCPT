@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface AffectationMaterielRepository extends JpaRepository<AffectationMateriel, Integer> {
     Optional<AffectationMateriel> findByMaterielAndDateFinIsNull(Materiel materiel);
 
+    java.util.List<AffectationMateriel> findByMaterielOrderByDateDebutDesc(Materiel materiel);
+
     @Query("select a from AffectationMateriel a where a.dateDebut <= :d and (a.dateFin is null or a.dateFin > :d)")
     List<AffectationMateriel> actives(@Param("d") LocalDate d);
 }
