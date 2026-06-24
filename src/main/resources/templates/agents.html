@@ -10,18 +10,35 @@
         <span class="spacer"></span>
         <a class="btn" th:href="@{/agents/nouveau}">+ Nouvel agent</a>
     </div>
+
+    <h2>Agents informaticiens <span class="muted" th:text="|(${informaticiens.size()})|"></span></h2>
+    <p class="muted">Direction Informatique — effectuent les missions.</p>
     <table class="table">
-        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Type</th><th>TPR</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Actions</th></tr></thead>
         <tbody>
-            <tr th:each="a : ${agents}">
+            <tr th:each="a : ${informaticiens}">
                 <td th:text="${a.matricule}"></td>
                 <td th:text="${a.nomComplet}"></td>
                 <td th:text="${a.fonction}"></td>
-                <td><span class="badge" th:classappend="${a.type == 'INFORMATICIEN'} ? 'gold' : 'green'" th:text="${a.type}"></span></td>
+                <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
+            </tr>
+            <tr th:if="${informaticiens.isEmpty()}"><td colspan="4" class="empty">Aucun informaticien.</td></tr>
+        </tbody>
+    </table>
+
+    <h2 style="margin-top:1.6rem">Agents de poste <span class="muted" th:text="|(${agentsPoste.size()})|"></span></h2>
+    <p class="muted">Rattachés à un TPR — utilisent le matériel.</p>
+    <table class="table">
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>TPR</th><th>Actions</th></tr></thead>
+        <tbody>
+            <tr th:each="a : ${agentsPoste}">
+                <td th:text="${a.matricule}"></td>
+                <td th:text="${a.nomComplet}"></td>
+                <td th:text="${a.fonction}"></td>
                 <td th:text="${a.posteNom}"></td>
                 <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
             </tr>
-            <tr th:if="${agents.isEmpty()}"><td colspan="6" class="empty">Aucun agent.</td></tr>
+            <tr th:if="${agentsPoste.isEmpty()}"><td colspan="5" class="empty">Aucun agent de poste.</td></tr>
         </tbody>
     </table>
 </main>

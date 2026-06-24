@@ -25,7 +25,9 @@ public class AgentController {
 
     @GetMapping
     public String liste(Model model) {
-        model.addAttribute("agents", agentService.lister());
+        var all = agentService.lister();
+        model.addAttribute("informaticiens", all.stream().filter(a -> "INFORMATICIEN".equals(a.getType())).toList());
+        model.addAttribute("agentsPoste", all.stream().filter(a -> "POSTE".equals(a.getType())).toList());
         return "agents";
     }
 
