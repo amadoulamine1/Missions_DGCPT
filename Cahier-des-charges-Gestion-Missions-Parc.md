@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 6 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 7 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -205,6 +205,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Attributaire** : choisi parmi les **agents du TPR** via la feuille « Agents TPR » (pré-remplie et complétable) ; les agents manquants sont **créés à l'import**.
 - **Caractéristiques d'ordinateur** ajoutées : **RAM**, **processeur**, **disque dur**.
 - **Garde-fous du canevas** : indicateur conforme/incomplet/non conforme, mises en forme conditionnelles (obligatoires en rouge, MAC invalide en orange), validation du format des MAC, et protection de la mise en forme contre le collage (voir §5.2).
+- **Pré-remplissage de l'inventaire** : au téléchargement du canevas pré-rempli, le matériel déjà connu du poste est reporté dans les feuilles (caractéristiques, statut, affectataire, logiciels) ; l'agent vérifie, corrige et ajoute les nouveautés.
 
 ### 9.7 Authentification, rôles et comptes
 - **Connexion par formulaire** (Spring Security) ; mots de passe **chiffrés en BCrypt** ; déconnexion.
@@ -230,10 +231,12 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - Le **chef de mission arbitre** chaque conflit (choix de la version à retenir), puis **intègre l'ensemble** en une transaction (rapprochement par clé, affectations historisées, relevés datés) ; les lots passent à *intégré*. Un lot erroné peut être **retiré** avant intégration.
 
 ### 9.10 Restitutions, recherche et exports
-- **Tableau de bord** (accueil) : chiffres clés (postes, matériel par statut et par type, missions par état, agents).
+- **Tableau de bord** (accueil) : chiffres clés et **graphiques en barres** (matériel par statut et par type, missions par état, postes/agents).
 - **Inventaire à une date** : reconstitution de la **composition et de la localisation** du parc à une date donnée, à partir de l'historique des affectations.
-- **Parc** : recherche (n°, nom, modèle) et filtres (poste, type, statut), avec **export Excel** de l'inventaire filtré.
-- **Missions** : recherche (n°, objet) et filtres (poste, état), et **export Excel des relevés** d'une mission.
+- **Parc** : recherche (n°, nom, modèle), filtres (poste, type, statut), **tri par colonnes** et **pagination**, avec **export Excel** de l'inventaire filtré.
+- **Missions** : recherche (n°, objet), filtres (poste, état), tri et pagination, avec **export Excel des relevés** d'une mission.
+- **Agents** : listes paginées (informaticiens et agents de poste, séparés).
+- **Étiquettes** : page imprimable des **n° d'inventaire** (filtrable comme le parc), à imprimer ou enregistrer en **PDF** pour étiqueter physiquement les machines.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :
