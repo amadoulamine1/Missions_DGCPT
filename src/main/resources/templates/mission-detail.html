@@ -52,7 +52,8 @@
             <tr><td class="k">Catégorie de câble</td><td th:text="${d.categorieCable}"></td></tr>
         </table>
     </div>
-    <h2>Inventaire relevé</h2>
+    <div class="toolbar"><h2 style="margin:0">Inventaire relevé</h2><span class="spacer"></span>
+        <a class="btn small secondary" th:href="@{/missions/{id}/releves/export(id=${d.mission.id})}">⬇ Export Excel</a></div>
     <table class="table">
         <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Saisi par</th><th>Zone</th><th>Date</th></tr></thead>
         <tbody>

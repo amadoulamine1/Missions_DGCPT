@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 import sn.dgcpt.missionsparc.consultation.dto.MaterielVue;
+import sn.dgcpt.missionsparc.consultation.dto.ReleveVue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,6 +37,33 @@ public class ParcExporter {
             }
             for (int i = 0; i < cols.length; i++) s.autoSizeColumn(i);
 
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            wb.write(out);
+            return out.toByteArray();
+        }
+    }
+
+    public byte[] exporterReleves(List<ReleveVue> releves) throws IOException {
+        try (Workbook wb = new XSSFWorkbook()) {
+            Sheet s = wb.createSheet("Relevés");
+            CellStyle entete = wb.createCellStyle();
+            Font gras = wb.createFont(); gras.setBold(true); entete.setFont(gras);
+            String[] cols = {"N° inventaire", "Type", "Nom", "Saisi par", "Zone", "Date"};
+            Row h = s.createRow(0);
+            for (int i = 0; i < cols.length; i++) {
+                Cell c = h.createCell(i); c.setCellValue(cols[i]); c.setCellStyle(entete);
+            }
+            int r = 1;
+            for (ReleveVue v : releves) {
+                Row row = s.createRow(r++);
+                row.createCell(0).setCellValue(nz(v.getNumeroInventaire()));
+                row.createCell(1).setCellValue(nz(v.getTypeMateriel()));
+                row.createCell(2).setCellValue(nz(v.getNomMateriel()));
+                row.createCell(3).setCellValue(nz(v.getAgentSaisisseur()));
+                row.createCell(4).setCellValue(nz(v.getZone()));
+                row.createCell(5).setCellValue(v.getDateReleve() == null ? "" : v.getDateReleve().toString());
+            }
+            for (int i = 0; i < cols.length; i++) s.autoSizeColumn(i);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
             return out.toByteArray();

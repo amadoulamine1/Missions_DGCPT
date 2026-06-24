@@ -162,6 +162,10 @@ public class ConsultationService {
         }).toList();
     }
 
+    public List<ReleveVue> relevesDeMission(Integer id) {
+        return releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
+    }
+
     // ---- mappers ----
 
     private PosteVue versPosteVue(Poste p) {

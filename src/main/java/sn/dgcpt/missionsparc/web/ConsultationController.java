@@ -96,4 +96,13 @@ public class ConsultationController {
         model.addAttribute("d", consultation.detailMission(id));
         return "mission-detail";
     }
+
+    @GetMapping("/missions/{id}/releves/export")
+    public ResponseEntity<byte[]> exportReleves(@PathVariable Integer id) throws IOException {
+        byte[] data = parcExporter.exporterReleves(consultation.relevesDeMission(id));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Releves-mission-" + id + ".xlsx\"")
+                .contentType(MediaType.parseMediaType(TYPE_XLSX))
+                .body(data);
+    }
 }
