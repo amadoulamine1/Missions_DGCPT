@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Étiquettes</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        .etiq-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:1rem; }
+        .etiq { border:1px solid #333; border-radius:6px; padding:8px 10px; page-break-inside:avoid; }
+        .etiq .num { font-size:1.15rem; font-weight:800; letter-spacing:.5px; }
+        .etiq .meta { font-size:.78rem; color:#555; margin-top:2px }
+        @media print {
+            .topbar, .no-print { display:none !important; }
+            .container { max-width:none; margin:0; padding:0; }
+            .etiq-grid { grid-template-columns:repeat(3, 1fr); gap:4mm; }
+            .etiq { border-color:#000; }
+        }
+    </style>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <div class="toolbar no-print">
+        <h1 style="margin:0">Étiquettes</h1>
+        <span class="spacer"></span>
+        <button class="btn" type="button" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+        <a class="btn secondary" th:href="@{/parc}">← Parc</a>
+    </div>
+    <p class="muted no-print"><span th:text="${materiels.size()}">0</span> étiquette(s). Utilisez « Imprimer » puis choisissez votre imprimante ou « Enregistrer au format PDF ».</p>
+
+    <div class="etiq-grid">
+        <div class="etiq" th:each="m : ${materiels}">
+            <div class="num" th:text="${m.numeroInventaire}">N°</div>
+            <div class="meta"><span th:text="${m.type}"></span> · <span th:text="${m.nom}"></span></div>
+            <div class="meta" th:text="${m.posteNom}"></div>
+        </div>
+    </div>
+    <p th:if="${materiels.isEmpty()}" class="empty">Aucun matériel pour ce filtre.</p>
+</main>
+</body>
+</html>

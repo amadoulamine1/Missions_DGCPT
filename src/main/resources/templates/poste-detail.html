@@ -11,6 +11,7 @@
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.poste.nom}">Poste</h1>
         <span class="spacer"></span>
+        <a class="btn secondary" th:href="@{/parc/etiquettes(poste=${d.poste.id})}">🏷 Étiquettes</a>
         <a class="btn secondary" th:href="@{/postes/{id}/modifier(id=${d.poste.id})}" th:if="${currentRole == 'ADMIN'}">Modifier</a>
     </div>
     <div class="card">

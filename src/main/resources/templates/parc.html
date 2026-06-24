@@ -28,6 +28,7 @@
         <span class="spacer"></span>
         <a class="btn secondary" th:href="@{/inventaire}">Inventaire à une date</a>
         <a class="btn secondary" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
+        <a class="btn secondary" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
     </form>
 
     <p class="muted"><span th:text="${page.total}">0</span> matériel(s)</p>

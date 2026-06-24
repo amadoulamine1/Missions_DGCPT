@@ -107,6 +107,16 @@ public class ConsultationController {
         return "inventaire-date";
     }
 
+    @GetMapping("/parc/etiquettes")
+    public String etiquettes(@RequestParam(required = false) String q,
+                             @RequestParam(required = false) Integer poste,
+                             @RequestParam(required = false) String type,
+                             @RequestParam(required = false) String statut,
+                             Model model) {
+        model.addAttribute("materiels", consultation.listerParc(q, poste, type, statut));
+        return "etiquettes";
+    }
+
     @GetMapping("/parc/{numero}")
     public String materiel(@PathVariable String numero, Model model) {
         model.addAttribute("d", consultation.detailMateriel(numero));
