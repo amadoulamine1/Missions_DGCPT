@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Accès refusé</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>403 — Accès refusé</h1>
+    <div class="card">
+        <p>Vous n'avez pas les droits nécessaires pour accéder à cette page. Cette action est réservée à un autre profil (par exemple administrateur).</p>
+        <p style="margin-top:1rem"><a class="btn" th:href="@{/}">← Retour au tableau de bord</a></p>
+    </div>
+</main>
+</body>
+</html>

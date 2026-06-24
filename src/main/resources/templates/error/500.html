@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Erreur serveur</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>500 — Erreur serveur</h1>
+    <div class="card">
+        <p>Une erreur inattendue s'est produite côté serveur. L'incident peut être signalé à l'administrateur. Vous pouvez réessayer ou revenir à l'accueil.</p>
+        <p style="margin-top:1rem"><a class="btn" th:href="@{/}">← Retour au tableau de bord</a></p>
+    </div>
+</main>
+</body>
+</html>
