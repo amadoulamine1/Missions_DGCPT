@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Inventaire à une date</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>Inventaire à une date</h1>
+    <form method="get" th:action="@{/inventaire}" class="toolbar" style="gap:.5rem">
+        <label>Date</label>
+        <input type="date" name="d" th:value="${date}"/>
+        <button class="btn" type="submit">Afficher</button>
+    </form>
+    <p class="muted"><span th:text="${lignes.size()}">0</span> matériel(s) affecté(s) au <span th:text="${date}"></span></p>
+    <table class="table">
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Affecté à</th><th>Depuis</th></tr></thead>
+        <tbody>
+            <tr th:each="l : ${lignes}">
+                <td><a th:href="@{/parc/{n}(n=${l.numeroInventaire})}" th:text="${l.numeroInventaire}"></a></td>
+                <td th:text="${l.type}"></td><td th:text="${l.nom}"></td><td th:text="${l.modele}"></td>
+                <td th:text="${l.poste}"></td><td th:text="${l.affecteA}"></td><td th:text="${l.depuis}"></td>
+            </tr>
+            <tr th:if="${lignes.isEmpty()}"><td colspan="7" class="empty">Aucun matériel affecté à cette date.</td></tr>
+        </tbody>
+    </table>
+    <p class="muted" style="margin-top:.6rem">Reconstitution fondée sur l'historique des affectations (composition et localisation du parc à la date choisie).</p>
+    <p style="margin-top:.6rem"><a th:href="@{/parc}">← Parc</a></p>
+</main>
+</body>
+</html>

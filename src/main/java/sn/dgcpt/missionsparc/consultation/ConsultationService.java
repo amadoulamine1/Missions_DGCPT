@@ -150,6 +150,18 @@ public class ConsultationService {
 
     private String nz(String s) { return s == null ? "" : s; }
 
+    public List<InventaireDateLigne> inventaireALaDate(LocalDate d) {
+        return affectationRepo.actives(d).stream().map(a -> {
+            Materiel m = a.getMateriel();
+            String affecteA = a.getAgent() == null ? "" :
+                    a.getAgent().getMatricule() + " — " + a.getAgent().getNom() + " " + a.getAgent().getPrenom();
+            return new InventaireDateLigne(
+                    m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(),
+                    a.getPoste() == null ? "" : a.getPoste().getNom(), affecteA,
+                    a.getDateDebut() == null ? "" : a.getDateDebut().toString());
+        }).toList();
+    }
+
     // ---- mappers ----
 
     private PosteVue versPosteVue(Poste p) {

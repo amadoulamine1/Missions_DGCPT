@@ -69,6 +69,16 @@ public class ConsultationController {
                 .body(data);
     }
 
+    @GetMapping("/inventaire")
+    public String inventaireDate(@RequestParam(required = false) String d, Model model) {
+        LocalDate date;
+        try { date = (d == null || d.isBlank()) ? LocalDate.now() : LocalDate.parse(d); }
+        catch (Exception e) { date = LocalDate.now(); }
+        model.addAttribute("date", date.toString());
+        model.addAttribute("lignes", consultation.inventaireALaDate(date));
+        return "inventaire-date";
+    }
+
     @GetMapping("/parc/{numero}")
     public String materiel(@PathVariable String numero, Model model) {
         model.addAttribute("d", consultation.detailMateriel(numero));
