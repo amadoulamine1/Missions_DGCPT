@@ -10,7 +10,7 @@
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
     <h1>Nouvelle mission</h1>
-    <p class="muted">Le N° de mission est généré automatiquement. Vous pourrez ensuite télécharger le canevas pré-rempli à distribuer aux agents.</p>
+    <p class="muted">Le N° de mission est généré automatiquement. Choisissez le TPR et les chefs dans les listes ; les blocs encadrés ne servent qu'à <strong>créer</strong> un élément absent. Les membres de la mission, eux, se saisissent dans le canevas.</p>
     <div class="card">
         <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
@@ -22,9 +22,11 @@
                     <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.code + ' — ' + p.nom}"></option>
                 </select>
             </div>
-            <div id="nouveau-tpr">
-                <div class="form-row"><label>Code du nouveau TPR <span class="req">*</span></label><input type="text" th:field="*{codePoste}"/></div>
-                <div class="form-row"><label>Nom du nouveau TPR</label><input type="text" th:field="*{nomPoste}"/></div>
+            <div id="nouveau-tpr" class="subform">
+                <p class="legend">Nouveau TPR</p>
+                <p class="hint">À remplir uniquement si le TPR n'existe pas encore.</p>
+                <div class="form-row"><label>Code du TPR <span class="req">*</span></label><input type="text" th:field="*{codePoste}"/></div>
+                <div class="form-row"><label>Nom du TPR</label><input type="text" th:field="*{nomPoste}"/></div>
             </div>
 
             <div class="form-row">
@@ -34,8 +36,10 @@
                     <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
                 </select>
             </div>
-            <div id="nouveau-chefmission">
-                <div class="form-row"><label>Matricule (informaticien) <span class="req">*</span></label><input type="text" th:field="*{chefMissionMat}"/></div>
+            <div id="nouveau-chefmission" class="subform">
+                <p class="legend">Nouvel informaticien (chef de mission)</p>
+                <p class="hint">À remplir uniquement si l'informaticien n'est pas dans la liste.</p>
+                <div class="form-row"><label>Matricule <span class="req">*</span></label><input type="text" th:field="*{chefMissionMat}"/></div>
                 <div class="form-row"><label>Nom</label><input type="text" th:field="*{chefMissionNom}"/></div>
                 <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefMissionPrenom}"/></div>
             </div>
@@ -46,8 +50,10 @@
                     <option value="">➕ Ajouter un agent…</option>
                 </select>
             </div>
-            <div id="nouveau-chefposte">
-                <div class="form-row"><label>Matricule (agent du TPR) <span class="req">*</span></label><input type="text" th:field="*{chefPosteMat}"/></div>
+            <div id="nouveau-chefposte" class="subform">
+                <p class="legend">Nouvel agent du TPR (chef de poste)</p>
+                <p class="hint">À remplir uniquement si l'agent n'est pas dans la liste.</p>
+                <div class="form-row"><label>Matricule <span class="req">*</span></label><input type="text" th:field="*{chefPosteMat}"/></div>
                 <div class="form-row"><label>Nom</label><input type="text" th:field="*{chefPosteNom}"/></div>
                 <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefPostePrenom}"/></div>
             </div>

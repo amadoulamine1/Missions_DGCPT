@@ -70,3 +70,7 @@ td.AVERTISSEMENT,span.AVERTISSEMENT{color:var(--gold-dark);font-weight:700}
 table.kv{border:none;background:transparent}
 table.kv td{border:none;padding:.25rem .8rem .25rem 0}
 table.kv td.k{color:var(--muted);white-space:nowrap}
+
+.subform{border:1px dashed var(--gold);border-radius:10px;padding:.2rem 1rem .8rem;margin:.2rem 0 1rem;background:var(--gold-pale)}
+.subform .legend{font-weight:600;color:var(--gold-dark);font-size:.9rem;margin:.7rem 0 .2rem}
+.subform .hint{color:var(--muted);font-size:.84rem;margin:.1rem 0 .5rem}
