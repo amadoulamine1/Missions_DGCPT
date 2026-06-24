@@ -27,12 +27,20 @@ public class AgentController {
 
     @GetMapping
     public String liste(@RequestParam(defaultValue = "0") int pi,
-                        @RequestParam(defaultValue = "0") int pp, Model model) {
-        var all = agentService.lister();
+                        @RequestParam(defaultValue = "0") int pp,
+                        @RequestParam(required = false) String q, Model model) {
+        String t = q == null ? "" : q.trim().toLowerCase();
+        var all = agentService.lister().stream()
+                .filter(a -> t.isEmpty()
+                        || (a.getMatricule() != null && a.getMatricule().toLowerCase().contains(t))
+                        || (a.getNomComplet() != null && a.getNomComplet().toLowerCase().contains(t))
+                        || (a.getFonction() != null && a.getFonction().toLowerCase().contains(t)))
+                .toList();
         var info = all.stream().filter(a -> "INFORMATICIEN".equals(a.getType())).toList();
         var poste = all.stream().filter(a -> "POSTE".equals(a.getType())).toList();
         model.addAttribute("pInfo", Pagination.page(info, pi, 25, null));
         model.addAttribute("pPoste", Pagination.page(poste, pp, 25, null));
+        model.addAttribute("q", q);
         return "agents";
     }
 

@@ -11,41 +11,93 @@
         <a class="btn" th:href="@{/agents/nouveau}">+ Nouvel agent</a>
     </div>
 
-    <h2>Agents informaticiens <span class="muted" th:text="|(${pInfo.total})|"></span></h2>
-    <p class="muted">Direction Informatique — effectuent les missions.</p>
-    <table class="table">
-        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Actions</th></tr></thead>
-        <tbody>
-            <tr th:each="a : ${pInfo.contenu}">
-                <td th:text="${a.matricule}"></td><td th:text="${a.nomComplet}"></td><td th:text="${a.fonction}"></td>
-                <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
-            </tr>
-            <tr th:if="${pInfo.vide}"><td colspan="4" class="empty">Aucun informaticien.</td></tr>
-        </tbody>
-    </table>
-    <div class="toolbar" th:if="${pInfo.totalPages > 1}" style="margin-top:.4rem">
-        <a class="btn small secondary" th:classappend="${pInfo.premier} ? 'disabled' : ''" th:href="@{/agents(pi=${pInfo.precedent},pp=${pPoste.page})}">← Précédent</a>
-        <span class="muted" th:text="'Page ' + ${pInfo.pageHumain} + ' / ' + ${pInfo.totalPages}"></span>
-        <a class="btn small secondary" th:classappend="${pInfo.dernier} ? 'disabled' : ''" th:href="@{/agents(pi=${pInfo.suivant},pp=${pPoste.page})}">Suivant →</a>
+    <div class="filters">
+        <div class="chips" id="catChips">
+            <button type="button" class="chip active" data-cat="tous">Tous</button>
+            <button type="button" class="chip" data-cat="info">Informaticiens</button>
+            <button type="button" class="chip" data-cat="poste">Agents de poste</button>
+        </div>
+        <span class="spacer"></span>
+        <form class="search" method="get" th:action="@{/agents}">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="text" name="q" th:value="${q}" placeholder="Rechercher un agent…"/>
+        </form>
     </div>
 
-    <h2 style="margin-top:1.6rem">Agents de poste <span class="muted" th:text="|(${pPoste.total})|"></span></h2>
-    <p class="muted">Rattachés à un TPR — utilisent le matériel.</p>
-    <table class="table">
-        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>TPR</th><th>Actions</th></tr></thead>
-        <tbody>
-            <tr th:each="a : ${pPoste.contenu}">
-                <td th:text="${a.matricule}"></td><td th:text="${a.nomComplet}"></td><td th:text="${a.fonction}"></td><td th:text="${a.posteNom}"></td>
-                <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
-            </tr>
-            <tr th:if="${pPoste.vide}"><td colspan="5" class="empty">Aucun agent de poste.</td></tr>
-        </tbody>
-    </table>
-    <div class="toolbar" th:if="${pPoste.totalPages > 1}" style="margin-top:.4rem">
-        <a class="btn small secondary" th:classappend="${pPoste.premier} ? 'disabled' : ''" th:href="@{/agents(pp=${pPoste.precedent},pi=${pInfo.page})}">← Précédent</a>
-        <span class="muted" th:text="'Page ' + ${pPoste.pageHumain} + ' / ' + ${pPoste.totalPages}"></span>
-        <a class="btn small secondary" th:classappend="${pPoste.dernier} ? 'disabled' : ''" th:href="@{/agents(pp=${pPoste.suivant},pi=${pInfo.page})}">Suivant →</a>
-    </div>
+    <section data-sec="info">
+        <h2>Agents informaticiens <span class="muted" th:text="|(${pInfo.total})|"></span></h2>
+        <p class="muted" style="margin-top:-.3rem">Direction Informatique — effectuent les missions.</p>
+        <div class="cards" th:if="${!pInfo.vide}">
+            <div class="acard" th:each="a : ${pInfo.contenu}">
+                <div class="acard-head">
+                    <div class="avatar" th:text="${a.nomComplet != null and a.nomComplet.length() > 0 ? a.nomComplet.substring(0,1) : '?'}">A</div>
+                    <div class="acard-id">
+                        <div class="acard-name" th:text="${a.nomComplet}"></div>
+                        <div class="role" th:text="${a.fonction}"></div>
+                    </div>
+                </div>
+                <div class="kv">
+                    <div class="kv-line"><span class="k">Matricule</span><span class="v mono" th:text="${a.matricule}"></span></div>
+                    <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">Poste</span><span class="v" th:text="${a.posteNom}"></span></div>
+                </div>
+                <div class="acard-foot">
+                    <a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a>
+                </div>
+            </div>
+        </div>
+        <p class="empty-box" th:if="${pInfo.vide}">Aucun informaticien.</p>
+        <div class="toolbar" th:if="${pInfo.totalPages > 1}" style="margin-top:.7rem">
+            <a class="btn small secondary" th:classappend="${pInfo.premier} ? 'disabled' : ''" th:href="@{/agents(q=${q},pi=${pInfo.precedent},pp=${pPoste.page})}">← Précédent</a>
+            <span class="muted" th:text="'Page ' + ${pInfo.pageHumain} + ' / ' + ${pInfo.totalPages}"></span>
+            <a class="btn small secondary" th:classappend="${pInfo.dernier} ? 'disabled' : ''" th:href="@{/agents(q=${q},pi=${pInfo.suivant},pp=${pPoste.page})}">Suivant →</a>
+        </div>
+    </section>
+
+    <section data-sec="poste" style="margin-top:1.7rem">
+        <h2>Agents de poste <span class="muted" th:text="|(${pPoste.total})|"></span></h2>
+        <p class="muted" style="margin-top:-.3rem">Rattachés à un TPR — utilisent le matériel.</p>
+        <div class="cards" th:if="${!pPoste.vide}">
+            <div class="acard" th:each="a : ${pPoste.contenu}">
+                <div class="acard-head">
+                    <div class="avatar" th:text="${a.nomComplet != null and a.nomComplet.length() > 0 ? a.nomComplet.substring(0,1) : '?'}">A</div>
+                    <div class="acard-id">
+                        <div class="acard-name" th:text="${a.nomComplet}"></div>
+                        <div class="role" th:text="${a.fonction}"></div>
+                    </div>
+                </div>
+                <div class="kv">
+                    <div class="kv-line"><span class="k">Matricule</span><span class="v mono" th:text="${a.matricule}"></span></div>
+                    <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">TPR</span><span class="v" th:text="${a.posteNom}"></span></div>
+                </div>
+                <div class="acard-foot">
+                    <a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a>
+                </div>
+            </div>
+        </div>
+        <p class="empty-box" th:if="${pPoste.vide}">Aucun agent de poste.</p>
+        <div class="toolbar" th:if="${pPoste.totalPages > 1}" style="margin-top:.7rem">
+            <a class="btn small secondary" th:classappend="${pPoste.premier} ? 'disabled' : ''" th:href="@{/agents(q=${q},pp=${pPoste.precedent},pi=${pInfo.page})}">← Précédent</a>
+            <span class="muted" th:text="'Page ' + ${pPoste.pageHumain} + ' / ' + ${pPoste.totalPages}"></span>
+            <a class="btn small secondary" th:classappend="${pPoste.dernier} ? 'disabled' : ''" th:href="@{/agents(q=${q},pp=${pPoste.suivant},pi=${pInfo.page})}">Suivant →</a>
+        </div>
+    </section>
+
+    <script>
+    (function(){
+      var chips=document.querySelectorAll('#catChips .chip');
+      var secInfo=document.querySelector('section[data-sec="info"]');
+      var secPoste=document.querySelector('section[data-sec="poste"]');
+      chips.forEach(function(c){
+        c.addEventListener('click',function(){
+          chips.forEach(function(x){x.classList.remove('active');});
+          c.classList.add('active');
+          var cat=c.getAttribute('data-cat');
+          if(secInfo) secInfo.style.display=(cat==='poste')?'none':'';
+          if(secPoste) secPoste.style.display=(cat==='info')?'none':'';
+        });
+      });
+    })();
+    </script>
 </main>
 </body>
 </html>

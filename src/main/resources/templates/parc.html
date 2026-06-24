@@ -7,47 +7,63 @@
 <main class="container">
     <h1>Inventaire du parc</h1>
 
-    <form method="get" th:action="@{/parc}" class="toolbar" style="flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
-        <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, nom, modèle)…" style="min-width:220px"/>
-        <select name="poste">
+    <form method="get" th:action="@{/parc}" class="filters">
+        <span class="search">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="text" name="q" th:value="${q}" placeholder="N° inv., nom, modèle…"/>
+        </span>
+        <select name="poste" onchange="this.form.submit()">
             <option value="">Tous les postes</option>
             <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
         </select>
-        <select name="type">
-            <option value="">Tous les types</option>
-            <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${fType == t.name()}"></option>
-        </select>
-        <select name="statut">
-            <option value="">Tous les statuts</option>
-            <option value="EN_SERVICE" th:selected="${fStatut == 'EN_SERVICE'}">En service</option>
-            <option value="EN_PANNE" th:selected="${fStatut == 'EN_PANNE'}">En panne</option>
-            <option value="A_CHANGER" th:selected="${fStatut == 'A_CHANGER'}">À changer</option>
-        </select>
-        <button class="btn" type="submit">Filtrer</button>
-        <a class="btn secondary" th:href="@{/parc}">Réinitialiser</a>
+        <input type="hidden" name="type" th:value="${fType}"/>
+        <input type="hidden" name="statut" th:value="${fStatut}"/>
+        <button class="btn" type="submit">Rechercher</button>
         <span class="spacer"></span>
-        <a class="btn secondary" th:href="@{/inventaire}">Inventaire à une date</a>
-        <a class="btn secondary" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
-        <a class="btn secondary" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
+        <a class="btn secondary small" th:href="@{/inventaire}">Inventaire à une date</a>
+        <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export</a>
+        <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
     </form>
+
+    <div class="chips" style="margin-bottom:.5rem">
+        <a class="chip" th:classappend="${fType == null or fType == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},statut=${fStatut})}">Tous types</a>
+        <a class="chip" th:each="t : ${types}" th:classappend="${fType == t.name()} ? 'active'"
+           th:href="@{/parc(q=${q},poste=${fPoste},type=${t},statut=${fStatut})}"
+           th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(t),'_',' '))}"></a>
+    </div>
+    <div class="chips" style="margin-bottom:1rem">
+        <a class="chip sm" th:classappend="${fStatut == null or fStatut == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType})}">Tous statuts</a>
+        <a class="chip sm" th:classappend="${fStatut == 'EN_SERVICE'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='EN_SERVICE')}">En service</a>
+        <a class="chip sm" th:classappend="${fStatut == 'EN_PANNE'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='EN_PANNE')}">En panne</a>
+        <a class="chip sm" th:classappend="${fStatut == 'A_CHANGER'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='A_CHANGER')}">À changer</a>
+    </div>
 
     <p class="muted"><span th:text="${page.total}">0</span> matériel(s)</p>
     <table class="table">
         <thead><tr>
             <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='type',sens=${(tri == 'type' and sens != 'desc') ? 'desc' : 'asc'})}">Type</a><span th:if="${tri == 'type'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='type',sens=${(tri == 'type' and sens != 'desc') ? 'desc' : 'asc'})}">Type</a><span th:if="${tri == 'type'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='modele',sens=${(tri == 'modele' and sens != 'desc') ? 'desc' : 'asc'})}">Modèle</a><span th:if="${tri == 'modele'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
         </tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
-                <td><a th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a></td><td th:text="${m.type}"></td>
-                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td>
+                <td>
+                    <span class="cell-mat">
+                        <span class="glyph" th:classappend="${m.type == 'ORDINATEUR' ? 't-ord' : (m.type == 'IMPRIMANTE' ? 't-imp' : ((m.type == 'SWITCH' or m.type == 'ACCESS_POINT') ? 't-net' : (m.type == 'SCANNER_CHEQUE' ? 't-scn' : 't-aut')))}"
+                              th:text="${m.type == 'ORDINATEUR' ? 'O' : (m.type == 'IMPRIMANTE' ? 'I' : (m.type == 'SWITCH' ? 'S' : (m.type == 'ACCESS_POINT' ? 'A' : (m.type == 'SCANNER_CHEQUE' ? 'C' : '•'))))}">O</span>
+                        <a class="mono" th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a>
+                    </span>
+                </td>
+                <td th:text="${m.nom}"></td>
+                <td th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(m.type),'_',' '))}"></td>
+                <td th:text="${m.modele}"></td>
+                <td th:text="${m.posteNom}"></td>
                 <td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${page.vide}"><td colspan="6" class="empty">Aucun matériel.</td></tr>
+            <tr th:if="${page.vide}"><td colspan="6" class="empty">Aucun matériel ne correspond à ces filtres.</td></tr>
         </tbody>
     </table>
 
