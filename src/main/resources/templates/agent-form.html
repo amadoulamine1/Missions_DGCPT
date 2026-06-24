@@ -6,6 +6,9 @@
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
     <h1 th:text="${mode == 'creation'} ? 'Nouvel agent' : 'Modifier un agent'">Agent</h1>
+
+    <p th:if="${message}" class="alert ok" th:text="${message}"></p>
+
     <div class="card">
         <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post"
@@ -34,6 +37,30 @@
             </div>
         </form>
     </div>
+
+    <div class="card" th:if="${mode == 'modification' and form.typeAgent == 'POSTE'}">
+        <h2 style="margin-top:0;border:none">Mutation vers un autre poste</h2>
+        <p class="muted" style="margin-top:-.3rem">Change le TPR de rattachement de l'agent, avec date d'effet (historisé). Le matériel reste dans son poste.</p>
+        <form method="post" th:action="@{/agents/{m}/muter(m=${form.matricule})}">
+            <div class="form-row"><label>Nouveau TPR <span class="req">*</span></label>
+                <select name="poste" required>
+                    <option value="">— Choisir —</option>
+                    <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.code + ' — ' + p.nom}"></option>
+                </select></div>
+            <div class="form-row"><label>Date d'effet</label><input type="date" name="date"/></div>
+            <button class="btn" type="submit">Muter</button>
+        </form>
+
+        <h3>Historique des rattachements</h3>
+        <table class="table">
+            <thead><tr><th>Poste (TPR)</th><th>Depuis</th><th>Jusqu'à</th></tr></thead>
+            <tbody>
+                <tr th:each="h : ${historique}"><td th:text="${h[0]}"></td><td th:text="${h[1]}"></td><td th:text="${h[2]}"></td></tr>
+                <tr th:if="${historique == null or historique.isEmpty()}"><td colspan="3" class="empty">Aucun rattachement enregistré.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
         function toggleTpr() {
             var t = document.getElementById('typeAgent').value;

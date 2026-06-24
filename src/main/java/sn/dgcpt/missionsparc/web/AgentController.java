@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.LocalDate;
 import sn.dgcpt.missionsparc.agent.AgentForm;
 import sn.dgcpt.missionsparc.agent.AgentService;
 import sn.dgcpt.missionsparc.consultation.Pagination;
@@ -62,8 +64,24 @@ public class AgentController {
     public String modifier(@PathVariable String matricule, Model model) {
         model.addAttribute("form", agentService.trouver(matricule));
         model.addAttribute("postes", posteRepo.findAll());
+        model.addAttribute("historique", agentService.historiqueRattachement(matricule));
         model.addAttribute("mode", "modification");
         return "agent-form";
+    }
+
+    @PostMapping("/{matricule}/muter")
+    public String muter(@PathVariable String matricule,
+                        @RequestParam(required = false) Integer poste,
+                        @RequestParam(required = false) String date,
+                        RedirectAttributes ra) {
+        try {
+            LocalDate d = (date == null || date.isBlank()) ? LocalDate.now() : LocalDate.parse(date);
+            agentService.muter(matricule, poste, d);
+            ra.addFlashAttribute("message", "Agent muté vers le nouveau poste.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/agents/" + matricule + "/modifier";
     }
 
     @PostMapping
@@ -87,6 +105,7 @@ public class AgentController {
             return "redirect:/agents";
         } catch (RuntimeException e) {
             model.addAttribute("postes", posteRepo.findAll());
+            model.addAttribute("historique", agentService.historiqueRattachement(matricule));
             model.addAttribute("mode", "modification");
             model.addAttribute("erreur", e.getMessage());
             return "agent-form";

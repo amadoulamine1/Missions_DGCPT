@@ -3,11 +3,17 @@ package sn.dgcpt.missionsparc.agent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.dgcpt.missionsparc.domain.Agent;
+import sn.dgcpt.missionsparc.domain.Poste;
+import sn.dgcpt.missionsparc.domain.RattachementAgent;
 import sn.dgcpt.missionsparc.domain.TypeAgent;
 import sn.dgcpt.missionsparc.repository.AgentRepository;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
+import sn.dgcpt.missionsparc.repository.RattachementAgentRepository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,10 +21,13 @@ public class AgentService {
 
     private final AgentRepository agentRepo;
     private final PosteRepository posteRepo;
+    private final RattachementAgentRepository rattachementRepo;
 
-    public AgentService(AgentRepository agentRepo, PosteRepository posteRepo) {
+    public AgentService(AgentRepository agentRepo, PosteRepository posteRepo,
+                        RattachementAgentRepository rattachementRepo) {
         this.agentRepo = agentRepo;
         this.posteRepo = posteRepo;
+        this.rattachementRepo = rattachementRepo;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +67,7 @@ public class AgentService {
         a.setMatricule(mat);
         appliquer(a, f);
         agentRepo.save(a);
+        synchroniserRattachement(a, LocalDate.now());
     }
 
     @Transactional
@@ -65,6 +75,68 @@ public class AgentService {
         Agent a = agentRepo.findById(f.getMatricule()).orElseThrow();
         appliquer(a, f);
         agentRepo.save(a);
+        synchroniserRattachement(a, LocalDate.now());
+    }
+
+    /** Mutation explicite d'un agent de poste vers un autre TPR, à une date d'effet (historisée). */
+    @Transactional
+    public void muter(String matricule, Integer posteId, LocalDate dateEffet) {
+        Agent a = agentRepo.findById(matricule)
+                .orElseThrow(() -> new IllegalArgumentException("Agent introuvable."));
+        if (a.getTypeAgent() != TypeAgent.POSTE)
+            throw new IllegalArgumentException("Seul un agent de poste peut être muté vers un TPR.");
+        if (posteId == null) throw new IllegalArgumentException("Veuillez choisir un poste.");
+        Poste nouveau = posteRepo.findById(posteId)
+                .orElseThrow(() -> new IllegalArgumentException("Poste introuvable."));
+        LocalDate d = (dateEffet == null) ? LocalDate.now() : dateEffet;
+
+        Optional<RattachementAgent> ouvert = rattachementRepo.findFirstByAgent_MatriculeAndDateFinIsNull(matricule);
+        if (ouvert.isPresent()) {
+            RattachementAgent r = ouvert.get();
+            if (r.getPoste() != null && r.getPoste().getId().equals(posteId))
+                throw new IllegalArgumentException("L'agent est déjà rattaché à ce poste.");
+            if (r.getDateDebut() != null && !d.isAfter(r.getDateDebut()))
+                throw new IllegalArgumentException("La date d'effet doit être postérieure au début du rattachement actuel (" + r.getDateDebut() + ").");
+            r.setDateFin(d);
+            rattachementRepo.saveAndFlush(r);
+        }
+        RattachementAgent nr = new RattachementAgent();
+        nr.setAgent(a);
+        nr.setPoste(nouveau);
+        nr.setDateDebut(d);
+        rattachementRepo.save(nr);
+        a.setPoste(nouveau);
+        agentRepo.save(a);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String[]> historiqueRattachement(String matricule) {
+        return rattachementRepo.findByAgent_MatriculeOrderByDateDebutDesc(matricule).stream()
+                .map(r -> new String[]{
+                        r.getPoste() == null ? "" : (r.getPoste().getCode() + " — " + r.getPoste().getNom()),
+                        r.getDateDebut() == null ? "" : r.getDateDebut().toString(),
+                        r.getDateFin() == null ? "En cours" : r.getDateFin().toString()
+                }).toList();
+    }
+
+    private void synchroniserRattachement(Agent a, LocalDate dateEffet) {
+        Optional<RattachementAgent> ouvert = rattachementRepo.findFirstByAgent_MatriculeAndDateFinIsNull(a.getMatricule());
+        Integer posteActuel = (a.getPoste() == null) ? null : a.getPoste().getId();
+        Integer posteOuvert = ouvert.map(r -> r.getPoste() == null ? null : r.getPoste().getId()).orElse(null);
+        if (Objects.equals(posteActuel, posteOuvert)) return;
+        if (ouvert.isPresent()) {
+            RattachementAgent r = ouvert.get();
+            LocalDate fin = (r.getDateDebut() != null && dateEffet.isBefore(r.getDateDebut())) ? r.getDateDebut() : dateEffet;
+            r.setDateFin(fin);
+            rattachementRepo.saveAndFlush(r);
+        }
+        if (a.getPoste() != null) {
+            RattachementAgent r = new RattachementAgent();
+            r.setAgent(a);
+            r.setPoste(a.getPoste());
+            r.setDateDebut(dateEffet);
+            rattachementRepo.save(r);
+        }
     }
 
     private void appliquer(Agent a, AgentForm f) {
