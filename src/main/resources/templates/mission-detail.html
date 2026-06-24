@@ -25,6 +25,7 @@
             <tr><td class="k">Statut</td><td><span class="badge" th:classappend="${d.mission.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${d.mission.statut}"></span></td></tr>
             <tr><td class="k">Chef de mission</td><td th:text="${d.chefMission}"></td></tr>
             <tr><td class="k">Chef de poste (figé)</td><td th:text="${d.chefPoste}"></td></tr>
+            <tr th:if="${d.observations != null and !d.observations.isEmpty()}"><td class="k">Observations</td><td th:text="${d.observations}"></td></tr>
         </table>
     </div>
     <h2>Membres de la mission</h2>
