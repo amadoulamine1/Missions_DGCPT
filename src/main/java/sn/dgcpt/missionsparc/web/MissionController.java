@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Mission;
 import sn.dgcpt.missionsparc.mission.CreationMissionForm;
 import sn.dgcpt.missionsparc.mission.MissionService;
@@ -54,6 +55,13 @@ public class MissionController {
             garnir(model);
             return "mission-nouvelle";
         }
+    }
+
+    @PostMapping("/missions/{id}/membres/{matricule}/retirer")
+    public String retirerMembre(@PathVariable Integer id, @PathVariable String matricule, RedirectAttributes ra) {
+        missionService.retirerMembre(id, matricule);
+        ra.addFlashAttribute("message", "Membre retiré de la mission.");
+        return "redirect:/missions/" + id;
     }
 
     @GetMapping("/missions/{id}/canevas")

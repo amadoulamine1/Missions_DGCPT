@@ -1,11 +1,15 @@
 package sn.dgcpt.missionsparc.mission;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CreationMissionForm {
     private Integer posteId;
     private String codePoste, nomPoste;
     private String objet, dateDebut, dateFin;
     private String chefMissionSel, chefMissionMat, chefMissionNom, chefMissionPrenom;
     private String chefPosteSel, chefPosteMat, chefPosteNom, chefPostePrenom;
+    private List<String> membres = new ArrayList<>();
 
     public Integer getPosteId() { return posteId; }
     public void setPosteId(Integer posteId) { this.posteId = posteId; }
@@ -35,4 +39,6 @@ public class CreationMissionForm {
     public void setChefPosteNom(String v) { this.chefPosteNom = v; }
     public String getChefPostePrenom() { return chefPostePrenom; }
     public void setChefPostePrenom(String v) { this.chefPostePrenom = v; }
+    public List<String> getMembres() { return membres; }
+    public void setMembres(List<String> membres) { this.membres = membres; }
 }

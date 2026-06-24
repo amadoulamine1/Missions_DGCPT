@@ -9,6 +9,8 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
+    <p th:if="${message}" class="alert ok" th:text="${message}">ok</p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">err</p>
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.mission.reference}">Mission</h1>
         <span class="spacer"></span>
@@ -24,6 +26,22 @@
             <tr><td class="k">Chef de poste (figé)</td><td th:text="${d.chefPoste}"></td></tr>
         </table>
     </div>
+    <h2>Membres de la mission</h2>
+    <table class="table">
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr th:each="mb : ${d.membres}">
+                <td th:text="${mb.matricule}"></td><td th:text="${mb.nomComplet}"></td><td th:text="${mb.fonction}"></td>
+                <td>
+                    <form method="post" th:action="@{/missions/{id}/membres/{mat}/retirer(id=${d.mission.id},mat=${mb.matricule})}" style="margin:0">
+                        <button class="btn small secondary" type="submit">Retirer</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${d.membres.isEmpty()}"><td colspan="4" class="empty">Aucun membre.</td></tr>
+        </tbody>
+    </table>
+
     <h2>Relevé réseau</h2>
     <div class="card">
         <table class="kv">

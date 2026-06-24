@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,10 @@ public class MissionService {
             throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début.");
         }
 
+        List<String> membres = (f.getMembres() == null) ? List.of()
+                : f.getMembres().stream().filter(s -> s != null && !s.isBlank()).map(String::trim).distinct().collect(Collectors.toList());
+        verifierChevauchement(membres, debut, fin);
+
         Poste poste = (f.getPosteId() != null)
                 ? posteRepo.findById(f.getPosteId()).orElseThrow()
                 : referentiel.resoudrePoste(f.getCodePoste(), f.getNomPoste());
@@ -71,19 +76,43 @@ public class MissionService {
         m.setChefMission(chefMission);
         m.setChefPosteFige(chefPoste);
         m.setStatut(StatutMission.EN_CONSOLIDATION);
+        for (String mat : membres) {
+            agentRepo.findById(mat).ifPresent(m.getMembres()::add);
+        }
         Mission saved = missionRepo.save(m);
 
         historiserChefPoste(poste, chefPoste, debut);
         return saved;
     }
 
-    /** Liste des informaticiens (chef de mission). */
+    private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin) {
+        List<String> conflits = new ArrayList<>();
+        for (String mat : membres) {
+            List<Mission> c = missionRepo.membreEnConflit(mat, debut, fin);
+            if (!c.isEmpty()) {
+                conflits.add(mat + " (déjà sur " + c.get(0).getReference() + ")");
+            }
+        }
+        if (!conflits.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Chevauchement de période — ces agents sont déjà membres d'une mission sur la même période : "
+                    + String.join(" ; ", conflits)
+                    + ". Retirez-les d'abord de leur mission existante avant de les ajouter ici.");
+        }
+    }
+
+    @Transactional
+    public void retirerMembre(Integer missionId, String matricule) {
+        Mission m = missionRepo.findById(missionId).orElseThrow();
+        m.getMembres().removeIf(a -> a.getMatricule().equals(matricule));
+        missionRepo.save(m);
+    }
+
     @Transactional(readOnly = true)
     public List<AgentOption> informaticiens() {
         return agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN).stream().map(this::option).collect(Collectors.toList());
     }
 
-    /** Pour chaque TPR : ses agents + le dernier chef de poste connu (reconduction). */
     @Transactional(readOnly = true)
     public Map<String, TprInfo> tprData() {
         Map<String, TprInfo> data = new LinkedHashMap<>();
@@ -105,8 +134,6 @@ public class MissionService {
     public String reference(Integer missionId) {
         return missionRepo.findById(missionId).map(Mission::getReference).orElse("mission");
     }
-
-    // ---- helpers ----
 
     private AgentOption option(Agent a) {
         return new AgentOption(a.getMatricule(), a.getMatricule() + " — " + a.getNom() + " " + a.getPrenom());
@@ -132,11 +159,10 @@ public class MissionService {
         });
     }
 
-    /** Maintient l'historique du chef de poste : reconduit si inchangé, sinon clôture l'ancien et ouvre le nouveau. */
     private void historiserChefPoste(Poste poste, Agent chef, LocalDate debut) {
         Optional<ChefPoste> courant = chefPosteRepo.findFirstByPoste_IdAndDateFinIsNull(poste.getId());
         if (courant.isPresent()) {
-            if (courant.get().getAgent().getMatricule().equals(chef.getMatricule())) return; // reconduit
+            if (courant.get().getAgent().getMatricule().equals(chef.getMatricule())) return;
             courant.get().setDateFin(debut);
             chefPosteRepo.saveAndFlush(courant.get());
         }

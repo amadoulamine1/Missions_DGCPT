@@ -58,6 +58,15 @@
                 <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefPostePrenom}"/></div>
             </div>
 
+            <div class="form-row" style="align-items:flex-start">
+                <label>Membres de la mission</label>
+                <div style="flex:1;max-width:340px">
+                    <select multiple size="6" th:field="*{membres}" style="width:100%;padding:.4rem;border:1px solid #e7dcc1;border-radius:9px">
+                        <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
+                    </select>
+                    <p class="hint" style="color:#7a7163;font-size:.84rem;margin:.3rem 0 0">Informaticiens uniquement. Maintenez Ctrl (Cmd sur Mac) pour en choisir plusieurs.</p>
+                </div>
+            </div>
             <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
             <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
             <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>

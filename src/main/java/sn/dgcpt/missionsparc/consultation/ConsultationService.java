@@ -66,7 +66,8 @@ public class ConsultationService {
         String chefPoste = m.getChefPosteFige() == null ? "" : m.getChefPosteFige().getMatricule();
         String cable = m.getCategorieCable() == null ? "" : m.getCategorieCable().getLibelle();
         List<ReleveVue> releves = releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
-        return new MissionDetailVue(versMissionVue(m), chefMission, chefPoste, m.getEtatCablage(), cable, releves);
+        List<AgentVue> membres = m.getMembres().stream().map(this::versAgentVue).toList();
+        return new MissionDetailVue(versMissionVue(m), chefMission, chefPoste, m.getEtatCablage(), cable, releves, membres);
     }
 
     // ---- mappers ----
