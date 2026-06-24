@@ -87,6 +87,17 @@ public class MissionController {
         return "redirect:/missions/" + id;
     }
 
+    @PostMapping("/missions/{id}/cloturer")
+    public String cloturer(@PathVariable Integer id, RedirectAttributes ra) {
+        try {
+            missionService.cloturer(id);
+            ra.addFlashAttribute("message", "Mission clôturée.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/missions/" + id;
+    }
+
     @GetMapping("/missions/{id}/canevas")
     public ResponseEntity<byte[]> canevas(@PathVariable Integer id) throws IOException {
         byte[] data = missionService.genererCanevas(id);

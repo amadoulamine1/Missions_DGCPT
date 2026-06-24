@@ -14,6 +14,9 @@
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.mission.reference}">Mission</h1>
         <span class="spacer"></span>
+        <form th:if="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') and d.mission.statut != 'CLOTUREE'}" method="post" th:action="@{/missions/{id}/cloturer(id=${d.mission.id})}" style="display:inline;margin:0" onsubmit="return confirm('Clôturer définitivement cette mission ?');">
+            <button class="btn secondary" type="submit">Clôturer</button>
+        </form>
         <a class="btn secondary" th:href="@{/missions/{id}/modifier(id=${d.mission.id})}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Modifier</a>
         <a class="btn secondary" th:href="@{/missions/{id}/consolidation(id=${d.mission.id})}">Consolidation des imports</a>
         <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger le canevas pré-rempli</a>

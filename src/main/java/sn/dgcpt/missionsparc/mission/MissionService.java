@@ -164,6 +164,13 @@ public class MissionService {
     }
 
     @Transactional
+    public void cloturer(Integer id) {
+        Mission m = missionRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Mission introuvable."));
+        m.setStatut(StatutMission.CLOTUREE);
+        missionRepo.save(m);
+    }
+
+    @Transactional
     public void retirerMembre(Integer missionId, String matricule) {
         Mission m = missionRepo.findById(missionId).orElseThrow();
         m.getMembres().removeIf(a -> a.getMatricule().equals(matricule));

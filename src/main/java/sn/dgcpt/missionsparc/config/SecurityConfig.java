@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/postes", "/postes/*").authenticated()
                 .requestMatchers("/missions/nouvelle", "/missions/*/modifier", "/missions/*/membres/**").hasAnyRole("ADMIN", "CHEF_MISSION")
                 .requestMatchers(HttpMethod.POST, "/missions/*/consolidation/**").hasAnyRole("ADMIN", "CHEF_MISSION")
+                .requestMatchers(HttpMethod.POST, "/missions/*/cloturer").hasAnyRole("ADMIN", "CHEF_MISSION")
                 .requestMatchers(HttpMethod.POST, "/parc/*/affectation").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .formLogin(form -> form
