@@ -161,10 +161,13 @@ public class ConsultationService {
             Materiel m = a.getMateriel();
             String affecteA = a.getAgent() == null ? "" :
                     a.getAgent().getMatricule() + " — " + a.getAgent().getNom() + " " + a.getAgent().getPrenom();
+            String etat = releveRepo
+                    .findFirstByMateriel_NumeroInventaireAndDateReleveLessThanEqualOrderByDateReleveDesc(m.getNumeroInventaire(), d)
+                    .map(r -> r.getEtatObserve()).orElse("");
             return new InventaireDateLigne(
                     m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(),
                     a.getPoste() == null ? "" : a.getPoste().getNom(), affecteA,
-                    a.getDateDebut() == null ? "" : a.getDateDebut().toString());
+                    a.getDateDebut() == null ? "" : a.getDateDebut().toString(), etat);
         }).toList();
     }
 

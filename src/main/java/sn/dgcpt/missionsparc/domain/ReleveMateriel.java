@@ -32,7 +32,8 @@ public class ReleveMateriel {
     @Column(name = "date_releve", nullable = false)
     private LocalDate dateReleve;
 
-    // TODO: etat_observe (JSONB) — snapshot des attributs observes (photo datee)
+    @Column(name = "etat_observe", columnDefinition = "text")
+    private String etatObserve;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -48,4 +49,6 @@ public class ReleveMateriel {
     public void setSourceFichier(String sourceFichier) { this.sourceFichier = sourceFichier; }
     public LocalDate getDateReleve() { return dateReleve; }
     public void setDateReleve(LocalDate dateReleve) { this.dateReleve = dateReleve; }
+    public String getEtatObserve() { return etatObserve; }
+    public void setEtatObserve(String etatObserve) { this.etatObserve = etatObserve; }
 }

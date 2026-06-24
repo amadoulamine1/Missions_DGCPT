@@ -13,12 +13,12 @@
     </form>
     <p class="muted"><span th:text="${lignes.size()}">0</span> matériel(s) affecté(s) au <span th:text="${date}"></span></p>
     <table class="table">
-        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Affecté à</th><th>Depuis</th></tr></thead>
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Affecté à</th><th>Depuis</th><th>État observé (à la date)</th></tr></thead>
         <tbody>
             <tr th:each="l : ${lignes}">
                 <td><a th:href="@{/parc/{n}(n=${l.numeroInventaire})}" th:text="${l.numeroInventaire}"></a></td>
                 <td th:text="${l.type}"></td><td th:text="${l.nom}"></td><td th:text="${l.modele}"></td>
-                <td th:text="${l.poste}"></td><td th:text="${l.affecteA}"></td><td th:text="${l.depuis}"></td>
+                <td th:text="${l.poste}"></td><td th:text="${l.affecteA}"></td><td th:text="${l.depuis}"></td><td class="muted" style="font-size:.82rem" th:text="${l.etatObserve}"></td>
             </tr>
             <tr th:if="${lignes.isEmpty()}"><td colspan="7" class="empty">Aucun matériel affecté à cette date.</td></tr>
         </tbody>

@@ -12,4 +12,7 @@ public interface ReleveMaterielRepository extends JpaRepository<ReleveMateriel, 
     Optional<ReleveMateriel> findByMissionAndMateriel(Mission mission, Materiel materiel);
     List<ReleveMateriel> findByMission_Id(Integer missionId);
     List<ReleveMateriel> findByMateriel_NumeroInventaire(String numero);
+
+    Optional<ReleveMateriel> findFirstByMateriel_NumeroInventaireAndDateReleveLessThanEqualOrderByDateReleveDesc(
+            String numero, java.time.LocalDate date);
 }

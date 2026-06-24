@@ -343,7 +343,47 @@ public class IntegrationService {
         r.setAgentSaisisseur(saisisseur);
         r.setZone(zone);
         r.setDateReleve(jour);
+        r.setEtatObserve(construireEtatObserve(mat));
         releveRepo.save(r);
+    }
+
+    /** Photo datée : résume les attributs observés du matériel au moment du relevé. */
+    private String construireEtatObserve(Materiel mat) {
+        StringBuilder sb = new StringBuilder();
+        ajoutEtat(sb, "Nom", mat.getNom());
+        ajoutEtat(sb, "Modèle", mat.getModele());
+        ajoutEtat(sb, "Statut", mat.getStatut() == null ? null : mat.getStatut().name());
+        switch (mat.getType()) {
+            case ORDINATEUR -> ordinateurRepo.findById(mat.getNumeroInventaire()).ifPresent(o -> {
+                ajoutEtat(sb, "MAC eth", o.getMacEthernet());
+                ajoutEtat(sb, "MAC wifi", o.getMacWifi());
+                ajoutEtat(sb, "RAM", o.getRam());
+                ajoutEtat(sb, "Processeur", o.getProcesseur());
+                ajoutEtat(sb, "Disque", o.getDisqueDur());
+                ajoutEtat(sb, "Logiciels", o.getLogiciels().stream().map(Logiciel::getNom).sorted().collect(java.util.stream.Collectors.joining(", ")));
+            });
+            case IMPRIMANTE -> imprimanteRepo.findById(mat.getNumeroInventaire()).ifPresent(i -> {
+                ajoutEtat(sb, "MAC", i.getMac());
+                ajoutEtat(sb, "IP", i.getIp());
+            });
+            case SWITCH, ACCESS_POINT -> reseauRepo.findById(mat.getNumeroInventaire()).ifPresent(e -> {
+                ajoutEtat(sb, "MAC", e.getMac());
+                ajoutEtat(sb, "IP", e.getIp());
+            });
+            case SCANNER_CHEQUE -> scannerRepo.findById(mat.getNumeroInventaire()).ifPresent(sc -> {
+                ajoutEtat(sb, "N° série", sc.getNumeroSerie());
+                ajoutEtat(sb, "Marque", sc.getMarque());
+            });
+            default -> { }
+        }
+        return sb.toString();
+    }
+
+    private void ajoutEtat(StringBuilder sb, String cle, String val) {
+        if (val != null && !val.isBlank()) {
+            if (sb.length() > 0) sb.append(" | ");
+            sb.append(cle).append(": ").append(val.trim());
+        }
     }
 
     private Set<Logiciel> logicielsDe(LigneOrdinateur o) {
