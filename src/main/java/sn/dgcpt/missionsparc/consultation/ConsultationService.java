@@ -7,7 +7,9 @@ import sn.dgcpt.missionsparc.domain.*;
 import sn.dgcpt.missionsparc.repository.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** Lecture seule : restitutions (postes, parc, missions). Mappe vers des DTO de vue. */
 @Service
@@ -20,16 +22,29 @@ public class ConsultationService {
     private final AgentRepository agentRepo;
     private final MissionRepository missionRepo;
     private final ReleveMaterielRepository releveRepo;
+    private final OrdinateurRepository ordinateurRepo;
+    private final ImprimanteRepository imprimanteRepo;
+    private final EquipementReseauRepository reseauRepo;
+    private final ScannerChequeRepository scannerRepo;
+    private final AffectationMaterielRepository affectationRepo;
 
     public ConsultationService(PosteRepository posteRepo, MaterielRepository materielRepo,
                                ChefPosteRepository chefPosteRepo, AgentRepository agentRepo,
-                               MissionRepository missionRepo, ReleveMaterielRepository releveRepo) {
+                               MissionRepository missionRepo, ReleveMaterielRepository releveRepo,
+                               OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
+                               EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
+                               AffectationMaterielRepository affectationRepo) {
         this.posteRepo = posteRepo;
         this.materielRepo = materielRepo;
         this.chefPosteRepo = chefPosteRepo;
         this.agentRepo = agentRepo;
         this.missionRepo = missionRepo;
         this.releveRepo = releveRepo;
+        this.ordinateurRepo = ordinateurRepo;
+        this.imprimanteRepo = imprimanteRepo;
+        this.reseauRepo = reseauRepo;
+        this.scannerRepo = scannerRepo;
+        this.affectationRepo = affectationRepo;
     }
 
     // ---- Postes ----
@@ -69,6 +84,54 @@ public class ConsultationService {
         List<AgentVue> membres = m.getMembres().stream().map(this::versAgentVue).toList();
         return new MissionDetailVue(versMissionVue(m), chefMission, chefPoste, m.getEtatCablage(), cable, m.getObservations(), releves, membres);
     }
+
+    public MaterielDetailVue detailMateriel(String numero) {
+        Materiel m = materielRepo.findById(numero).orElseThrow();
+        List<String[]> attrs = new ArrayList<>();
+        switch (m.getType()) {
+            case ORDINATEUR -> ordinateurRepo.findById(numero).ifPresent(o -> {
+                attrs.add(new String[]{"Nom machine", nz(o.getNomMachine())});
+                attrs.add(new String[]{"MAC ethernet", nz(o.getMacEthernet())});
+                attrs.add(new String[]{"MAC wifi", nz(o.getMacWifi())});
+                attrs.add(new String[]{"RAM", nz(o.getRam())});
+                attrs.add(new String[]{"Processeur", nz(o.getProcesseur())});
+                attrs.add(new String[]{"Disque dur", nz(o.getDisqueDur())});
+                attrs.add(new String[]{"Agent traitant", o.getAgentInstallateur() == null ? "" :
+                        o.getAgentInstallateur().getMatricule() + " — " + o.getAgentInstallateur().getNom() + " " + o.getAgentInstallateur().getPrenom()});
+                attrs.add(new String[]{"Logiciels", o.getLogiciels().stream().map(Logiciel::getNom).sorted().collect(Collectors.joining(", "))});
+            });
+            case IMPRIMANTE -> imprimanteRepo.findById(numero).ifPresent(i -> {
+                attrs.add(new String[]{"MAC", nz(i.getMac())});
+                attrs.add(new String[]{"MAC wifi", nz(i.getMacWifi())});
+                attrs.add(new String[]{"IP", nz(i.getIp())});
+            });
+            case SWITCH, ACCESS_POINT -> reseauRepo.findById(numero).ifPresent(e -> {
+                attrs.add(new String[]{"MAC", nz(e.getMac())});
+                attrs.add(new String[]{"IP", nz(e.getIp())});
+            });
+            case SCANNER_CHEQUE -> scannerRepo.findById(numero).ifPresent(sc -> {
+                attrs.add(new String[]{"Numéro de série", nz(sc.getNumeroSerie())});
+                attrs.add(new String[]{"Marque", nz(sc.getMarque())});
+            });
+            default -> { }
+        }
+        var aff = affectationRepo.findByMaterielAndDateFinIsNull(m);
+        String affA = aff.map(a -> a.getAgent() == null ? "" :
+                a.getAgent().getMatricule() + " — " + a.getAgent().getNom() + " " + a.getAgent().getPrenom()).orElse("");
+        String affP = aff.map(a -> a.getPoste() == null ? "" : a.getPoste().getNom()).orElse("");
+        String affD = aff.map(a -> a.getDateDebut() == null ? "" : a.getDateDebut().toString()).orElse("");
+        List<String[]> rel = releveRepo.findByMateriel_NumeroInventaire(numero).stream()
+                .map(r -> new String[]{
+                        r.getMission() == null ? "" : r.getMission().getReference(),
+                        r.getDateReleve() == null ? "" : r.getDateReleve().toString(),
+                        r.getAgentSaisisseur() == null ? "" : r.getAgentSaisisseur().getMatricule(),
+                        nz(r.getZone())
+                }).toList();
+        String cree = m.getDateCreation() == null ? "" : m.getDateCreation().toString().substring(0, 10);
+        return new MaterielDetailVue(versMaterielVue(m), cree, attrs, affA, affP, affD, rel);
+    }
+
+    private String nz(String s) { return s == null ? "" : s; }
 
     // ---- mappers ----
 

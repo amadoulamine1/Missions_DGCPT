@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ReleveMaterielRepository extends JpaRepository<ReleveMateriel, Integer> {
     Optional<ReleveMateriel> findByMissionAndMateriel(Mission mission, Materiel materiel);
     List<ReleveMateriel> findByMission_Id(Integer missionId);
+    List<ReleveMateriel> findByMateriel_NumeroInventaire(String numero);
 }

@@ -33,6 +33,12 @@ public class ConsultationController {
         return "parc";
     }
 
+    @GetMapping("/parc/{numero}")
+    public String materiel(@PathVariable String numero, Model model) {
+        model.addAttribute("d", consultation.detailMateriel(numero));
+        return "materiel-detail";
+    }
+
     @GetMapping("/missions")
     public String missions(Model model) {
         model.addAttribute("missions", consultation.listerMissions());

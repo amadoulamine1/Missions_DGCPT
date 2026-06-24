@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Matériel</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <div class="toolbar">
+        <h1 style="margin:0" th:text="${d.base.numeroInventaire}">Matériel</h1>
+        <span class="spacer"></span>
+        <span class="badge" th:classappend="${d.base.type}" th:text="${d.base.type}"></span>
+    </div>
+    <div class="card">
+        <table class="kv">
+            <tr><td class="k">Nom</td><td th:text="${d.base.nom}"></td></tr>
+            <tr><td class="k">Modèle</td><td th:text="${d.base.modele}"></td></tr>
+            <tr><td class="k">Poste</td><td th:text="${d.base.posteNom}"></td></tr>
+            <tr><td class="k">Statut</td><td><span th:if="${d.base.statut != ''}" class="badge" th:classappend="${d.base.statut == 'En service' ? 'green' : (d.base.statut == 'En panne' ? 'red' : 'orange')}" th:text="${d.base.statut}"></span></td></tr>
+            <tr th:if="${d.base.observation != ''}"><td class="k">Observation</td><td th:text="${d.base.observation}"></td></tr>
+            <tr><td class="k">Créé le</td><td th:text="${d.dateCreation}"></td></tr>
+        </table>
+    </div>
+
+    <h2>Caractéristiques</h2>
+    <div class="card">
+        <table class="kv">
+            <tr th:each="a : ${d.attributs}"><td class="k" th:text="${a[0]}"></td><td th:text="${a[1]}"></td></tr>
+            <tr th:if="${d.attributs.isEmpty()}"><td class="empty" colspan="2">—</td></tr>
+        </table>
+    </div>
+
+    <h2>Affectation courante</h2>
+    <div class="card">
+        <table class="kv">
+            <tr><td class="k">Affecté à</td><td th:text="${d.affecteA != '' ? d.affecteA : '(non affecté)'}"></td></tr>
+            <tr><td class="k">Poste</td><td th:text="${d.affectePoste}"></td></tr>
+            <tr><td class="k">Depuis</td><td th:text="${d.affecteDepuis}"></td></tr>
+        </table>
+    </div>
+
+    <h2>Relevés (missions)</h2>
+    <table class="table">
+        <thead><tr><th>Mission</th><th>Date</th><th>Saisi par</th><th>Zone</th></tr></thead>
+        <tbody>
+            <tr th:each="r : ${d.releves}">
+                <td th:text="${r[0]}"></td><td th:text="${r[1]}"></td><td th:text="${r[2]}"></td><td th:text="${r[3]}"></td>
+            </tr>
+            <tr th:if="${d.releves.isEmpty()}"><td colspan="4" class="empty">Aucun relevé.</td></tr>
+        </tbody>
+    </table>
+    <p style="margin-top:1rem"><a th:href="@{/parc}">← Parc</a></p>
+</main>
+</body>
+</html>
