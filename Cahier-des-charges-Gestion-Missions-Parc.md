@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 8 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 9 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -41,7 +41,7 @@ Personne (personnel de l'organisation) identifiée par son **matricule** (clé d
 
 Tous les agents partagent ces attributs, mais relèvent de **deux rattachements distincts** :
 
-- **Agent de poste** — rattaché à **un seul poste régional à la fois** (rattachement qui peut évoluer dans le temps). Se voit attribuer du matériel et l'utilise ; peut être chef de poste. **N'effectue pas les missions.**
+- **Agent de poste** — rattaché à **un seul poste régional à la fois** (rattachement **historisé** : un agent peut être **muté vers un autre TPR** avec date d'effet, l'historique des périodes étant conservé). Se voit attribuer du matériel et l'utilise ; peut être chef de poste. **N'effectue pas les missions.**
 - **Agent informaticien** — rattaché à la **Direction Informatique**. **Effectue les missions** (chef de mission ou membre), réalise les relevés réseau et les inventaires.
 
 Conséquence : le **chef de mission et les membres d'une mission sont toujours des agents informaticiens** ; le **chef de poste et l'attributaire d'une machine sont des agents de poste**. Un membre de mission n'est pas une fiche distincte : c'est un agent (informaticien) jouant un rôle dans une mission — même entité, même matricule.
@@ -95,7 +95,9 @@ Attributs spécifiques par type :
 - **Scanner de chèque** : **numéro de série** (clé d'identification physique), **marque**, **modèle**. Pas d'adresse MAC.
 
 ### 3.7 Affectation de matériel *(historisée)*
-Lien matériel ↔ agent (et/ou poste) avec période. Permet de savoir à qui/où était un matériel à une date donnée.
+Lien matériel ↔ agent (et/ou poste) avec période. Permet de savoir à qui/où était un matériel à une date donnée. Le matériel peut être **réaffecté à un autre agent** (du **même TPR** que le matériel) avec une **date d'effet** : la période courante est clôturée et une nouvelle ouverte, et l'**historique des propriétaires** est conservé et consultable sur la fiche de l'équipement.
+
+**Distinction avec la mutation d'agent.** Réaffecter un matériel (matériel ↔ agent) et muter un agent (agent ↔ TPR, §3.2) sont **deux opérations indépendantes**, toutes deux historisées : quand un **agent change de TPR**, le **matériel reste dans son poste** — c'est l'agent qui se déplace, pas l'équipement.
 
 ### 3.8 Référentiels (paramétrables)
 - **Logiciels** (extensible : on pourra en ajouter au-delà des 5 actuels) ;
@@ -222,8 +224,10 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Statut du matériel** : **En service / En panne / À changer**, saisi dans le canevas et affiché (parc, fiche poste, fiche équipement).
 - **Observations** : champ libre par matériel, et une observation générale par mission.
 - **Statut temporel de la mission** dérivé des dates : **Planifiée** (à venir), **En cours**, **Terminée**.
-- **Fiche détaillée d'un équipement** : caractéristiques par type (MAC, RAM, processeur, disque, logiciels, n° série…), statut, observations, **affectation courante** et **historique des relevés**.
+- **Fiche détaillée d'un équipement** : caractéristiques par type (MAC, RAM, processeur, disque, logiciels, n° série…), statut, observations, **affectation courante**, **historique des propriétaires** et **historique des relevés**.
 - **Page agents** : présentation en **fiches (cartes)** séparées (**informaticiens** / **agents de poste**), avec **recherche** et **filtre par TPR**.
+- **Réaffectation du matériel** : depuis la fiche d'un équipement (réservé administrateur), réaffectation à un autre agent **du même TPR**, avec **date d'effet** ; **historique des propriétaires** affiché (agent, période). Le contrôle « même poste » est appliqué dans la liste de choix **et** côté serveur.
+- **Mutation d'un agent** : depuis la fiche d'un agent de poste (réservé administrateur), changement de **TPR de rattachement** avec **date d'effet** ; **historique des rattachements** affiché. Conformément au §3.7, **le matériel n'est pas déplacé**.
 
 ### 9.9 Consolidation multi-fichiers et arbitrage des conflits
 - Chaque canevas chargé devient un **lot** rattaché à sa mission (stocké, contrôlé à l'upload) ; plusieurs lots s'accumulent pour une même mission.
