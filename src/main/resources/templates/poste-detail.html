@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Poste</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}"/>
-</head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Poste</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
+    <p th:if="${message}" class="alert ok" th:text="${message}">ok</p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
+
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.poste.nom}">Poste</h1>
         <span class="spacer"></span>
@@ -21,6 +20,29 @@
             <tr><td class="k">Chef de poste actuel</td><td><strong th:text="${d.chefActuel}"></strong></td></tr>
         </table>
     </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Changer le chef de poste</h2>
+        <form method="post" th:action="@{/postes/{id}/chef(id=${d.poste.id})}">
+            <div class="form-row">
+                <label>Chef de poste <span class="req">*</span></label>
+                <select id="chefSel" name="chefSel" onchange="toggleNouveauChef()">
+                    <option value="">➕ Ajouter un agent…</option>
+                    <option th:each="a : ${d.agents}" th:value="${a.matricule}"
+                            th:text="${a.matricule + ' — ' + a.nomComplet}"
+                            th:selected="${a.matricule == d.chefActuelMatricule}"></option>
+                </select>
+            </div>
+            <div id="nouveau-chef">
+                <div class="form-row"><label>Matricule (nouvel agent) <span class="req">*</span></label><input type="text" id="chefMat" name="chefMat"/></div>
+                <div class="form-row"><label>Nom</label><input type="text" name="chefNom"/></div>
+                <div class="form-row"><label>Prénom</label><input type="text" name="chefPrenom"/></div>
+            </div>
+            <div class="form-row"><label>Date d'effet</label><input type="date" name="dateEffet"/></div>
+            <div class="toolbar" style="margin-top:.6rem"><button class="btn" type="submit">Enregistrer le chef</button></div>
+        </form>
+    </div>
+
     <h2>Agents du poste</h2>
     <table class="table">
         <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Téléphone</th></tr></thead>
@@ -32,6 +54,7 @@
             <tr th:if="${d.agents.isEmpty()}"><td colspan="4" class="empty">Aucun agent.</td></tr>
         </tbody>
     </table>
+
     <h2>Matériel du poste</h2>
     <table class="table">
         <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th></tr></thead>
@@ -44,6 +67,15 @@
         </tbody>
     </table>
     <p style="margin-top:1rem"><a th:href="@{/postes}">← Liste des postes</a></p>
+
+    <script>
+        function toggleNouveauChef() {
+            var v = document.getElementById('chefSel').value;
+            document.getElementById('nouveau-chef').style.display = (v === '') ? 'block' : 'none';
+            var m = document.getElementById('chefMat'); if (m) m.required = (v === '');
+        }
+        document.addEventListener('DOMContentLoaded', toggleNouveauChef);
+    </script>
 </main>
 </body>
 </html>

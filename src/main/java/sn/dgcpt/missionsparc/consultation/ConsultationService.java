@@ -40,12 +40,12 @@ public class ConsultationService {
 
     public PosteDetailVue detailPoste(Integer id) {
         Poste p = posteRepo.findById(id).orElseThrow();
-        String chef = chefPosteRepo.findFirstByPoste_IdAndDateFinIsNull(id)
-                .map(cp -> cp.getAgent().getMatricule() + " — " + cp.getAgent().getNom())
-                .orElse("(aucun)");
+        var courant = chefPosteRepo.findFirstByPoste_IdAndDateFinIsNull(id);
+        String chef = courant.map(cp -> cp.getAgent().getMatricule() + " — " + cp.getAgent().getNom()).orElse("(aucun)");
+        String chefMat = courant.map(cp -> cp.getAgent().getMatricule()).orElse("");
         List<AgentVue> agents = agentRepo.findByPoste_Id(id).stream().map(this::versAgentVue).toList();
         List<MaterielVue> materiels = materielRepo.findByPoste_Id(id).stream().map(this::versMaterielVue).toList();
-        return new PosteDetailVue(versPosteVue(p), chef, agents, materiels);
+        return new PosteDetailVue(versPosteVue(p), chef, chefMat, agents, materiels);
     }
 
     // ---- Parc ----

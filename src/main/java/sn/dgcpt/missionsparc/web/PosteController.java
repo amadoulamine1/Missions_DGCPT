@@ -3,7 +3,10 @@ package sn.dgcpt.missionsparc.web;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Poste;
+import sn.dgcpt.missionsparc.mission.ChefPosteService;
+import sn.dgcpt.missionsparc.mission.DesignationChefForm;
 import sn.dgcpt.missionsparc.mission.PosteForm;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
@@ -12,9 +15,11 @@ import sn.dgcpt.missionsparc.repository.PosteRepository;
 public class PosteController {
 
     private final PosteRepository posteRepo;
+    private final ChefPosteService chefPosteService;
 
-    public PosteController(PosteRepository posteRepo) {
+    public PosteController(PosteRepository posteRepo, ChefPosteService chefPosteService) {
         this.posteRepo = posteRepo;
+        this.chefPosteService = chefPosteService;
     }
 
     @GetMapping("/nouveau")
@@ -62,5 +67,16 @@ public class PosteController {
         p.setRegion(form.getRegion());
         posteRepo.save(p);
         return "redirect:/postes";
+    }
+
+    @PostMapping("/{id}/chef")
+    public String designerChef(@PathVariable Integer id, @ModelAttribute DesignationChefForm form, RedirectAttributes ra) {
+        try {
+            chefPosteService.designer(id, form);
+            ra.addFlashAttribute("message", "Chef de poste mis à jour.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", e.getMessage() != null ? e.getMessage() : "Désignation impossible.");
+        }
+        return "redirect:/postes/" + id;
     }
 }
