@@ -15,6 +15,9 @@ public class LigneOrdinateur {
     private boolean sicCDD;
     private boolean cic;
     private boolean sysbudget;
+    private String ram;
+    private String processeur;
+    private String disqueDur;
 
     public int getNumLigne() { return numLigne; }
     public void setNumLigne(int numLigne) { this.numLigne = numLigne; }
@@ -42,4 +45,10 @@ public class LigneOrdinateur {
     public void setCic(boolean cic) { this.cic = cic; }
     public boolean isSysbudget() { return sysbudget; }
     public void setSysbudget(boolean sysbudget) { this.sysbudget = sysbudget; }
+    public String getRam() { return ram; }
+    public void setRam(String ram) { this.ram = ram; }
+    public String getProcesseur() { return processeur; }
+    public void setProcesseur(String processeur) { this.processeur = processeur; }
+    public String getDisqueDur() { return disqueDur; }
+    public void setDisqueDur(String disqueDur) { this.disqueDur = disqueDur; }
 }

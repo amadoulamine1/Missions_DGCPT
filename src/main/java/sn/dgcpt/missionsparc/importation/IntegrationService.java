@@ -203,6 +203,9 @@ public class IntegrationService {
         ord.setMacEthernet(nullSiVide(o.getMacEthernet()));
         ord.setMacWifi(nullSiVide(o.getMacWifi()));
         ord.setNomMachine(o.getNomMachine());
+        ord.setRam(nullSiVide(o.getRam()));
+        ord.setProcesseur(nullSiVide(o.getProcesseur()));
+        ord.setDisqueDur(nullSiVide(o.getDisqueDur()));
         ord.setAgentInstallateur(resoudreAgent(o.getAgentInstallateur(), TypeAgent.INFORMATICIEN, null));
         ord.setLogiciels(logicielsDe(o));
         ordinateurRepo.save(ord);

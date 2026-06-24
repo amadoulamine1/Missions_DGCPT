@@ -106,7 +106,7 @@ public class CanevasReader {
         if (s == null) return;
         for (int r = 1; r <= s.getLastRowNum(); r++) {
             Row row = s.getRow(r);
-            if (ligneVide(row, 12)) continue;
+            if (ligneVide(row, 15)) continue;
             LigneOrdinateur o = new LigneOrdinateur();
             o.setNumLigne(r + 1);
             o.setNumeroInventaire(cell(row, 0));
@@ -121,6 +121,9 @@ public class CanevasReader {
             o.setSicCDD(oui(cell(row, 9)));
             o.setCic(oui(cell(row, 10)));
             o.setSysbudget(oui(cell(row, 11)));
+            o.setRam(cell(row, 12));
+            o.setProcesseur(cell(row, 13));
+            o.setDisqueDur(cell(row, 14));
             c.getOrdinateurs().add(o);
         }
     }

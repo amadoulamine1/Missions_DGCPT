@@ -26,6 +26,15 @@ public class Ordinateur {
     @Column(name = "nom_machine")
     private String nomMachine;
 
+    @Column(name = "ram")
+    private String ram;
+
+    @Column(name = "processeur")
+    private String processeur;
+
+    @Column(name = "disque_dur")
+    private String disqueDur;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agent_installateur_matricule")
     private Agent agentInstallateur;
@@ -46,6 +55,12 @@ public class Ordinateur {
     public void setMacWifi(String macWifi) { this.macWifi = macWifi; }
     public String getNomMachine() { return nomMachine; }
     public void setNomMachine(String nomMachine) { this.nomMachine = nomMachine; }
+    public String getRam() { return ram; }
+    public void setRam(String ram) { this.ram = ram; }
+    public String getProcesseur() { return processeur; }
+    public void setProcesseur(String processeur) { this.processeur = processeur; }
+    public String getDisqueDur() { return disqueDur; }
+    public void setDisqueDur(String disqueDur) { this.disqueDur = disqueDur; }
     public Agent getAgentInstallateur() { return agentInstallateur; }
     public void setAgentInstallateur(Agent agentInstallateur) { this.agentInstallateur = agentInstallateur; }
     public Set<Logiciel> getLogiciels() { return logiciels; }

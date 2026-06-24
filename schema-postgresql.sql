@@ -99,7 +99,10 @@ CREATE TABLE ordinateur (
     mac_ethernet                  VARCHAR(17) UNIQUE,   -- AA:BB:CC:DD:EE:FF
     mac_wifi                      VARCHAR(17),
     nom_machine                   VARCHAR(120),
-    agent_installateur_matricule  VARCHAR(30) REFERENCES agent(matricule)   -- informaticien
+    agent_installateur_matricule  VARCHAR(30) REFERENCES agent(matricule),  -- informaticien
+    ram                           VARCHAR(80),
+    processeur                    VARCHAR(120),
+    disque_dur                    VARCHAR(80)
 );
 
 CREATE TABLE imprimante (
