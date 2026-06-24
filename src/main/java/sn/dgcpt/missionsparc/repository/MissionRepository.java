@@ -13,11 +13,15 @@ public interface MissionRepository extends JpaRepository<Mission, Integer> {
     Optional<Mission> findByReference(String reference);
     long countByReferenceStartingWith(String prefixe);
 
-    /** Missions où l'agent est membre et dont la période chevauche [debut, fin] (fin null = ouverte). */
+    /**
+     * Missions où l'agent est membre et dont la période chevauche [debut, fin].
+     * La fin ouverte (sans date de fin) est passée sous forme de date sentinelle par l'appelant,
+     * afin d'éviter un paramètre non typable (PostgreSQL 42P18) dans un test IS NULL.
+     */
     @Query("select m from Mission m join m.membres a " +
            "where a.matricule = :mat " +
            "and (m.dateFin is null or m.dateFin >= :debut) " +
-           "and (:fin is null or m.dateDebut <= :fin)")
+           "and m.dateDebut <= :fin")
     List<Mission> membreEnConflit(@Param("mat") String matricule,
                                   @Param("debut") LocalDate debut,
                                   @Param("fin") LocalDate fin);

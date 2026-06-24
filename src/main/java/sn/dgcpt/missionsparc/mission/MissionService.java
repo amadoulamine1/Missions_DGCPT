@@ -93,9 +93,10 @@ public class MissionService {
     }
 
     private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin) {
+        LocalDate finEff = (fin != null) ? fin : LocalDate.of(9999, 12, 31);
         List<String> conflits = new ArrayList<>();
         for (String mat : membres) {
-            List<Mission> c = missionRepo.membreEnConflit(mat, debut, fin);
+            List<Mission> c = missionRepo.membreEnConflit(mat, debut, finEff);
             if (!c.isEmpty()) {
                 conflits.add(mat + " (déjà sur " + c.get(0).getReference() + ")");
             }
