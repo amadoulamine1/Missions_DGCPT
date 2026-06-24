@@ -46,6 +46,7 @@ public class CanevasWriter {
             remplir(s, "date de fin", m.getDateFin() == null ? "" : m.getDateFin().format(FMT));
             remplir(s, "chef de mission", libelle(m.getChefMission()));
             remplir(s, "chef de poste", libelle(m.getChefPosteFige()));
+            remplir(s, "observations", m.getObservations());
 
             // 2) Membres de la mission
             Sheet mem = wb.getSheet("2-Membres mission");
