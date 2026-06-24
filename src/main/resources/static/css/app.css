@@ -77,3 +77,9 @@ table.kv td.k{color:var(--muted);white-space:nowrap}
 .subform{border:1px dashed var(--gold);border-radius:10px;padding:.2rem 1rem .8rem;margin:.2rem 0 1rem;background:var(--gold-pale)}
 .subform .legend{font-weight:600;color:var(--gold-dark);font-size:.9rem;margin:.7rem 0 .2rem}
 .subform .hint{color:var(--muted);font-size:.84rem;margin:.1rem 0 .5rem}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1rem 0}
+.kpi{display:block;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;text-decoration:none}
+.kpi:hover{border-color:var(--gold)}
+.kpi .n{font-size:1.9rem;font-weight:800;color:var(--gold-dark);line-height:1}
+.kpi .l{color:var(--muted);font-size:.85rem;margin-top:.35rem}

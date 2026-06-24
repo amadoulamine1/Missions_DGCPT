@@ -9,16 +9,53 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
-    <h1>Gestion des missions et du parc informatique</h1>
-    <p class="muted">Direction Générale de la Comptabilité Publique et du Trésor (DGCPT)</p>
-    <div class="grid" style="margin-top:1rem">
+    <h1 style="margin-bottom:.2rem">Tableau de bord</h1>
+    <p class="muted">DGCPT — Gestion des missions et du parc informatique</p>
+
+    <div class="kpis">
+        <a class="kpi" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
+        <a class="kpi" th:href="@{/parc}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
+        <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
+        <div class="kpi"><div class="n" th:text="|${nbInfo} / ${nbAgentsPoste}|">0</div><div class="l">Agents (info. / poste)</div></div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3 style="margin-top:0;border:none">Matériel par statut</h3>
+            <p style="line-height:2">
+                <span class="badge green" th:text="${matEnService}">0</span> En service<br/>
+                <span class="badge red" th:text="${matEnPanne}">0</span> En panne<br/>
+                <span class="badge orange" th:text="${matAChanger}">0</span> À changer
+            </p>
+        </div>
+        <div class="card">
+            <h3 style="margin-top:0;border:none">Missions par état</h3>
+            <p style="line-height:2">
+                <span class="badge blue" th:text="${misPlan}">0</span> Planifiées<br/>
+                <span class="badge orange" th:text="${misEnCours}">0</span> En cours<br/>
+                <span class="badge green" th:text="${misTerm}">0</span> Terminées
+            </p>
+        </div>
+        <div class="card">
+            <h3 style="margin-top:0;border:none">Matériel par type</h3>
+            <p style="line-height:2">
+                Ordinateurs : <strong th:text="${nbOrdi}">0</strong><br/>
+                Imprimantes : <strong th:text="${nbImp}">0</strong><br/>
+                Switchs / AP : <strong th:text="${nbReseau}">0</strong> &nbsp;·&nbsp; Scanners : <strong th:text="${nbScan}">0</strong>
+            </p>
+        </div>
+    </div>
+
+    <h2 style="margin-top:1.6rem">Accès rapides</h2>
+    <div class="grid">
         <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
-        <a class="tile" th:href="@{/agents}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
+        <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
         <a class="tile" th:href="@{/parc}"><h3>Parc</h3><p>Inventaire complet du matériel.</p></a>
         <a class="tile" th:href="@{/missions}"><h3>Missions</h3><p>Missions et relevés datés.</p></a>
-        <a class="tile" th:href="@{/missions/nouvelle}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
+        <a class="tile" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
         <a class="tile" th:href="@{/import}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
         <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
+        <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
     </div>
 </main>
 </body>
