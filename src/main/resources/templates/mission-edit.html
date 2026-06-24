@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Modifier la mission</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1 th:text="'Modifier la mission ' + ${ref}">Modifier la mission</h1>
+    <p class="muted">Le N° de mission et le TPR ne changent pas. Le chef de mission se désigne parmi les membres sélectionnés.</p>
+    <div class="card">
+        <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
+        <form method="post" th:action="@{/missions/{id}/modifier(id=${form.id})}" th:object="${form}">
+            <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
+            <div class="form-row"><label>Date de début</label><input type="date" id="dateDebut" th:field="*{dateDebut}"/></div>
+            <div class="form-row"><label>Date de fin</label><input type="date" id="dateFin" th:field="*{dateFin}"/></div>
+            <div class="form-row">
+                <label>Statut</label>
+                <select th:field="*{statut}">
+                    <option value="EN_CONSOLIDATION">En consolidation</option>
+                    <option value="CLOTUREE">Clôturée</option>
+                </select>
+            </div>
+
+            <div class="form-row" style="align-items:flex-start">
+                <label>Membres de la mission <span class="req">*</span></label>
+                <div style="flex:1;max-width:340px">
+                    <select multiple size="6" id="membres" th:field="*{membres}" onchange="majChefMission()" style="width:100%;padding:.4rem;border:1px solid #e7dcc1;border-radius:9px">
+                        <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
+                    </select>
+                    <p class="hint" style="color:#7a7163;font-size:.84rem;margin:.3rem 0 0">Informaticiens uniquement. Ctrl (Cmd sur Mac) pour en choisir plusieurs.</p>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Chef de mission <span class="req">*</span></label>
+                <select id="chefMissionSel" th:field="*{chefMissionSel}" required>
+                    <option value="">— Désigner le chef parmi les membres —</option>
+                </select>
+            </div>
+
+            <div class="form-row" style="align-items:flex-start">
+                <label>Observations</label>
+                <textarea th:field="*{observations}" rows="3" style="flex:1;max-width:340px;padding:.4rem;border:1px solid #e7dcc1;border-radius:9px"></textarea>
+            </div>
+
+            <div class="toolbar" style="margin-top:1rem">
+                <button class="btn" type="submit">Enregistrer</button>
+                <a class="btn secondary" th:href="@{/missions/{id}(id=${form.id})}">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var CHEF_INIT = /*[[${form.chefMissionSel}]]*/ '';
+        function majChefMission(){
+            var membres = document.getElementById('membres');
+            var chef = document.getElementById('chefMissionSel');
+            var prev = chef.value || CHEF_INIT;
+            chef.innerHTML = '<option value="">— Désigner le chef parmi les membres —</option>';
+            for (var i=0; i<membres.options.length; i++){
+                var opt = membres.options[i];
+                if (opt.selected){
+                    var o=document.createElement('option'); o.value=opt.value; o.textContent=opt.textContent;
+                    if (opt.value === prev) { o.selected = true; }
+                    chef.appendChild(o);
+                }
+            }
+            CHEF_INIT = '';
+        }
+        function majDateFinMin(){ var dd=document.getElementById('dateDebut'), df=document.getElementById('dateFin'); if(dd&&df) df.min = dd.value || ''; }
+        document.addEventListener('DOMContentLoaded', function(){
+            majChefMission(); majDateFinMin();
+            var dd=document.getElementById('dateDebut'); if(dd) dd.addEventListener('change', majDateFinMin);
+        });
+        /*]]>*/
+    </script>
+</main>
+</body>
+</html>

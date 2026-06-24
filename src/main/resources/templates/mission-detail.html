@@ -14,6 +14,7 @@
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.mission.reference}">Mission</h1>
         <span class="spacer"></span>
+        <a class="btn secondary" th:href="@{/missions/{id}/modifier(id=${d.mission.id})}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Modifier</a>
         <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger le canevas pré-rempli</a>
     </div>
     <div class="card">

@@ -93,12 +93,17 @@ public class MissionService {
     }
 
     private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin) {
+        verifierChevauchement(membres, debut, fin, null);
+    }
+
+    private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin, Integer exclureMissionId) {
         LocalDate finEff = (fin != null) ? fin : LocalDate.of(9999, 12, 31);
         List<String> conflits = new ArrayList<>();
         for (String mat : membres) {
-            List<Mission> c = missionRepo.membreEnConflit(mat, debut, finEff);
-            if (!c.isEmpty()) {
-                conflits.add(mat + " (déjà sur " + c.get(0).getReference() + ")");
+            for (Mission c : missionRepo.membreEnConflit(mat, debut, finEff)) {
+                if (exclureMissionId != null && c.getId().equals(exclureMissionId)) continue;
+                conflits.add(mat + " (déjà sur " + c.getReference() + ")");
+                break;
             }
         }
         if (!conflits.isEmpty()) {
@@ -107,6 +112,55 @@ public class MissionService {
                     + String.join(" ; ", conflits)
                     + ". Retirez-les d'abord de leur mission existante avant de les ajouter ici.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public EditionMissionForm formulaireEdition(Integer id) {
+        Mission m = missionRepo.findById(id).orElseThrow();
+        EditionMissionForm f = new EditionMissionForm();
+        f.setId(m.getId());
+        f.setObjet(m.getObjet());
+        f.setDateDebut(m.getDateDebut() == null ? "" : m.getDateDebut().toString());
+        f.setDateFin(m.getDateFin() == null ? "" : m.getDateFin().toString());
+        f.setObservations(m.getObservations());
+        f.setStatut(m.getStatut().name());
+        f.setChefMissionSel(m.getChefMission() == null ? "" : m.getChefMission().getMatricule());
+        f.setMembres(m.getMembres().stream().map(Agent::getMatricule).collect(Collectors.toList()));
+        return f;
+    }
+
+    @Transactional
+    public Mission modifier(EditionMissionForm f) {
+        Mission m = missionRepo.findById(f.getId()).orElseThrow();
+        LocalDate debut = parseDate(f.getDateDebut(), m.getDateDebut());
+        LocalDate fin = parseDate(f.getDateFin(), null);
+        if (fin != null && fin.isBefore(debut)) {
+            throw new IllegalArgumentException("La date de fin ne peut pas être antérieure à la date de début.");
+        }
+        List<String> membres = (f.getMembres() == null) ? List.of()
+                : f.getMembres().stream().filter(x -> x != null && !x.isBlank()).map(String::trim).distinct().collect(Collectors.toList());
+        if (membres.isEmpty()) {
+            throw new IllegalArgumentException("Sélectionnez au moins un membre pour la mission.");
+        }
+        String chefMat = (f.getChefMissionSel() == null) ? "" : f.getChefMissionSel().trim();
+        if (chefMat.isEmpty() || !membres.contains(chefMat)) {
+            throw new IllegalArgumentException("Désignez le chef de mission parmi les membres sélectionnés (un seul).");
+        }
+        verifierChevauchement(membres, debut, fin, m.getId());
+
+        m.setObjet((f.getObjet() == null || f.getObjet().isBlank()) ? m.getObjet() : f.getObjet().trim());
+        m.setDateDebut(debut);
+        m.setDateFin(fin);
+        m.setObservations((f.getObservations() == null || f.getObservations().isBlank()) ? null : f.getObservations().trim());
+        if (f.getStatut() != null && !f.getStatut().isBlank()) {
+            m.setStatut(StatutMission.valueOf(f.getStatut()));
+        }
+        m.setChefMission(agentRepo.findById(chefMat).orElseThrow());
+        m.getMembres().clear();
+        for (String mat : membres) {
+            agentRepo.findById(mat).ifPresent(m.getMembres()::add);
+        }
+        return missionRepo.save(m);
     }
 
     @Transactional

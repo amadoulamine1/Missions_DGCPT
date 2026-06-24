@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Mission;
 import sn.dgcpt.missionsparc.mission.CreationMissionForm;
+import sn.dgcpt.missionsparc.mission.EditionMissionForm;
 import sn.dgcpt.missionsparc.mission.MissionService;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
@@ -54,6 +55,28 @@ public class MissionController {
             model.addAttribute("erreur", e.getMessage() != null ? e.getMessage() : "Données invalides.");
             garnir(model);
             return "mission-nouvelle";
+        }
+    }
+
+    @GetMapping("/missions/{id}/modifier")
+    public String editer(@PathVariable Integer id, Model model) {
+        model.addAttribute("form", missionService.formulaireEdition(id));
+        model.addAttribute("informaticiens", missionService.informaticiens());
+        model.addAttribute("ref", missionService.reference(id));
+        return "mission-edit";
+    }
+
+    @PostMapping("/missions/{id}/modifier")
+    public String modifier(@PathVariable Integer id, @ModelAttribute("form") EditionMissionForm form, Model model) {
+        form.setId(id);
+        try {
+            missionService.modifier(form);
+            return "redirect:/missions/" + id;
+        } catch (IllegalArgumentException | java.util.NoSuchElementException e) {
+            model.addAttribute("erreur", e.getMessage() != null ? e.getMessage() : "Données invalides.");
+            model.addAttribute("informaticiens", missionService.informaticiens());
+            model.addAttribute("ref", missionService.reference(id));
+            return "mission-edit";
         }
     }
 
