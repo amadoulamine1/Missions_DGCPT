@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 4 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 5 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -187,6 +187,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Membres** : choisis parmi les informaticiens (sélection multiple) ; **contrôle de chevauchement** (un agent ne peut pas être sur deux missions simultanées) ; retrait possible depuis le détail de la mission.
 - **Chef de mission** : désigné **parmi les membres** de la mission (un et un seul).
 - **Contrôle des dates** : la date de fin ne peut pas être antérieure à la date de début.
+- **Édition d'une mission** après création : objet, dates, **statut** (en consolidation / clôturée), observations, **membres** et **chef de mission** modifiables (le N° de mission, le TPR et le chef de poste figé restent inchangés). Le contrôle de chevauchement **exclut la mission éditée**.
 
 ### 9.3 Référentiels et création à la volée
 - Écrans dédiés de **gestion des TPR** (créer/modifier) et des **agents** (créer/modifier, type informaticien ou agent de poste).
@@ -207,10 +208,11 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 
 ### 9.7 Authentification, rôles et comptes
 - **Connexion par formulaire** (Spring Security) ; mots de passe **chiffrés en BCrypt** ; déconnexion.
-- **Trois rôles** : **Administrateur** (postes, agents, comptes, référentiels), **Chef de mission** (création de mission, validation des imports), **Agent** (consultation, téléchargement des canevas, téléversement des fichiers).
+- **Trois rôles** : **Administrateur** (gestion des postes, agents, comptes, référentiels), **Chef de mission** (création et **édition** de mission, validation des imports), **Agent** (consultation, téléchargement des canevas, téléversement des fichiers).
 - **Règles d'accès** appliquées par rôle et **navigation adaptée** (liens et actions réservés masqués).
-- **Gestion des comptes** par l'administrateur : créer, modifier, désactiver, réinitialiser un mot de passe.
-- **Comptes liés aux agents informaticiens** : un compte (chef de mission / agent) est rattaché à un agent informaticien (un agent = un compte) ; le nom du compte en est dérivé.
+- **Consultation des postes et de leur inventaire** ouverte à tous les rôles ; la **création/modification** des postes et des agents reste réservée à l'administrateur.
+- **Gestion des comptes** par l'administrateur : créer, modifier, désactiver, **réinitialiser** le mot de passe (valeur temporaire) ; le mot de passe est **affichable** à la saisie.
+- **Comptes liés aux agents informaticiens** : un compte (chef de mission / agent) est rattaché à un agent informaticien (un agent = un compte) ; dans ce cas l'**identifiant devient le matricule** et le **nom est repris** de l'agent.
 - **Compte administrateur initial** créé au premier démarrage (`admin` / `admin`, à changer aussitôt).
 - *Note technique* : la protection CSRF est désactivée pour l'intranet ; à réactiver pour une mise en production exposée.
 
