@@ -1,6 +1,5 @@
 package sn.dgcpt.missionsparc.web;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import sn.dgcpt.missionsparc.importation.ConsolidationService;
 import sn.dgcpt.missionsparc.importation.ImportService;
 import sn.dgcpt.missionsparc.importation.RapportImport;
 import sn.dgcpt.missionsparc.importation.dto.CanevasImporte;
@@ -25,13 +26,13 @@ public class ImportController {
 
     private static final String TYPE_XLSX =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    private static final String SESSION_FICHIER = "canevasBytes";
-    private static final String SESSION_NOM = "canevasNom";
 
     private final ImportService importService;
+    private final ConsolidationService consolidation;
 
-    public ImportController(ImportService importService) {
+    public ImportController(ImportService importService, ConsolidationService consolidation) {
         this.importService = importService;
+        this.consolidation = consolidation;
     }
 
     @GetMapping
@@ -48,16 +49,14 @@ public class ImportController {
     public ResponseEntity<Resource> telechargerCanevas() {
         Resource canevas = new ClassPathResource("canevas/canevas-vierge.xlsx");
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"Canevas-Saisie-Mission-Parc.xlsx\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Canevas-Saisie-Mission-Parc.xlsx\"")
                 .contentType(MediaType.parseMediaType(TYPE_XLSX))
                 .body(canevas);
     }
 
-    /** Étape 1 : chargement -> lecture + contrôle -> aperçu (rien n'est encore intégré). */
+    /** Chargement : lecture + contrôle ; si OK, le fichier devient un lot ajouté à la consolidation de la mission. */
     @PostMapping
-    public String televerser(@RequestParam("fichier") MultipartFile fichier,
-                             HttpSession session, Model model) {
+    public String televerser(@RequestParam("fichier") MultipartFile fichier, Model model, RedirectAttributes ra) {
         if (fichier == null || fichier.isEmpty()) {
             model.addAttribute("erreur", "Veuillez sélectionner un fichier .xlsx.");
             return "import";
@@ -66,45 +65,21 @@ public class ImportController {
             byte[] bytes = fichier.getBytes();
             CanevasImporte canevas = importService.lire(new ByteArrayInputStream(bytes));
             RapportImport rapport = importService.controler(canevas);
-            session.setAttribute(SESSION_FICHIER, bytes);
-            session.setAttribute(SESSION_NOM, fichier.getOriginalFilename());
-            model.addAttribute("canevas", canevas);
-            model.addAttribute("rapport", rapport);
-            model.addAttribute("nomFichier", fichier.getOriginalFilename());
-            return "import-apercu";
-        } catch (Exception e) {
-            model.addAttribute("erreur", "Lecture impossible : " + e.getMessage());
-            return "import";
-        }
-    }
-
-    /** Étape 2 : validation explicite -> intégration. */
-    @PostMapping("/valider")
-    public String valider(HttpSession session, Model model) {
-        byte[] bytes = (byte[]) session.getAttribute(SESSION_FICHIER);
-        if (bytes == null) {
-            model.addAttribute("erreur", "Aucun canevas en attente. Veuillez recharger le fichier.");
-            return "import";
-        }
-        try {
-            CanevasImporte canevas = importService.lire(new ByteArrayInputStream(bytes));
-            RapportImport rapport = importService.controler(canevas);
             if (!rapport.estIntegrable()) {
                 model.addAttribute("canevas", canevas);
                 model.addAttribute("rapport", rapport);
-                model.addAttribute("nomFichier", session.getAttribute(SESSION_NOM));
-                model.addAttribute("erreur", "Des anomalies bloquantes empêchent la validation.");
+                model.addAttribute("nomFichier", fichier.getOriginalFilename());
+                model.addAttribute("erreur", "Des anomalies bloquantes empêchent l'ajout à la consolidation. Corrigez le canevas puis rechargez-le.");
                 return "import-apercu";
             }
-            int nbMateriels = importService.integrer(canevas);
-            session.removeAttribute(SESSION_FICHIER);
-            session.removeAttribute(SESSION_NOM);
-            model.addAttribute("reference", canevas.getEntete().getReference());
-            model.addAttribute("nbMateriels", nbMateriels);
-            model.addAttribute("nbMembres", canevas.getMembres().size());
-            return "import-valide";
+            Integer missionId = consolidation.creerLot(canevas, bytes, fichier.getOriginalFilename());
+            ra.addFlashAttribute("message", "Fichier ajouté à la consolidation de la mission.");
+            return "redirect:/missions/" + missionId + "/consolidation";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erreur", e.getMessage());
+            return "import";
         } catch (Exception e) {
-            model.addAttribute("erreur", "Validation impossible : " + e.getMessage());
+            model.addAttribute("erreur", "Lecture impossible : " + e.getMessage());
             return "import";
         }
     }

@@ -88,17 +88,8 @@
     </table>
     <p th:if="${rapport.anomalies.isEmpty()}" class="muted">Aucune anomalie.</p>
 
-    <h2>Validation</h2>
-    <div th:if="${rapport.estIntegrable()}">
-        <p class="alert ok">Aucune anomalie bloquante. Vous pouvez valider la prise en compte de ces données.</p>
-        <form method="post" th:action="@{/import/valider}" class="toolbar" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">
-            <button class="btn" type="submit">Valider l'import</button>
-            <a class="btn secondary" th:href="@{/import}">Annuler</a>
-        </form>
-        <p th:if="${currentRole == 'AGENT'}" class="muted">La validation de l'import est réservée au chef de mission.</p>
-    </div>
-    <div th:unless="${rapport.estIntegrable()}">
-        <p class="alert warn">Des anomalies bloquantes empêchent la validation. Corrigez le canevas puis rechargez-le.</p>
+    <div>
+        <p class="alert warn">Des anomalies bloquantes empêchent l'ajout à la consolidation. Corrigez le canevas puis rechargez-le.</p>
         <a class="btn secondary" th:href="@{/import}">Importer un autre fichier</a>
     </div>
 </main>
