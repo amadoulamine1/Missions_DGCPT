@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Consolidation</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <p th:if="${message}" class="alert ok" th:text="${message}">ok</p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">err</p>
+    <div class="toolbar">
+        <h1 style="margin:0" th:text="'Consolidation — ' + ${ref}">Consolidation</h1>
+        <span class="spacer"></span>
+        <a class="btn secondary" th:href="@{/missions/{id}(id=${missionId})}">← Mission</a>
+        <a class="btn secondary" th:href="@{/import}">+ Charger un fichier</a>
+    </div>
+
+    <h2>Fichiers en attente</h2>
+    <table class="table">
+        <thead><tr><th>Lot</th><th>Saisisseur</th><th>Fichier</th><th>Chargé le</th><th>Lignes</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr th:each="l : ${lots}">
+                <td th:text="${'#' + l.id}"></td><td th:text="${l.saisisseur}"></td><td th:text="${l.fichier}"></td>
+                <td th:text="${l.date}"></td><td th:text="${l.nbLignes}"></td>
+                <td>
+                    <form method="post" th:action="@{/missions/{id}/consolidation/lots/{lid}/supprimer(id=${missionId},lid=${l.id})}"
+                          style="display:inline;margin:0" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"
+                          onsubmit="return confirm('Retirer ce lot de la consolidation ?');">
+                        <button class="btn small secondary" type="submit">Retirer</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${lots.isEmpty()}"><td colspan="6" class="empty">Aucun fichier en attente. Chargez les canevas remplis depuis « Importer ».</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Conflits à arbitrer</h2>
+    <form method="post" th:action="@{/missions/{id}/consolidation/integrer(id=${missionId})}">
+        <div th:each="c, stat : ${conflits}" class="card" style="margin-bottom:.7rem">
+            <p style="margin-top:0"><span class="badge orange">Conflit</span>
+                <strong th:text="${c.type + ' ' + c.cle}"></strong> — valeurs divergentes entre fichiers ; choisissez la version à retenir :</p>
+            <div th:each="o : ${c.options}" class="form-row" style="align-items:center">
+                <label><input type="radio" th:name="${'g' + stat.index}" th:value="${c.cle + '::' + o.lotId}" required/>
+                    <strong th:text="${o.label}"></strong> — <span th:text="${o.resume}"></span></label>
+            </div>
+        </div>
+        <p th:if="${conflits.isEmpty()}" class="alert ok">Aucun conflit — les fichiers sont cohérents.</p>
+        <div class="toolbar" style="margin-top:1rem" th:if="${not lots.isEmpty()}">
+            <button class="btn" type="submit" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Valider et intégrer</button>
+            <span th:if="${currentRole == 'AGENT'}" class="muted">L'intégration de la consolidation est réservée au chef de mission.</span>
+        </div>
+    </form>
+    <p class="muted" style="margin-top:.6rem">L'intégration écrit les données en base (rapprochement par clé), fige les relevés datés et marque les lots comme intégrés.</p>
+</main>
+</body>
+</html>
