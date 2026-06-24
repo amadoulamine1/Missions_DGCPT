@@ -35,7 +35,11 @@
     <div class="kpis">
         <a class="kpi" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
         <a class="kpi" th:href="@{/parc}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
-        <div class="kpi"><div class="n" th:text="|${tauxDispo} %|">0</div><div class="l">Disponibilité (en service)</div></div>
+        <div class="kpi" title="Disponibilité = matériels « En service » rapportés au matériel dont le statut est renseigné (en service + en panne + à changer). Les équipements sans statut ne sont pas comptés.">
+            <div class="n" th:text="|${tauxDispo} %|">0</div>
+            <div class="l">Disponibilité</div>
+            <div class="l" style="margin-top:.2rem;font-size:.76rem" th:text="|${matEnService} en service / ${nbStatues} évalués|"></div>
+        </div>
         <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
         <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
     </div>

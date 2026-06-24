@@ -50,7 +50,9 @@ public class HomeController {
         model.addAttribute("matEnService", matEnService);
         model.addAttribute("matEnPanne", matEnPanne);
         model.addAttribute("matAChanger", matAChanger);
-        model.addAttribute("tauxDispo", parc.size() > 0 ? matEnService * 100 / parc.size() : 0);
+        long nbStatues = matEnService + matEnPanne + matAChanger;
+        model.addAttribute("nbStatues", nbStatues);
+        model.addAttribute("tauxDispo", nbStatues > 0 ? matEnService * 100 / nbStatues : 0);
 
         long nbOrdi = parc.stream().filter(m -> m.getType() == TypeMateriel.ORDINATEUR).count();
         long nbImp = parc.stream().filter(m -> m.getType() == TypeMateriel.IMPRIMANTE).count();
