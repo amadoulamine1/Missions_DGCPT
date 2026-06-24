@@ -83,6 +83,7 @@ public class CanevasWriter {
                     set(row, 3, a.getFonction());
                     set(row, 4, a.getTelephone());
                     set(row, 5, a.getEmail());
+                    set(row, 7, libelle(a)); // colonne H : libellé "matricule — prénom nom" (valeur, pour la liste attributaire)
                 }
             }
 
