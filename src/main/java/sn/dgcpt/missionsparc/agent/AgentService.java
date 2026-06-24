@@ -39,7 +39,9 @@ public class AgentService {
                         a.getFonction(),
                         a.getTypeAgent() == null ? "" : a.getTypeAgent().name(),
                         a.getPoste() == null ? "" : a.getPoste().getNom(),
-                        a.getPoste() == null ? null : a.getPoste().getId()))
+                        a.getPoste() == null ? null : a.getPoste().getId(),
+                        a.getTelephone(),
+                        a.getEmail()))
                 .collect(Collectors.toList());
     }
 

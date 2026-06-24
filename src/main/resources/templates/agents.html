@@ -45,6 +45,8 @@
                 </div>
                 <div class="kv">
                     <div class="kv-line"><span class="k">Matricule</span><span class="v mono" th:text="${a.matricule}"></span></div>
+                    <div class="kv-line" th:if="${a.telephone != null and a.telephone != ''}"><span class="k">Tél.</span><span class="v" th:text="${a.telephone}"></span></div>
+                    <div class="kv-line" th:if="${a.email != null and a.email != ''}"><span class="k">E-mail</span><span class="v" style="font-size:.8rem" th:text="${a.email}"></span></div>
                     <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">Poste</span><span class="v" th:text="${a.posteNom}"></span></div>
                 </div>
                 <div class="acard-foot">
@@ -74,6 +76,8 @@
                 </div>
                 <div class="kv">
                     <div class="kv-line"><span class="k">Matricule</span><span class="v mono" th:text="${a.matricule}"></span></div>
+                    <div class="kv-line" th:if="${a.telephone != null and a.telephone != ''}"><span class="k">Tél.</span><span class="v" th:text="${a.telephone}"></span></div>
+                    <div class="kv-line" th:if="${a.email != null and a.email != ''}"><span class="k">E-mail</span><span class="v" style="font-size:.8rem" th:text="${a.email}"></span></div>
                     <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">TPR</span><span class="v" th:text="${a.posteNom}"></span></div>
                 </div>
                 <div class="acard-foot">
