@@ -35,6 +35,15 @@ public class AffectationService {
             throw new IllegalArgumentException("Veuillez choisir un agent.");
         Agent agent = agentRepo.findById(agentMatricule)
                 .orElseThrow(() -> new IllegalArgumentException("Agent introuvable."));
+
+        // La réaffectation est limitée à un agent rattaché au même poste (TPR) que le matériel.
+        Integer posteMateriel = (m.getPoste() == null) ? null : m.getPoste().getId();
+        Integer posteAgent = (agent.getPoste() == null) ? null : agent.getPoste().getId();
+        if (posteMateriel == null)
+            throw new IllegalArgumentException("Ce matériel n'est rattaché à aucun poste.");
+        if (posteAgent == null || !posteAgent.equals(posteMateriel))
+            throw new IllegalArgumentException("L'agent choisi doit être rattaché au même poste (TPR) que le matériel.");
+
         LocalDate d = (dateEffet == null) ? LocalDate.now() : dateEffet;
 
         Optional<AffectationMateriel> courante = affectationRepo.findByMaterielAndDateFinIsNull(m);
