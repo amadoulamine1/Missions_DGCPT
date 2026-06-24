@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Référentiels</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <h1>Référentiels</h1>
+    <p class="muted">Listes paramétrables utilisées dans le canevas et les fiches matériel.</p>
+    <p th:if="${message}" class="alert ok" th:text="${message}"></p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}"></p>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+        <div class="card">
+            <h2 style="margin-top:0;border:none">Logiciels</h2>
+            <p class="muted" style="margin-top:-.2rem">Logiciels installables sur les ordinateurs (cases Oui/Non du canevas).</p>
+            <form method="post" th:action="@{/referentiels/logiciels}" class="toolbar" style="margin-bottom:.8rem">
+                <input type="text" name="nom" placeholder="Nouveau logiciel…" required
+                       style="flex:1;min-width:160px;padding:.4rem .6rem;border:1px solid var(--line);border-radius:7px;font-size:.92rem"/>
+                <button class="btn" type="submit">+ Ajouter</button>
+            </form>
+            <table class="table">
+                <thead><tr><th>Nom</th><th style="width:1%">Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="l : ${logiciels}">
+                        <td>
+                            <form method="post" th:action="@{/referentiels/logiciels/{id}(id=${l.id})}" style="display:flex;gap:.4rem;align-items:center;margin:0">
+                                <input type="text" name="nom" th:value="${l.nom}" style="flex:1;padding:.32rem .5rem;border:1px solid var(--line);border-radius:6px;font-size:.9rem"/>
+                                <button class="btn small secondary" type="submit">Renommer</button>
+                            </form>
+                        </td>
+                        <td style="text-align:right;white-space:nowrap">
+                            <form method="post" th:action="@{/referentiels/logiciels/{id}/supprimer(id=${l.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer ce logiciel ?');">
+                                <button class="btn small secondary" type="submit">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${logiciels.isEmpty()}"><td colspan="2" class="empty">Aucun logiciel.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top:0;border:none">Catégories de câble</h2>
+            <p class="muted" style="margin-top:-.2rem">Catégories utilisées dans le relevé réseau des missions.</p>
+            <form method="post" th:action="@{/referentiels/cables}" class="toolbar" style="margin-bottom:.8rem">
+                <input type="text" name="libelle" placeholder="Nouvelle catégorie…" required
+                       style="flex:1;min-width:160px;padding:.4rem .6rem;border:1px solid var(--line);border-radius:7px;font-size:.92rem"/>
+                <button class="btn" type="submit">+ Ajouter</button>
+            </form>
+            <table class="table">
+                <thead><tr><th>Libellé</th><th style="width:1%">Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="cc : ${cables}">
+                        <td>
+                            <form method="post" th:action="@{/referentiels/cables/{id}(id=${cc.id})}" style="display:flex;gap:.4rem;align-items:center;margin:0">
+                                <input type="text" name="libelle" th:value="${cc.libelle}" style="flex:1;padding:.32rem .5rem;border:1px solid var(--line);border-radius:6px;font-size:.9rem"/>
+                                <button class="btn small secondary" type="submit">Renommer</button>
+                            </form>
+                        </td>
+                        <td style="text-align:right;white-space:nowrap">
+                            <form method="post" th:action="@{/referentiels/cables/{id}/supprimer(id=${cc.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                                <button class="btn small secondary" type="submit">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${cables.isEmpty()}"><td colspan="2" class="empty">Aucune catégorie.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

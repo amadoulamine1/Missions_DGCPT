@@ -24,6 +24,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/favicon.ico").permitAll()
                 .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
+                .requestMatchers("/referentiels/**").hasRole("ADMIN")
                 .requestMatchers("/agents/**").hasRole("ADMIN")
                 .requestMatchers("/postes/nouveau", "/postes/*/modifier").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/postes", "/postes/**").hasRole("ADMIN")
