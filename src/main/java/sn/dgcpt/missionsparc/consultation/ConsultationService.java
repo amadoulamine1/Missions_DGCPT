@@ -62,8 +62,8 @@ public class ConsultationService {
 
     public MissionDetailVue detailMission(Integer id) {
         Mission m = missionRepo.findById(id).orElseThrow();
-        String chefMission = m.getChefMission() == null ? "" : m.getChefMission().getMatricule();
-        String chefPoste = m.getChefPosteFige() == null ? "" : m.getChefPosteFige().getMatricule();
+        String chefMission = m.getChefMission() == null ? "" : m.getChefMission().getMatricule() + " — " + m.getChefMission().getPrenom() + " " + m.getChefMission().getNom();
+        String chefPoste = m.getChefPosteFige() == null ? "" : m.getChefPosteFige().getMatricule() + " — " + m.getChefPosteFige().getPrenom() + " " + m.getChefPosteFige().getNom();
         String cable = m.getCategorieCable() == null ? "" : m.getCategorieCable().getLibelle();
         List<ReleveVue> releves = releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
         List<AgentVue> membres = m.getMembres().stream().map(this::versAgentVue).toList();
