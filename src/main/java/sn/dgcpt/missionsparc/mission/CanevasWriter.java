@@ -34,6 +34,8 @@ public class CanevasWriter {
         try (InputStream is = new ClassPathResource("canevas/canevas-vierge.xlsx").getInputStream();
              Workbook wb = new XSSFWorkbook(is)) {
 
+            wb.setForceFormulaRecalculation(true);
+
             // 1) En-tête
             Sheet s = wb.getSheet("1-Mission et Réseau");
             remplir(s, "n° de mission", m.getReference());
@@ -100,7 +102,7 @@ public class CanevasWriter {
     }
 
     private String libelle(Agent a) {
-        return a == null ? "" : a.getMatricule() + " — " + a.getNom() + " " + a.getPrenom();
+        return a == null ? "" : a.getMatricule() + " — " + a.getPrenom() + " " + a.getNom();
     }
 
     private Row ligne(Sheet s, int rowIdx) {
