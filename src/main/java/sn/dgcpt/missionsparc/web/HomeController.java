@@ -42,6 +42,18 @@ public class HomeController {
         model.addAttribute("nbImp", parc.stream().filter(m -> m.getType() == TypeMateriel.IMPRIMANTE).count());
         model.addAttribute("nbReseau", parc.stream().filter(m -> m.getType() == TypeMateriel.SWITCH || m.getType() == TypeMateriel.ACCESS_POINT).count());
         model.addAttribute("nbScan", parc.stream().filter(m -> m.getType() == TypeMateriel.SCANNER_CHEQUE).count());
+        model.addAttribute("ordSvc", c(parc, StatutMateriel.EN_SERVICE, TypeMateriel.ORDINATEUR));
+        model.addAttribute("ordPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.ORDINATEUR));
+        model.addAttribute("ordChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.ORDINATEUR));
+        model.addAttribute("impSvc", c(parc, StatutMateriel.EN_SERVICE, TypeMateriel.IMPRIMANTE));
+        model.addAttribute("impPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.IMPRIMANTE));
+        model.addAttribute("impChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.IMPRIMANTE));
+        model.addAttribute("resSvc", c(parc, StatutMateriel.EN_SERVICE, TypeMateriel.SWITCH, TypeMateriel.ACCESS_POINT));
+        model.addAttribute("resPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.SWITCH, TypeMateriel.ACCESS_POINT));
+        model.addAttribute("resChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.SWITCH, TypeMateriel.ACCESS_POINT));
+        model.addAttribute("scnSvc", c(parc, StatutMateriel.EN_SERVICE, TypeMateriel.SCANNER_CHEQUE));
+        model.addAttribute("scnPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.SCANNER_CHEQUE));
+        model.addAttribute("scnChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.SCANNER_CHEQUE));
 
         List<Mission> missions = missionRepo.findAll();
         LocalDate today = LocalDate.now();
@@ -54,5 +66,14 @@ public class HomeController {
         model.addAttribute("misEnCours", enCours);
         model.addAttribute("misTerm", missions.size() - plan - enCours);
         return "index";
+    }
+
+    private long c(List<Materiel> parc, StatutMateriel st, TypeMateriel... types) {
+        return parc.stream().filter(m -> m.getStatut() == st && contient(types, m.getType())).count();
+    }
+
+    private boolean contient(TypeMateriel[] types, TypeMateriel t) {
+        for (TypeMateriel x : types) if (x == t) return true;
+        return false;
     }
 }
