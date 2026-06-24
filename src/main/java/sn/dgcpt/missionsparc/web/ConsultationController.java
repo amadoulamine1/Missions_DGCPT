@@ -9,11 +9,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import sn.dgcpt.missionsparc.consultation.ConsultationService;
+import sn.dgcpt.missionsparc.consultation.Pagination;
+import sn.dgcpt.missionsparc.consultation.dto.MaterielVue;
+import sn.dgcpt.missionsparc.consultation.dto.MissionVue;
+import sn.dgcpt.missionsparc.consultation.dto.PageVue;
 import sn.dgcpt.missionsparc.consultation.ParcExporter;
 import sn.dgcpt.missionsparc.domain.TypeMateriel;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
 
 @Controller
 public class ConsultationController {
@@ -46,15 +52,37 @@ public class ConsultationController {
                        @RequestParam(required = false) Integer poste,
                        @RequestParam(required = false) String type,
                        @RequestParam(required = false) String statut,
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(required = false) String tri,
+                       @RequestParam(required = false) String sens,
                        Model model) {
-        model.addAttribute("materiels", consultation.listerParc(q, poste, type, statut));
+        List<MaterielVue> tout = consultation.listerParc(q, poste, type, statut);
+        Comparator<MaterielVue> cmp = comparateurParc(tri);
+        if ("desc".equals(sens)) cmp = cmp.reversed();
+        PageVue<MaterielVue> p = Pagination.page(tout, page, 25, cmp);
+        model.addAttribute("page", p);
+        model.addAttribute("materiels", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
         model.addAttribute("types", TypeMateriel.values());
         model.addAttribute("q", q);
         model.addAttribute("fPoste", poste);
         model.addAttribute("fType", type);
         model.addAttribute("fStatut", statut);
+        model.addAttribute("tri", tri);
+        model.addAttribute("sens", sens);
         return "parc";
+    }
+
+    private Comparator<MaterielVue> comparateurParc(String tri) {
+        Comparator<String> n = Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER);
+        return switch (tri == null ? "" : tri) {
+            case "type" -> Comparator.comparing(MaterielVue::getType, n);
+            case "nom" -> Comparator.comparing(MaterielVue::getNom, n);
+            case "modele" -> Comparator.comparing(MaterielVue::getModele, n);
+            case "poste" -> Comparator.comparing(MaterielVue::getPosteNom, n);
+            case "statut" -> Comparator.comparing(MaterielVue::getStatut, n);
+            default -> Comparator.comparing(MaterielVue::getNumeroInventaire, n);
+        };
     }
 
     @GetMapping("/parc/export")
@@ -89,13 +117,34 @@ public class ConsultationController {
     public String missions(@RequestParam(required = false) String q,
                            @RequestParam(required = false) Integer poste,
                            @RequestParam(required = false) String etat,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(required = false) String tri,
+                           @RequestParam(required = false) String sens,
                            Model model) {
-        model.addAttribute("missions", consultation.listerMissions(q, poste, etat));
+        List<MissionVue> tout = consultation.listerMissions(q, poste, etat);
+        Comparator<MissionVue> cmp = comparateurMissions(tri);
+        if ("desc".equals(sens)) cmp = cmp.reversed();
+        PageVue<MissionVue> p = Pagination.page(tout, page, 25, cmp);
+        model.addAttribute("page", p);
+        model.addAttribute("missions", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
         model.addAttribute("q", q);
         model.addAttribute("fPoste", poste);
         model.addAttribute("fEtat", etat);
+        model.addAttribute("tri", tri);
+        model.addAttribute("sens", sens);
         return "missions";
+    }
+
+    private Comparator<MissionVue> comparateurMissions(String tri) {
+        Comparator<String> n = Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER);
+        return switch (tri == null ? "" : tri) {
+            case "objet" -> Comparator.comparing(MissionVue::getObjet, n);
+            case "poste" -> Comparator.comparing(MissionVue::getPosteNom, n);
+            case "etat" -> Comparator.comparing(MissionVue::getEtat, n);
+            case "statut" -> Comparator.comparing(MissionVue::getStatut, n);
+            default -> Comparator.comparing(MissionVue::getReference, n);
+        };
     }
 
     @GetMapping("/missions/{id}")

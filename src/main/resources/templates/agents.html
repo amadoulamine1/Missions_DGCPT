@@ -11,36 +11,41 @@
         <a class="btn" th:href="@{/agents/nouveau}">+ Nouvel agent</a>
     </div>
 
-    <h2>Agents informaticiens <span class="muted" th:text="|(${informaticiens.size()})|"></span></h2>
+    <h2>Agents informaticiens <span class="muted" th:text="|(${pInfo.total})|"></span></h2>
     <p class="muted">Direction Informatique — effectuent les missions.</p>
     <table class="table">
         <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>Actions</th></tr></thead>
         <tbody>
-            <tr th:each="a : ${informaticiens}">
-                <td th:text="${a.matricule}"></td>
-                <td th:text="${a.nomComplet}"></td>
-                <td th:text="${a.fonction}"></td>
+            <tr th:each="a : ${pInfo.contenu}">
+                <td th:text="${a.matricule}"></td><td th:text="${a.nomComplet}"></td><td th:text="${a.fonction}"></td>
                 <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
             </tr>
-            <tr th:if="${informaticiens.isEmpty()}"><td colspan="4" class="empty">Aucun informaticien.</td></tr>
+            <tr th:if="${pInfo.vide}"><td colspan="4" class="empty">Aucun informaticien.</td></tr>
         </tbody>
     </table>
+    <div class="toolbar" th:if="${pInfo.totalPages > 1}" style="margin-top:.4rem">
+        <a class="btn small secondary" th:classappend="${pInfo.premier} ? 'disabled' : ''" th:href="@{/agents(pi=${pInfo.precedent},pp=${pPoste.page})}">← Précédent</a>
+        <span class="muted" th:text="'Page ' + ${pInfo.pageHumain} + ' / ' + ${pInfo.totalPages}"></span>
+        <a class="btn small secondary" th:classappend="${pInfo.dernier} ? 'disabled' : ''" th:href="@{/agents(pi=${pInfo.suivant},pp=${pPoste.page})}">Suivant →</a>
+    </div>
 
-    <h2 style="margin-top:1.6rem">Agents de poste <span class="muted" th:text="|(${agentsPoste.size()})|"></span></h2>
+    <h2 style="margin-top:1.6rem">Agents de poste <span class="muted" th:text="|(${pPoste.total})|"></span></h2>
     <p class="muted">Rattachés à un TPR — utilisent le matériel.</p>
     <table class="table">
         <thead><tr><th>Matricule</th><th>Nom</th><th>Fonction</th><th>TPR</th><th>Actions</th></tr></thead>
         <tbody>
-            <tr th:each="a : ${agentsPoste}">
-                <td th:text="${a.matricule}"></td>
-                <td th:text="${a.nomComplet}"></td>
-                <td th:text="${a.fonction}"></td>
-                <td th:text="${a.posteNom}"></td>
+            <tr th:each="a : ${pPoste.contenu}">
+                <td th:text="${a.matricule}"></td><td th:text="${a.nomComplet}"></td><td th:text="${a.fonction}"></td><td th:text="${a.posteNom}"></td>
                 <td><a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a></td>
             </tr>
-            <tr th:if="${agentsPoste.isEmpty()}"><td colspan="5" class="empty">Aucun agent de poste.</td></tr>
+            <tr th:if="${pPoste.vide}"><td colspan="5" class="empty">Aucun agent de poste.</td></tr>
         </tbody>
     </table>
+    <div class="toolbar" th:if="${pPoste.totalPages > 1}" style="margin-top:.4rem">
+        <a class="btn small secondary" th:classappend="${pPoste.premier} ? 'disabled' : ''" th:href="@{/agents(pp=${pPoste.precedent},pi=${pInfo.page})}">← Précédent</a>
+        <span class="muted" th:text="'Page ' + ${pPoste.pageHumain} + ' / ' + ${pPoste.totalPages}"></span>
+        <a class="btn small secondary" th:classappend="${pPoste.dernier} ? 'disabled' : ''" th:href="@{/agents(pp=${pPoste.suivant},pi=${pInfo.page})}">Suivant →</a>
+    </div>
 </main>
 </body>
 </html>

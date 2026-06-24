@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Parc</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}"/>
-</head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Parc</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
@@ -15,8 +11,7 @@
         <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, nom, modèle)…" style="min-width:220px"/>
         <select name="poste">
             <option value="">Tous les postes</option>
-            <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}"
-                    th:selected="${fPoste != null and fPoste == p.id}"></option>
+            <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
         </select>
         <select name="type">
             <option value="">Tous les types</option>
@@ -35,18 +30,33 @@
         <a class="btn secondary" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
     </form>
 
-    <p class="muted"><span th:text="${materiels.size()}">0</span> matériel(s)</p>
+    <p class="muted"><span th:text="${page.total}">0</span> matériel(s)</p>
     <table class="table">
-        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Statut</th></tr></thead>
+        <thead><tr>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='type',sens=${(tri == 'type' and sens != 'desc') ? 'desc' : 'asc'})}">Type</a><span th:if="${tri == 'type'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='modele',sens=${(tri == 'modele' and sens != 'desc') ? 'desc' : 'asc'})}">Modèle</a><span th:if="${tri == 'modele'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+        </tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
                 <td><a th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a></td><td th:text="${m.type}"></td>
                 <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td>
                 <td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${materiels.isEmpty()}"><td colspan="6" class="empty">Aucun matériel.</td></tr>
+            <tr th:if="${page.vide}"><td colspan="6" class="empty">Aucun matériel.</td></tr>
         </tbody>
     </table>
+
+    <div class="toolbar" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
+        <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"
+           th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
+        <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>
+        <a class="btn small secondary" th:classappend="${page.dernier} ? 'disabled' : ''"
+           th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri=${tri},sens=${sens},page=${page.suivant})}">Suivant →</a>
+    </div>
 </main>
 </body>
 </html>

@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import sn.dgcpt.missionsparc.agent.AgentForm;
 import sn.dgcpt.missionsparc.agent.AgentService;
+import sn.dgcpt.missionsparc.consultation.Pagination;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 @Controller
@@ -24,10 +26,13 @@ public class AgentController {
     }
 
     @GetMapping
-    public String liste(Model model) {
+    public String liste(@RequestParam(defaultValue = "0") int pi,
+                        @RequestParam(defaultValue = "0") int pp, Model model) {
         var all = agentService.lister();
-        model.addAttribute("informaticiens", all.stream().filter(a -> "INFORMATICIEN".equals(a.getType())).toList());
-        model.addAttribute("agentsPoste", all.stream().filter(a -> "POSTE".equals(a.getType())).toList());
+        var info = all.stream().filter(a -> "INFORMATICIEN".equals(a.getType())).toList();
+        var poste = all.stream().filter(a -> "POSTE".equals(a.getType())).toList();
+        model.addAttribute("pInfo", Pagination.page(info, pi, 25, null));
+        model.addAttribute("pPoste", Pagination.page(poste, pp, 25, null));
         return "agents";
     }
 
