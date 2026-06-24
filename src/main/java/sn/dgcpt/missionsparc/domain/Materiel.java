@@ -19,6 +19,13 @@ public class Materiel {
     private String nom;
     private String modele;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut")
+    private StatutMateriel statut;
+
+    @Column(name = "observation", length = 2000)
+    private String observation;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poste_id")
     private Poste poste;
@@ -38,4 +45,8 @@ public class Materiel {
     public void setPoste(Poste poste) { this.poste = poste; }
     public Instant getDateCreation() { return dateCreation; }
     public void setDateCreation(Instant dateCreation) { this.dateCreation = dateCreation; }
+    public StatutMateriel getStatut() { return statut; }
+    public void setStatut(StatutMateriel statut) { this.statut = statut; }
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
 }

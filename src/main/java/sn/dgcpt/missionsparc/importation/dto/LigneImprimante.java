@@ -9,6 +9,8 @@ public class LigneImprimante {
     private String mac;
     private String macWifi;
     private String ip;
+    private String statut;
+    private String observation;
 
     public int getNumLigne() { return numLigne; }
     public void setNumLigne(int numLigne) { this.numLigne = numLigne; }
@@ -24,4 +26,8 @@ public class LigneImprimante {
     public void setMacWifi(String macWifi) { this.macWifi = macWifi; }
     public String getIp() { return ip; }
     public void setIp(String ip) { this.ip = ip; }
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
 }

@@ -10,6 +10,8 @@ public class LigneEquipementReseau {
     private String modele;
     private String mac;
     private String ip;
+    private String statut;
+    private String observation;
 
     public int getNumLigne() { return numLigne; }
     public void setNumLigne(int numLigne) { this.numLigne = numLigne; }
@@ -25,4 +27,8 @@ public class LigneEquipementReseau {
     public void setMac(String mac) { this.mac = mac; }
     public String getIp() { return ip; }
     public void setIp(String ip) { this.ip = ip; }
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
 }

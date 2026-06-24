@@ -7,6 +7,8 @@ public class LigneScanner {
     private String numeroSerie;
     private String marque;
     private String modele;
+    private String statut;
+    private String observation;
 
     public int getNumLigne() { return numLigne; }
     public void setNumLigne(int numLigne) { this.numLigne = numLigne; }
@@ -18,4 +20,8 @@ public class LigneScanner {
     public void setMarque(String marque) { this.marque = marque; }
     public String getModele() { return modele; }
     public void setModele(String modele) { this.modele = modele; }
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
 }

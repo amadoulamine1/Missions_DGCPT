@@ -82,6 +82,7 @@ public class CanevasReader {
             else if (label.startsWith("zone")) e.setZone(val);
             else if (label.startsWith("état du câblage")) e.setEtatCablage(val);
             else if (label.startsWith("catégorie de câble")) e.setCategorieCable(val);
+            else if (label.startsWith("observations")) e.setObservations(val);
         }
     }
 
@@ -106,7 +107,7 @@ public class CanevasReader {
         if (s == null) return;
         for (int r = 1; r <= s.getLastRowNum(); r++) {
             Row row = s.getRow(r);
-            if (ligneVide(row, 15)) continue;
+            if (ligneVide(row, 17)) continue;
             LigneOrdinateur o = new LigneOrdinateur();
             o.setNumLigne(r + 1);
             o.setNumeroInventaire(cell(row, 0));
@@ -124,6 +125,8 @@ public class CanevasReader {
             o.setRam(cell(row, 12));
             o.setProcesseur(cell(row, 13));
             o.setDisqueDur(cell(row, 14));
+            o.setStatut(cell(row, 15));
+            o.setObservation(cell(row, 16));
             c.getOrdinateurs().add(o);
         }
     }
@@ -132,7 +135,7 @@ public class CanevasReader {
         if (s == null) return;
         for (int r = 1; r <= s.getLastRowNum(); r++) {
             Row row = s.getRow(r);
-            if (ligneVide(row, 6)) continue;
+            if (ligneVide(row, 8)) continue;
             LigneImprimante i = new LigneImprimante();
             i.setNumLigne(r + 1);
             i.setNumeroInventaire(cell(row, 0));
@@ -141,6 +144,8 @@ public class CanevasReader {
             i.setMac(cell(row, 3));
             i.setMacWifi(cell(row, 4));
             i.setIp(cell(row, 5));
+            i.setStatut(cell(row, 6));
+            i.setObservation(cell(row, 7));
             c.getImprimantes().add(i);
         }
     }
@@ -149,7 +154,7 @@ public class CanevasReader {
         if (s == null) return;
         for (int r = 1; r <= s.getLastRowNum(); r++) {
             Row row = s.getRow(r);
-            if (ligneVide(row, 6)) continue;
+            if (ligneVide(row, 8)) continue;
             LigneEquipementReseau eq = new LigneEquipementReseau();
             eq.setNumLigne(r + 1);
             eq.setNumeroInventaire(cell(row, 0));
@@ -158,6 +163,8 @@ public class CanevasReader {
             eq.setModele(cell(row, 3));
             eq.setMac(cell(row, 4));
             eq.setIp(cell(row, 5));
+            eq.setStatut(cell(row, 6));
+            eq.setObservation(cell(row, 7));
             c.getEquipementsReseau().add(eq);
         }
     }
@@ -166,13 +173,15 @@ public class CanevasReader {
         if (s == null) return;
         for (int r = 1; r <= s.getLastRowNum(); r++) {
             Row row = s.getRow(r);
-            if (ligneVide(row, 4)) continue;
+            if (ligneVide(row, 6)) continue;
             LigneScanner sc = new LigneScanner();
             sc.setNumLigne(r + 1);
             sc.setNumeroInventaire(cell(row, 0));
             sc.setNumeroSerie(cell(row, 1));
             sc.setMarque(cell(row, 2));
             sc.setModele(cell(row, 3));
+            sc.setStatut(cell(row, 4));
+            sc.setObservation(cell(row, 5));
             c.getScanners().add(sc);
         }
     }

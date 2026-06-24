@@ -12,13 +12,13 @@
     <h1>Inventaire du parc</h1>
     <p class="muted">Total : <span th:text="${materiels.size()}">0</span> matériel(s)</p>
     <table class="table">
-        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th></tr></thead>
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Statut</th></tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
                 <td th:text="${m.numeroInventaire}"></td><td th:text="${m.type}"></td>
-                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td>
+                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td><td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${materiels.isEmpty()}"><td colspan="5" class="empty">Parc vide.</td></tr>
+            <tr th:if="${materiels.isEmpty()}"><td colspan="6" class="empty">Parc vide.</td></tr>
         </tbody>
     </table>
 </main>

@@ -18,6 +18,8 @@ public class LigneOrdinateur {
     private String ram;
     private String processeur;
     private String disqueDur;
+    private String statut;
+    private String observation;
 
     public int getNumLigne() { return numLigne; }
     public void setNumLigne(int numLigne) { this.numLigne = numLigne; }
@@ -51,4 +53,8 @@ public class LigneOrdinateur {
     public void setProcesseur(String processeur) { this.processeur = processeur; }
     public String getDisqueDur() { return disqueDur; }
     public void setDisqueDur(String disqueDur) { this.disqueDur = disqueDur; }
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
+    public String getObservation() { return observation; }
+    public void setObservation(String observation) { this.observation = observation; }
 }

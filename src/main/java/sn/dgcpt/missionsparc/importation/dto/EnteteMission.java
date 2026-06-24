@@ -15,6 +15,7 @@ public class EnteteMission {
     private String zone;
     private String etatCablage;
     private String categorieCable;
+    private String observations;
 
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
@@ -40,4 +41,6 @@ public class EnteteMission {
     public void setEtatCablage(String etatCablage) { this.etatCablage = etatCablage; }
     public String getCategorieCable() { return categorieCable; }
     public void setCategorieCable(String categorieCable) { this.categorieCable = categorieCable; }
+    public String getObservations() { return observations; }
+    public void setObservations(String observations) { this.observations = observations; }
 }

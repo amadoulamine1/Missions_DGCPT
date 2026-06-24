@@ -41,6 +41,9 @@ public class Mission {
     @Column(name = "etat_cablage")
     private String etatCablage;
 
+    @Column(name = "observations", length = 2000)
+    private String observations;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_cable_id")
     private CategorieCable categorieCable;
@@ -73,6 +76,8 @@ public class Mission {
     public void setChefPosteFige(Agent chefPosteFige) { this.chefPosteFige = chefPosteFige; }
     public String getEtatCablage() { return etatCablage; }
     public void setEtatCablage(String etatCablage) { this.etatCablage = etatCablage; }
+    public String getObservations() { return observations; }
+    public void setObservations(String observations) { this.observations = observations; }
     public CategorieCable getCategorieCable() { return categorieCable; }
     public void setCategorieCable(CategorieCable categorieCable) { this.categorieCable = categorieCable; }
     public StatutMission getStatut() { return statut; }

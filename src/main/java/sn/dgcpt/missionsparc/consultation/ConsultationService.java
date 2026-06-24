@@ -82,7 +82,18 @@ public class ConsultationService {
 
     private MaterielVue versMaterielVue(Materiel m) {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
-        return new MaterielVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(), poste);
+        String statut = libelleStatut(m.getStatut());
+        String obs = m.getObservation() == null ? "" : m.getObservation();
+        return new MaterielVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(), poste, statut, obs);
+    }
+
+    private String libelleStatut(StatutMateriel s) {
+        if (s == null) return "";
+        return switch (s) {
+            case EN_SERVICE -> "En service";
+            case EN_PANNE -> "En panne";
+            case A_CHANGER -> "À changer";
+        };
     }
 
     private MissionVue versMissionVue(Mission m) {

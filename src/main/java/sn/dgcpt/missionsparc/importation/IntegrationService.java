@@ -78,6 +78,7 @@ public class IntegrationService {
 
         Poste poste = resoudrePoste(e.getCodePoste(), e.getNomPoste());
         Mission mission = resoudreMission(e, poste, jour);
+        if (!vide(e.getObservations())) mission.setObservations(e.getObservations().trim());
         Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
         String zone = vide(e.getZone()) ? null : e.getZone();
 
@@ -182,6 +183,15 @@ public class IntegrationService {
         agentRepo.save(a);
     }
 
+    private StatutMateriel parseStatut(String v) {
+        if (vide(v)) return null;
+        String x = v.trim().toLowerCase();
+        if (x.startsWith("en panne")) return StatutMateriel.EN_PANNE;
+        if (x.startsWith("à changer") || x.startsWith("a changer")) return StatutMateriel.A_CHANGER;
+        if (x.startsWith("en service")) return StatutMateriel.EN_SERVICE;
+        return null;
+    }
+
     private CategorieCable resoudreCategorie(String libelle) {
         if (vide(libelle)) return null;
         String lib = libelle.trim();
@@ -195,7 +205,7 @@ public class IntegrationService {
     // ---------- intégration par type ----------
 
     private void integrerOrdinateur(LigneOrdinateur o, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(o.getNumeroInventaire(), TypeMateriel.ORDINATEUR, o.getNomMachine(), o.getModele(), poste,
+        Materiel mat = rapprocher(o.getNumeroInventaire(), TypeMateriel.ORDINATEUR, o.getNomMachine(), o.getModele(), poste, o.getStatut(), o.getObservation(),
                 () -> vide(o.getMacEthernet()) ? Optional.empty()
                         : ordinateurRepo.findByMacEthernet(o.getMacEthernet()).map(Ordinateur::getMateriel));
         Ordinateur ord = ordinateurRepo.findById(mat.getNumeroInventaire()).orElseGet(Ordinateur::new);
@@ -216,7 +226,7 @@ public class IntegrationService {
     }
 
     private void integrerImprimante(LigneImprimante i, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(i.getNumeroInventaire(), TypeMateriel.IMPRIMANTE, i.getNom(), i.getModele(), poste,
+        Materiel mat = rapprocher(i.getNumeroInventaire(), TypeMateriel.IMPRIMANTE, i.getNom(), i.getModele(), poste, i.getStatut(), i.getObservation(),
                 () -> vide(i.getMac()) ? Optional.empty()
                         : imprimanteRepo.findByMac(i.getMac()).map(Imprimante::getMateriel));
         Imprimante imp = imprimanteRepo.findById(mat.getNumeroInventaire()).orElseGet(Imprimante::new);
@@ -231,7 +241,7 @@ public class IntegrationService {
 
     private void integrerReseau(LigneEquipementReseau eq, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
         TypeMateriel type = "Access point".equalsIgnoreCase(trim(eq.getType())) ? TypeMateriel.ACCESS_POINT : TypeMateriel.SWITCH;
-        Materiel mat = rapprocher(eq.getNumeroInventaire(), type, eq.getNom(), eq.getModele(), poste,
+        Materiel mat = rapprocher(eq.getNumeroInventaire(), type, eq.getNom(), eq.getModele(), poste, eq.getStatut(), eq.getObservation(),
                 () -> vide(eq.getMac()) ? Optional.empty()
                         : reseauRepo.findByMac(eq.getMac()).map(EquipementReseau::getMateriel));
         EquipementReseau er = reseauRepo.findById(mat.getNumeroInventaire()).orElseGet(EquipementReseau::new);
@@ -244,7 +254,7 @@ public class IntegrationService {
     }
 
     private void integrerScanner(LigneScanner s, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(s.getNumeroInventaire(), TypeMateriel.SCANNER_CHEQUE, null, s.getModele(), poste,
+        Materiel mat = rapprocher(s.getNumeroInventaire(), TypeMateriel.SCANNER_CHEQUE, null, s.getModele(), poste, s.getStatut(), s.getObservation(),
                 () -> vide(s.getNumeroSerie()) ? Optional.empty()
                         : scannerRepo.findByNumeroSerie(s.getNumeroSerie()).map(ScannerCheque::getMateriel));
         ScannerCheque sc = scannerRepo.findById(mat.getNumeroInventaire()).orElseGet(ScannerCheque::new);
@@ -259,6 +269,7 @@ public class IntegrationService {
     // ---------- noyau ----------
 
     private Materiel rapprocher(String numero, TypeMateriel type, String nom, String modele, Poste poste,
+                                String statut, String observation,
                                 Supplier<Optional<Materiel>> parCleNaturelle) {
         Materiel mat;
         if (!vide(numero)) {
@@ -280,6 +291,10 @@ public class IntegrationService {
         if (!vide(nom)) mat.setNom(nom);
         if (!vide(modele)) mat.setModele(modele);
         mat.setPoste(poste);
+        StatutMateriel st = parseStatut(statut);
+        if (st != null) mat.setStatut(st);
+        else if (mat.getStatut() == null) mat.setStatut(StatutMateriel.EN_SERVICE);
+        if (!vide(observation)) mat.setObservation(observation.trim());
         return materielRepo.save(mat);
     }
 
