@@ -69,6 +69,23 @@ public class ConsultationService {
         return materielRepo.findAll().stream().map(this::versMaterielVue).toList();
     }
 
+    public List<MaterielVue> listerParc(String q, Integer posteId, String type, String statut) {
+        String texte = (q == null) ? "" : q.trim().toLowerCase();
+        return materielRepo.findAll().stream()
+                .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
+                .filter(m -> type == null || type.isBlank() || m.getType().name().equals(type))
+                .filter(m -> statut == null || statut.isBlank() || (m.getStatut() != null && m.getStatut().name().equals(statut)))
+                .filter(m -> texte.isEmpty() || contientTexte(m, texte))
+                .map(this::versMaterielVue)
+                .toList();
+    }
+
+    private boolean contientTexte(Materiel m, String s) {
+        return (m.getNumeroInventaire() != null && m.getNumeroInventaire().toLowerCase().contains(s))
+                || (m.getNom() != null && m.getNom().toLowerCase().contains(s))
+                || (m.getModele() != null && m.getModele().toLowerCase().contains(s));
+    }
+
     // ---- Missions ----
 
     public List<MissionVue> listerMissions() {

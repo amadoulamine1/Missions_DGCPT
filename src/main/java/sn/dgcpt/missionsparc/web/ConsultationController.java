@@ -1,18 +1,32 @@
 package sn.dgcpt.missionsparc.web;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import sn.dgcpt.missionsparc.consultation.ConsultationService;
+import sn.dgcpt.missionsparc.consultation.ParcExporter;
+import sn.dgcpt.missionsparc.domain.TypeMateriel;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 @Controller
 public class ConsultationController {
 
-    private final ConsultationService consultation;
+    private static final String TYPE_XLSX =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    public ConsultationController(ConsultationService consultation) {
+    private final ConsultationService consultation;
+    private final ParcExporter parcExporter;
+
+    public ConsultationController(ConsultationService consultation, ParcExporter parcExporter) {
         this.consultation = consultation;
+        this.parcExporter = parcExporter;
     }
 
     @GetMapping("/postes")
@@ -28,9 +42,31 @@ public class ConsultationController {
     }
 
     @GetMapping("/parc")
-    public String parc(Model model) {
-        model.addAttribute("materiels", consultation.listerParc());
+    public String parc(@RequestParam(required = false) String q,
+                       @RequestParam(required = false) Integer poste,
+                       @RequestParam(required = false) String type,
+                       @RequestParam(required = false) String statut,
+                       Model model) {
+        model.addAttribute("materiels", consultation.listerParc(q, poste, type, statut));
+        model.addAttribute("postes", consultation.listerPostes());
+        model.addAttribute("types", TypeMateriel.values());
+        model.addAttribute("q", q);
+        model.addAttribute("fPoste", poste);
+        model.addAttribute("fType", type);
+        model.addAttribute("fStatut", statut);
         return "parc";
+    }
+
+    @GetMapping("/parc/export")
+    public ResponseEntity<byte[]> exportParc(@RequestParam(required = false) String q,
+                                             @RequestParam(required = false) Integer poste,
+                                             @RequestParam(required = false) String type,
+                                             @RequestParam(required = false) String statut) throws IOException {
+        byte[] data = parcExporter.exporter(consultation.listerParc(q, poste, type, statut));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Parc-" + LocalDate.now() + ".xlsx\"")
+                .contentType(MediaType.parseMediaType(TYPE_XLSX))
+                .body(data);
     }
 
     @GetMapping("/parc/{numero}")

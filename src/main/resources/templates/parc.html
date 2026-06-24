@@ -10,15 +10,40 @@
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
     <h1>Inventaire du parc</h1>
-    <p class="muted">Total : <span th:text="${materiels.size()}">0</span> matériel(s)</p>
+
+    <form method="get" th:action="@{/parc}" class="toolbar" style="flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
+        <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, nom, modèle)…" style="min-width:220px"/>
+        <select name="poste">
+            <option value="">Tous les postes</option>
+            <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}"
+                    th:selected="${fPoste != null and fPoste == p.id}"></option>
+        </select>
+        <select name="type">
+            <option value="">Tous les types</option>
+            <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${fType == t.name()}"></option>
+        </select>
+        <select name="statut">
+            <option value="">Tous les statuts</option>
+            <option value="EN_SERVICE" th:selected="${fStatut == 'EN_SERVICE'}">En service</option>
+            <option value="EN_PANNE" th:selected="${fStatut == 'EN_PANNE'}">En panne</option>
+            <option value="A_CHANGER" th:selected="${fStatut == 'A_CHANGER'}">À changer</option>
+        </select>
+        <button class="btn" type="submit">Filtrer</button>
+        <a class="btn secondary" th:href="@{/parc}">Réinitialiser</a>
+        <span class="spacer"></span>
+        <a class="btn secondary" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
+    </form>
+
+    <p class="muted"><span th:text="${materiels.size()}">0</span> matériel(s)</p>
     <table class="table">
         <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Poste</th><th>Statut</th></tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
                 <td><a th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a></td><td th:text="${m.type}"></td>
-                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td><td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
+                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.posteNom}"></td>
+                <td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${materiels.isEmpty()}"><td colspan="6" class="empty">Parc vide.</td></tr>
+            <tr th:if="${materiels.isEmpty()}"><td colspan="6" class="empty">Aucun matériel.</td></tr>
         </tbody>
     </table>
 </main>
