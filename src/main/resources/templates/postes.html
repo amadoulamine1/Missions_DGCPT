@@ -14,8 +14,15 @@
         <span class="spacer"></span>
         <a class="btn" th:href="@{/postes/nouveau}" th:if="${currentRole == 'ADMIN'}">+ Nouveau poste</a>
     </div>
+    <p class="muted"><span th:text="${page.total}">0</span> poste(s)</p>
     <table class="table">
-        <thead><tr><th>Code</th><th>Nom</th><th>Région</th><th>Matériel</th><th>Actions</th></tr></thead>
+        <thead><tr>
+            <th><a th:href="@{/postes(tri='code',sens=${(tri == 'code' and sens != 'desc') ? 'desc' : 'asc'})}">Code</a><span th:if="${tri == 'code'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/postes(tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/postes(tri='region',sens=${(tri == 'region' and sens != 'desc') ? 'desc' : 'asc'})}">Région</a><span th:if="${tri == 'region'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th><a th:href="@{/postes(tri='materiel',sens=${(tri == 'materiel' and sens != 'desc') ? 'desc' : 'asc'})}">Matériel</a><span th:if="${tri == 'materiel'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th>Actions</th>
+        </tr></thead>
         <tbody>
             <tr th:each="p : ${postes}">
                 <td th:text="${p.code}"></td>
@@ -24,9 +31,14 @@
                 <td><span class="badge gold" th:text="${p.nbMateriel}">0</span></td>
                 <td><a class="btn small" th:href="@{/postes/{id}(id=${p.id})}">Détail</a> <a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}" th:if="${currentRole == 'ADMIN'}">Modifier</a></td>
             </tr>
-            <tr th:if="${postes.isEmpty()}"><td colspan="5" class="empty">Aucun poste enregistré.</td></tr>
+            <tr th:if="${page.vide}"><td colspan="5" class="empty">Aucun poste enregistré.</td></tr>
         </tbody>
     </table>
+    <div class="toolbar" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
+        <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''" th:href="@{/postes(tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
+        <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>
+        <a class="btn small secondary" th:classappend="${page.dernier} ? 'disabled' : ''" th:href="@{/postes(tri=${tri},sens=${sens},page=${page.suivant})}">Suivant →</a>
+    </div>
 </main>
 </body>
 </html>

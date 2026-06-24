@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Accueil</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        @media print {
+            .no-print { display:none !important; }
+            body { background:#fff; }
+            .card,.kpi { box-shadow:none; break-inside:avoid; }
+            .grid { display:block; }
+            .grid .card { margin-bottom:1rem; }
+        }
+    </style>
 </head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
@@ -12,9 +21,16 @@
     <h1 style="margin-bottom:.2rem">Tableau de bord</h1>
     <p class="muted">DGCPT — Gestion des missions et du parc informatique</p>
 
+    <div class="toolbar no-print" style="margin:.5rem 0 1.1rem">
+        <a class="btn secondary small" th:href="@{/tableau-bord/export}">⬇ Export Excel</a>
+        <button class="btn secondary small" type="button" onclick="window.print()">🖨 Export PDF</button>
+    </div>
+
     <div class="kpis">
         <a class="kpi" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
         <a class="kpi" th:href="@{/parc}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
+        <div class="kpi"><div class="n" th:text="|${tauxDispo} %|">0</div><div class="l">Disponibilité</div></div>
+        <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte</div></a>
         <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
         <div class="kpi"><div class="n" th:text="|${nbInfo} / ${nbAgentsPoste}|">0</div><div class="l">Agents (info. / poste)</div></div>
     </div>
@@ -56,18 +72,31 @@
                     <span class="v" th:text="${nbScan}">0</span></div>
             </div>
         </div>
+        <div class="card">
+            <h3 style="margin-top:0;border:none">Matériel par poste</h3>
+            <div class="bars">
+                <div class="bar-row" th:each="sp : ${parPoste}" th:title="|${sp.total} matériel(s) · ${sp.enPanne} en panne|">
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" th:text="${sp.nom}">Poste</span>
+                    <span class="bar-track"><span class="bar-fill gold" th:style="'width:' + (${maxParPoste} > 0 ? ${sp.total} * 100 / ${maxParPoste} : 0) + '%'"></span></span>
+                    <span class="v" th:text="${sp.total}">0</span>
+                </div>
+                <p class="muted" th:if="${parPoste.isEmpty()}" style="margin:.3rem 0 0">Aucun matériel.</p>
+            </div>
+        </div>
     </div>
 
-    <h2 style="margin-top:1.6rem">Accès rapides</h2>
-    <div class="grid">
-        <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
-        <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
-        <a class="tile" th:href="@{/parc}"><h3>Parc</h3><p>Inventaire complet du matériel.</p></a>
-        <a class="tile" th:href="@{/missions}"><h3>Missions</h3><p>Missions et relevés datés.</p></a>
-        <a class="tile" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
-        <a class="tile" th:href="@{/import}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
-        <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
-        <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
+    <div class="no-print">
+        <h2 style="margin-top:1.6rem">Accès rapides</h2>
+        <div class="grid">
+            <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
+            <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
+            <a class="tile" th:href="@{/parc}"><h3>Parc</h3><p>Inventaire complet du matériel.</p></a>
+            <a class="tile" th:href="@{/missions}"><h3>Missions</h3><p>Missions et relevés datés.</p></a>
+            <a class="tile" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
+            <a class="tile" th:href="@{/import}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
+            <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
+            <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
+        </div>
     </div>
 </main>
 </body>

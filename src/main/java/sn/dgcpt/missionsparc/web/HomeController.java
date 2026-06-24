@@ -1,12 +1,18 @@
 package sn.dgcpt.missionsparc.web;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import sn.dgcpt.missionsparc.consultation.StatsExporter;
+import sn.dgcpt.missionsparc.consultation.dto.StatPoste;
 import sn.dgcpt.missionsparc.domain.*;
 import sn.dgcpt.missionsparc.repository.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,13 +23,16 @@ public class HomeController {
     private final AgentRepository agentRepo;
     private final MaterielRepository materielRepo;
     private final MissionRepository missionRepo;
+    private final StatsExporter statsExporter;
 
     public HomeController(PosteRepository posteRepo, AgentRepository agentRepo,
-                          MaterielRepository materielRepo, MissionRepository missionRepo) {
+                          MaterielRepository materielRepo, MissionRepository missionRepo,
+                          StatsExporter statsExporter) {
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
         this.materielRepo = materielRepo;
         this.missionRepo = missionRepo;
+        this.statsExporter = statsExporter;
     }
 
     @GetMapping("/")
@@ -34,10 +43,15 @@ public class HomeController {
         model.addAttribute("nbAgentsPoste", agentRepo.findByTypeAgent(TypeAgent.POSTE).size());
 
         List<Materiel> parc = materielRepo.findAll();
+        long matEnService = parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_SERVICE).count();
+        long matEnPanne = parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_PANNE).count();
+        long matAChanger = parc.stream().filter(m -> m.getStatut() == StatutMateriel.A_CHANGER).count();
         model.addAttribute("nbMateriel", parc.size());
-        model.addAttribute("matEnService", parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_SERVICE).count());
-        model.addAttribute("matEnPanne", parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_PANNE).count());
-        model.addAttribute("matAChanger", parc.stream().filter(m -> m.getStatut() == StatutMateriel.A_CHANGER).count());
+        model.addAttribute("matEnService", matEnService);
+        model.addAttribute("matEnPanne", matEnPanne);
+        model.addAttribute("matAChanger", matAChanger);
+        model.addAttribute("tauxDispo", parc.size() > 0 ? matEnService * 100 / parc.size() : 0);
+
         long nbOrdi = parc.stream().filter(m -> m.getType() == TypeMateriel.ORDINATEUR).count();
         long nbImp = parc.stream().filter(m -> m.getType() == TypeMateriel.IMPRIMANTE).count();
         long nbReseau = parc.stream().filter(m -> m.getType() == TypeMateriel.SWITCH || m.getType() == TypeMateriel.ACCESS_POINT).count();
@@ -60,6 +74,12 @@ public class HomeController {
         model.addAttribute("scnPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.SCANNER_CHEQUE));
         model.addAttribute("scnChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.SCANNER_CHEQUE));
 
+        List<StatPoste> parPosteAll = StatsExporter.parPoste(parc);
+        List<StatPoste> parPoste = parPosteAll.stream().limit(8).toList();
+        model.addAttribute("parPoste", parPoste);
+        model.addAttribute("maxParPoste", parPoste.stream().mapToLong(StatPoste::getTotal).max().orElse(0));
+        model.addAttribute("postesAlerte", parPosteAll.stream().filter(sp -> sp.getEnPanne() > 0).count());
+
         List<Mission> missions = missionRepo.findAll();
         LocalDate today = LocalDate.now();
         long plan = missions.stream().filter(m -> m.getDateDebut() != null && m.getDateDebut().isAfter(today)).count();
@@ -71,6 +91,19 @@ public class HomeController {
         model.addAttribute("misEnCours", enCours);
         model.addAttribute("misTerm", missions.size() - plan - enCours);
         return "index";
+    }
+
+    @GetMapping("/tableau-bord/export")
+    @Transactional(readOnly = true)
+    public ResponseEntity<byte[]> exportStats() throws IOException {
+        byte[] x = statsExporter.exporter(materielRepo.findAll(), missionRepo.findAll(),
+                posteRepo.count(),
+                agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN).size(),
+                agentRepo.findByTypeAgent(TypeAgent.POSTE).size());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statistiques-dgcpt.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(x);
     }
 
     private long c(List<Materiel> parc, StatutMateriel st, TypeMateriel... types) {

@@ -13,6 +13,7 @@ import sn.dgcpt.missionsparc.consultation.Pagination;
 import sn.dgcpt.missionsparc.consultation.dto.MaterielVue;
 import sn.dgcpt.missionsparc.consultation.dto.MissionVue;
 import sn.dgcpt.missionsparc.consultation.dto.PageVue;
+import sn.dgcpt.missionsparc.consultation.dto.PosteVue;
 import sn.dgcpt.missionsparc.consultation.ParcExporter;
 import sn.dgcpt.missionsparc.domain.TypeMateriel;
 
@@ -36,8 +37,18 @@ public class ConsultationController {
     }
 
     @GetMapping("/postes")
-    public String postes(Model model) {
-        model.addAttribute("postes", consultation.listerPostes());
+    public String postes(@RequestParam(defaultValue = "0") int page,
+                         @RequestParam(required = false) String tri,
+                         @RequestParam(required = false) String sens,
+                         Model model) {
+        List<PosteVue> tout = consultation.listerPostes();
+        Comparator<PosteVue> cmp = comparateurPostes(tri);
+        if ("desc".equals(sens)) cmp = cmp.reversed();
+        PageVue<PosteVue> p = Pagination.page(tout, page, 25, cmp);
+        model.addAttribute("page", p);
+        model.addAttribute("postes", p.getContenu());
+        model.addAttribute("tri", tri);
+        model.addAttribute("sens", sens);
         return "postes";
     }
 
@@ -82,6 +93,16 @@ public class ConsultationController {
             case "poste" -> Comparator.comparing(MaterielVue::getPosteNom, n);
             case "statut" -> Comparator.comparing(MaterielVue::getStatut, n);
             default -> Comparator.comparing(MaterielVue::getNumeroInventaire, n);
+        };
+    }
+
+    private Comparator<PosteVue> comparateurPostes(String tri) {
+        Comparator<String> n = Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER);
+        return switch (tri == null ? "" : tri) {
+            case "nom" -> Comparator.comparing(PosteVue::getNom, n);
+            case "region" -> Comparator.comparing(PosteVue::getRegion, n);
+            case "materiel" -> Comparator.comparingLong(PosteVue::getNbMateriel);
+            default -> Comparator.comparing(PosteVue::getCode, n);
         };
     }
 
