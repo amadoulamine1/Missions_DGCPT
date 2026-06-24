@@ -38,21 +38,23 @@
         </div>
         <div class="card">
             <h3 style="margin-top:0;border:none">Matériel par type</h3>
-            <table class="table" style="margin:0;font-size:.85rem">
-                <thead><tr>
-                    <th style="text-align:left">Type</th>
-                    <th style="text-align:center"><span class="badge green">En service</span></th>
-                    <th style="text-align:center"><span class="badge red">En panne</span></th>
-                    <th style="text-align:center"><span class="badge orange">À changer</span></th>
-                    <th style="text-align:center">Total</th>
-                </tr></thead>
-                <tbody style="text-align:center">
-                    <tr><td style="text-align:left">Ordinateurs</td><td th:text="${ordSvc}">0</td><td th:text="${ordPan}">0</td><td th:text="${ordChg}">0</td><td><strong th:text="${nbOrdi}">0</strong></td></tr>
-                    <tr><td style="text-align:left">Imprimantes</td><td th:text="${impSvc}">0</td><td th:text="${impPan}">0</td><td th:text="${impChg}">0</td><td><strong th:text="${nbImp}">0</strong></td></tr>
-                    <tr><td style="text-align:left">Switchs / AP</td><td th:text="${resSvc}">0</td><td th:text="${resPan}">0</td><td th:text="${resChg}">0</td><td><strong th:text="${nbReseau}">0</strong></td></tr>
-                    <tr><td style="text-align:left">Scanners</td><td th:text="${scnSvc}">0</td><td th:text="${scnPan}">0</td><td th:text="${scnChg}">0</td><td><strong th:text="${nbScan}">0</strong></td></tr>
-                </tbody>
-            </table>
+            <p class="muted" style="margin:.2rem 0 .55rem;font-size:.8rem">
+                <span class="badge green">En service</span> <span class="badge red">En panne</span> <span class="badge orange">À changer</span>
+            </p>
+            <div class="bars">
+                <div class="bar-row"><span>Ordinateurs</span>
+                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${maxType} > 0 ? ${ordSvc} * 100 / ${maxType} : 0) + '%'" th:title="|En service : ${ordSvc}|"></span><span class="seg red" th:style="'width:' + (${maxType} > 0 ? ${ordPan} * 100 / ${maxType} : 0) + '%'" th:title="|En panne : ${ordPan}|"></span><span class="seg orange" th:style="'width:' + (${maxType} > 0 ? ${ordChg} * 100 / ${maxType} : 0) + '%'" th:title="|À changer : ${ordChg}|"></span></span>
+                    <span class="v" th:text="${nbOrdi}">0</span></div>
+                <div class="bar-row"><span>Imprimantes</span>
+                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${maxType} > 0 ? ${impSvc} * 100 / ${maxType} : 0) + '%'" th:title="|En service : ${impSvc}|"></span><span class="seg red" th:style="'width:' + (${maxType} > 0 ? ${impPan} * 100 / ${maxType} : 0) + '%'" th:title="|En panne : ${impPan}|"></span><span class="seg orange" th:style="'width:' + (${maxType} > 0 ? ${impChg} * 100 / ${maxType} : 0) + '%'" th:title="|À changer : ${impChg}|"></span></span>
+                    <span class="v" th:text="${nbImp}">0</span></div>
+                <div class="bar-row"><span>Switchs / AP</span>
+                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${maxType} > 0 ? ${resSvc} * 100 / ${maxType} : 0) + '%'" th:title="|En service : ${resSvc}|"></span><span class="seg red" th:style="'width:' + (${maxType} > 0 ? ${resPan} * 100 / ${maxType} : 0) + '%'" th:title="|En panne : ${resPan}|"></span><span class="seg orange" th:style="'width:' + (${maxType} > 0 ? ${resChg} * 100 / ${maxType} : 0) + '%'" th:title="|À changer : ${resChg}|"></span></span>
+                    <span class="v" th:text="${nbReseau}">0</span></div>
+                <div class="bar-row"><span>Scanners</span>
+                    <span class="bar-track"><span class="seg green" th:style="'width:' + (${maxType} > 0 ? ${scnSvc} * 100 / ${maxType} : 0) + '%'" th:title="|En service : ${scnSvc}|"></span><span class="seg red" th:style="'width:' + (${maxType} > 0 ? ${scnPan} * 100 / ${maxType} : 0) + '%'" th:title="|En panne : ${scnPan}|"></span><span class="seg orange" th:style="'width:' + (${maxType} > 0 ? ${scnChg} * 100 / ${maxType} : 0) + '%'" th:title="|À changer : ${scnChg}|"></span></span>
+                    <span class="v" th:text="${nbScan}">0</span></div>
+            </div>
         </div>
     </div>
 
