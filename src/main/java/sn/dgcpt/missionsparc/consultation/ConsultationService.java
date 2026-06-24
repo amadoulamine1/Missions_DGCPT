@@ -162,6 +162,18 @@ public class ConsultationService {
         }).toList();
     }
 
+    public List<MissionVue> listerMissions(String q, Integer posteId, String etat) {
+        String texte = (q == null) ? "" : q.trim().toLowerCase();
+        return missionRepo.findAll().stream()
+                .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
+                .filter(m -> etat == null || etat.isBlank() || etatTemporel(m).equals(etat))
+                .filter(m -> texte.isEmpty()
+                        || (m.getReference() != null && m.getReference().toLowerCase().contains(texte))
+                        || (m.getObjet() != null && m.getObjet().toLowerCase().contains(texte)))
+                .map(this::versMissionVue)
+                .toList();
+    }
+
     public List<ReleveVue> relevesDeMission(Integer id) {
         return releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
     }

@@ -14,6 +14,21 @@
         <span class="spacer"></span>
         <a class="btn" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">+ Nouvelle mission</a>
     </div>
+    <form method="get" th:action="@{/missions}" class="toolbar" style="flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
+        <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, objet)…" style="min-width:200px"/>
+        <select name="poste">
+            <option value="">Tous les postes</option>
+            <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
+        </select>
+        <select name="etat">
+            <option value="">Tous les états</option>
+            <option value="Planifiée" th:selected="${fEtat == 'Planifiée'}">Planifiée</option>
+            <option value="En cours" th:selected="${fEtat == 'En cours'}">En cours</option>
+            <option value="Terminée" th:selected="${fEtat == 'Terminée'}">Terminée</option>
+        </select>
+        <button class="btn" type="submit">Filtrer</button>
+        <a class="btn secondary" th:href="@{/missions}">Réinitialiser</a>
+    </form>
     <table class="table">
         <thead><tr><th>N° mission</th><th>Objet</th><th>Poste</th><th>Période</th><th>État</th><th>Statut</th></tr></thead>
         <tbody>

@@ -86,8 +86,15 @@ public class ConsultationController {
     }
 
     @GetMapping("/missions")
-    public String missions(Model model) {
-        model.addAttribute("missions", consultation.listerMissions());
+    public String missions(@RequestParam(required = false) String q,
+                           @RequestParam(required = false) Integer poste,
+                           @RequestParam(required = false) String etat,
+                           Model model) {
+        model.addAttribute("missions", consultation.listerMissions(q, poste, etat));
+        model.addAttribute("postes", consultation.listerPostes());
+        model.addAttribute("q", q);
+        model.addAttribute("fPoste", poste);
+        model.addAttribute("fEtat", etat);
         return "missions";
     }
 
