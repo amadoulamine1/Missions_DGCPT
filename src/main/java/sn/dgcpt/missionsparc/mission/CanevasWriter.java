@@ -60,17 +60,36 @@ public class CanevasWriter {
                 }
             }
 
-            // 3) Référentiels : vrais agents (remplace les exemples)
+            // 3) Référentiels : listes par rôle (remplace les exemples)
             Sheet ref = wb.getSheet("Referentiels");
-            if (ref != null && m.getPoste() != null) {
-                for (int rr = 3; rr < 80; rr++) { vider(ref, rr, 0); vider(ref, rr, 2); }
-                int ra = 3;
-                for (Agent a : agentRepo.findByPoste_Id(m.getPoste().getId())) {
-                    set(ligne(ref, ra++), 0, libelle(a));
+            if (ref != null) {
+                // Colonne G : membres de la mission -> listes "agent saisisseur" et "agent traitant"
+                for (int rr = 3; rr < 210; rr++) { vider(ref, rr, 6); }
+                int rm = 3;
+                for (Agent a : m.getMembres()) { set(ligne(ref, rm++), 6, libelle(a)); }
+
+                if (m.getPoste() != null) {
+                    for (int rr = 3; rr < 210; rr++) { vider(ref, rr, 0); vider(ref, rr, 2); }
+                    int ra = 3;
+                    for (Agent a : agentRepo.findByPoste_Id(m.getPoste().getId())) { set(ligne(ref, ra++), 0, libelle(a)); }
+                    int ri = 3;
+                    for (Agent a : agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN)) { set(ligne(ref, ri++), 2, libelle(a)); }
                 }
-                int ri = 3;
-                for (Agent a : agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN)) {
-                    set(ligne(ref, ri++), 2, libelle(a));
+            }
+
+            // 4) Feuille "Agents TPR" : agents du poste (attributaires), pré-chargés et complétables
+            Sheet agtpr = wb.getSheet("Agents TPR");
+            if (agtpr != null && m.getPoste() != null) {
+                for (int rr = 1; rr < 210; rr++) { for (int cc = 0; cc < 6; cc++) { vider(agtpr, rr, cc); } }
+                int r = 1;
+                for (Agent a : agentRepo.findByPoste_Id(m.getPoste().getId())) {
+                    Row row = ligne(agtpr, r++);
+                    set(row, 0, a.getMatricule());
+                    set(row, 1, a.getNom());
+                    set(row, 2, a.getPrenom());
+                    set(row, 3, a.getFonction());
+                    set(row, 4, a.getTelephone());
+                    set(row, 5, a.getEmail());
                 }
             }
 

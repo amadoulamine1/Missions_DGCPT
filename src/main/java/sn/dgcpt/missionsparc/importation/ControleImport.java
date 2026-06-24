@@ -23,7 +23,7 @@ public class ControleImport {
             r.incrementerLignesLues();
             obligatoire(o.getNomMachine(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "Nom machine", r);
             obligatoire(o.getAgentAttributaire(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "Agent attributaire", r);
-            obligatoire(o.getAgentInstallateur(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "Agent installateur", r);
+            obligatoire(o.getAgentInstallateur(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "Agent traitant", r);
             macObligatoire(o.getMacEthernet(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "MAC ethernet", r);
             macSiPresent(o.getMacWifi(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "MAC wifi", r);
         }

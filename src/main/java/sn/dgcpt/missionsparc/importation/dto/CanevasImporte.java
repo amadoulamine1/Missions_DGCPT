@@ -12,6 +12,7 @@ public class CanevasImporte {
     private List<LigneImprimante> imprimantes = new ArrayList<>();
     private List<LigneEquipementReseau> equipementsReseau = new ArrayList<>();
     private List<LigneScanner> scanners = new ArrayList<>();
+    private List<LigneAgentPoste> agentsTpr = new ArrayList<>();
 
     public EnteteMission getEntete() { return entete; }
     public void setEntete(EnteteMission entete) { this.entete = entete; }
@@ -25,4 +26,6 @@ public class CanevasImporte {
     public void setEquipementsReseau(List<LigneEquipementReseau> equipementsReseau) { this.equipementsReseau = equipementsReseau; }
     public List<LigneScanner> getScanners() { return scanners; }
     public void setScanners(List<LigneScanner> scanners) { this.scanners = scanners; }
+    public List<LigneAgentPoste> getAgentsTpr() { return agentsTpr; }
+    public void setAgentsTpr(List<LigneAgentPoste> agentsTpr) { this.agentsTpr = agentsTpr; }
 }

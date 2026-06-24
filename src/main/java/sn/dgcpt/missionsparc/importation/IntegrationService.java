@@ -81,16 +81,33 @@ public class IntegrationService {
         Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
         String zone = vide(e.getZone()) ? null : e.getZone();
 
+        // Agents de la TPR déclarés dans le canevas : créés/complétés en base (attributaires éventuellement nouveaux)
+        for (LigneAgentPoste a : canevas.getAgentsTpr()) { upsertAgentPoste(a, poste); }
+
+        // Membres du canevas fusionnés dans la mission
+        for (LigneMembre m : canevas.getMembres()) {
+            Agent a = resoudreAgent(m.getMatricule(), TypeAgent.INFORMATICIEN, null);
+            if (a != null) mission.getMembres().add(a);
+        }
+
+        // Règle : l'agent saisisseur doit être un membre de la mission
+        boolean estMembre = false;
+        if (saisisseur != null) {
+            for (Agent a : mission.getMembres()) {
+                if (a.getMatricule().equals(saisisseur.getMatricule())) { estMembre = true; break; }
+            }
+        }
+        if (!estMembre) {
+            throw new IllegalStateException("L'agent saisisseur (" + e.getAgentSaisisseur()
+                    + ") doit être un membre de la mission " + mission.getReference() + ".");
+        }
+
         int nb = 0;
         for (LigneOrdinateur o : canevas.getOrdinateurs()) { integrerOrdinateur(o, poste, mission, saisisseur, zone, jour); nb++; }
         for (LigneImprimante i : canevas.getImprimantes()) { integrerImprimante(i, poste, mission, saisisseur, zone, jour); nb++; }
         for (LigneEquipementReseau eq : canevas.getEquipementsReseau()) { integrerReseau(eq, poste, mission, saisisseur, zone, jour); nb++; }
         for (LigneScanner s : canevas.getScanners()) { integrerScanner(s, poste, mission, saisisseur, zone, jour); nb++; }
 
-        for (LigneMembre m : canevas.getMembres()) {
-            Agent a = resoudreAgent(m.getMatricule(), TypeAgent.INFORMATICIEN, null);
-            if (a != null) mission.getMembres().add(a);
-        }
         missionRepo.save(mission);
 
         log.info("Intégration mission={} : {} matériel(s), {} membre(s)",
@@ -141,6 +158,28 @@ public class IntegrationService {
             a.setPoste(type == TypeAgent.POSTE ? poste : null);
             return agentRepo.save(a);
         });
+    }
+
+    /** Crée ou complète un agent de poste déclaré dans la feuille « Agents TPR » du canevas. */
+    private void upsertAgentPoste(LigneAgentPoste l, Poste poste) {
+        String mat = trim(l.getMatricule());
+        if (mat.isEmpty()) return;
+        Agent a = agentRepo.findById(mat).orElse(null);
+        boolean nouveau = (a == null);
+        if (nouveau) {
+            a = new Agent();
+            a.setMatricule(mat);
+            a.setTypeAgent(TypeAgent.POSTE);
+            a.setPoste(poste);
+        }
+        if (!vide(l.getNom())) a.setNom(l.getNom().trim());
+        else if (nouveau) a.setNom(mat);
+        if (!vide(l.getPrenom())) a.setPrenom(l.getPrenom().trim());
+        else if (nouveau) a.setPrenom("-");
+        if (!vide(l.getFonction())) a.setFonction(l.getFonction().trim());
+        if (!vide(l.getTelephone())) a.setTelephone(l.getTelephone().trim());
+        if (!vide(l.getEmail())) a.setEmail(l.getEmail().trim());
+        agentRepo.save(a);
     }
 
     private CategorieCable resoudreCategorie(String libelle) {
