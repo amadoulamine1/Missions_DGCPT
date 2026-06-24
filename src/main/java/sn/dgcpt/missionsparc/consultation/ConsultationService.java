@@ -59,7 +59,7 @@ public class ConsultationService {
         String chef = courant.map(cp -> cp.getAgent().getMatricule() + " — " + cp.getAgent().getNom()).orElse("(aucun)");
         String chefMat = courant.map(cp -> cp.getAgent().getMatricule()).orElse("");
         List<AgentVue> agents = agentRepo.findByPoste_Id(id).stream().map(this::versAgentVue).toList();
-        List<MaterielVue> materiels = materielRepo.findByPoste_Id(id).stream().map(this::versMaterielVue).toList();
+        List<MaterielLignePoste> materiels = materielRepo.findByPoste_Id(id).stream().map(this::versLignePoste).toList();
         return new PosteDetailVue(versPosteVue(p), chef, chefMat, agents, materiels);
     }
 
@@ -186,6 +186,44 @@ public class ConsultationService {
 
     private AgentVue versAgentVue(Agent a) {
         return new AgentVue(a.getMatricule(), a.getNom() + " " + a.getPrenom(), a.getFonction(), a.getTelephone());
+    }
+
+    private MaterielLignePoste versLignePoste(Materiel m) {
+        String statut = libelleStatut(m.getStatut());
+        String affecteA = affectationRepo.findByMaterielAndDateFinIsNull(m)
+                .map(AffectationMateriel::getAgent)
+                .map(a -> a.getMatricule() + " — " + a.getNom() + " " + a.getPrenom()).orElse("");
+        return new MaterielLignePoste(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(),
+                statut, affecteA, caracteristiques(m));
+    }
+
+    private String caracteristiques(Materiel m) {
+        String num = m.getNumeroInventaire();
+        return switch (m.getType()) {
+            case ORDINATEUR -> ordinateurRepo.findById(num).map(o ->
+                    join(" · ", pre("MAC ", o.getMacEthernet()), nz(o.getRam()), nz(o.getProcesseur()), nz(o.getDisqueDur()))).orElse("");
+            case IMPRIMANTE -> imprimanteRepo.findById(num).map(i ->
+                    join(" · ", pre("MAC ", i.getMac()), pre("IP ", i.getIp()))).orElse("");
+            case SWITCH, ACCESS_POINT -> reseauRepo.findById(num).map(e ->
+                    join(" · ", pre("MAC ", e.getMac()), pre("IP ", e.getIp()))).orElse("");
+            case SCANNER_CHEQUE -> scannerRepo.findById(num).map(sc ->
+                    join(" · ", pre("Série ", sc.getNumeroSerie()), nz(sc.getMarque()))).orElse("");
+            default -> "";
+        };
+    }
+
+    private String pre(String prefixe, String val) {
+        return (val == null || val.isBlank()) ? "" : prefixe + val.trim();
+    }
+
+    private String join(String sep, String... parts) {
+        StringBuilder sb = new StringBuilder();
+        for (String x : parts) {
+            if (x == null || x.isBlank()) continue;
+            if (sb.length() > 0) sb.append(sep);
+            sb.append(x.trim());
+        }
+        return sb.toString();
     }
 
     private MaterielVue versMaterielVue(Materiel m) {

@@ -7,9 +7,9 @@ public class PosteDetailVue {
     private final String chefActuel;
     private final String chefActuelMatricule;
     private final List<AgentVue> agents;
-    private final List<MaterielVue> materiels;
+    private final List<MaterielLignePoste> materiels;
     public PosteDetailVue(PosteVue poste, String chefActuel, String chefActuelMatricule,
-                          List<AgentVue> agents, List<MaterielVue> materiels) {
+                          List<AgentVue> agents, List<MaterielLignePoste> materiels) {
         this.poste = poste; this.chefActuel = chefActuel; this.chefActuelMatricule = chefActuelMatricule;
         this.agents = agents; this.materiels = materiels;
     }
@@ -17,5 +17,5 @@ public class PosteDetailVue {
     public String getChefActuel() { return chefActuel; }
     public String getChefActuelMatricule() { return chefActuelMatricule; }
     public List<AgentVue> getAgents() { return agents; }
-    public List<MaterielVue> getMateriels() { return materiels; }
+    public List<MaterielLignePoste> getMateriels() { return materiels; }
 }
