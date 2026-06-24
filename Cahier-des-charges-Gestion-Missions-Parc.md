@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 2 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 3 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -55,7 +55,7 @@ Dans l'application, le chef de poste se **désigne ou se change directement depu
 Contient :
 
 - l'**objet** de la mission ;
-- le **chef de mission** (un agent informaticien) ;
+- le **chef de mission** (un agent informaticien, **désigné parmi les membres**) ;
 - les **membres** de la mission (des agents informaticiens) ;
 - la **période** (début → fin) ;
 - le **poste** où elle se déroule ;
@@ -89,7 +89,7 @@ Identité commune à tous les types :
 
 Attributs spécifiques par type :
 
-- **Ordinateur** : MAC ethernet, MAC wifi, nom de la machine, **agent attributaire** (agent de poste), **agent installateur** (agent informaticien), **logiciels installés** (Aster, Antivirus, SicCDD, CIC, Sysbudget — liste paramétrable).
+- **Ordinateur** : MAC ethernet, MAC wifi, nom de la machine, **RAM**, **processeur**, **disque dur**, **agent attributaire** (agent de poste), **agent traitant** (agent informaticien **membre de la mission** ; anciennement « agent installateur »), **logiciels installés** (Aster, Antivirus, SicCDD, CIC, Sysbudget — liste paramétrable).
 - **Imprimante** : MAC, wifi, IP, nom, modèle, et toute information de paramétrage.
 - **Switch / Access point** : attributs identiques — informations réseau (MAC, IP, nom, modèle…).
 - **Scanner de chèque** : **numéro de série** (clé d'identification physique), **marque**, **modèle**. Pas d'adresse MAC.
@@ -134,10 +134,20 @@ Fonctionnement normal : saisie en ligne dans l'application. En cas de coupure :
 Sur une même mission, le chef de mission et les agents peuvent se répartir le travail et **remplir chacun leur propre fichier**. L'application les consolide grâce à trois mécanismes :
 
 - **Référence de mission commune.** Le chef de mission crée d'abord la mission dans l'application (au siège, réseau disponible) ; l'app génère un **N° de mission**. Les canevas sont distribués déjà estampillés avec ce numéro et le code poste. À l'upload, chaque fichier se rattache automatiquement à la bonne mission.
-- **Agent saisisseur par fichier.** L'en-tête de chaque fichier porte le **matricule de l'agent qui l'a rempli**. L'application trace ainsi, ligne par ligne, qui a saisi quoi.
+- **Agent saisisseur par fichier.** L'en-tête de chaque fichier porte le **matricule de l'agent qui l'a rempli** ; cet agent doit être un **membre de la mission**. L'application trace ainsi, ligne par ligne, qui a saisi quoi.
 - **Consolidation à l'import.** Tous les fichiers reçus alimentent le **relevé unique** de la mission. Le rapprochement par clé (N° d'inventaire, sinon MAC ou numéro de série) détecte les recouvrements entre agents : doublon signalé, et conflit à arbitrer par le chef si les valeurs diffèrent. La mission reste *en consolidation* jusqu'à sa **clôture par le chef de mission** ; les fichiers sont chargés au fur et à mesure qu'ils arrivent.
 
 **Départage des tâches.** Pour éviter que deux agents saisissent le même matériel, le travail est réparti par **type de matériel** et/ou par **zone/périmètre** du poste (champ « zone » optionnel dans l'en-tête). Le **relevé réseau** (état du câblage, catégorie de câble) est renseigné **une seule fois** pour la mission, généralement par le chef.
+
+### 5.2 Fiabilité de la saisie dans le canevas
+
+Le canevas Excel intègre plusieurs garde-fous pour limiter les erreurs avant même l'import :
+
+- **Listes déroulantes par rôle.** L'**attributaire** se choisit parmi les **agents du TPR** (feuille dédiée « Agents TPR », pré-remplie ; un agent absent de la base peut y être ajouté et sera **créé à l'import**). Le **saisisseur** et l'**agent traitant** se choisissent parmi les **membres de la mission**. Les chefs de mission et de poste sont **pré-remplis**. Les agents s'affichent au format « matricule — prénom nom ».
+- **Indicateur d'état** (feuille « 1-Mission et Réseau ») : **CANEVAS CONFORME** (vert), **CANEVAS INCOMPLET** (rouge — un champ obligatoire manque) ou **CANEVAS NON CONFORME** (orange — un champ a un format invalide, p. ex. une adresse MAC).
+- **Mise en forme conditionnelle** : un champ obligatoire laissé vide apparaît en **rouge** ; une adresse MAC mal formée apparaît en **orange**.
+- **Validation de saisie des adresses MAC** : format `AA:BB:CC:DD:EE:FF` imposé, message d'aide à la sélection, refus des valeurs mal formées.
+- **Protection de la mise en forme** : seules les cellules de saisie sont modifiables ; la mise en forme et les contrôles sont figés afin qu'un **collage** ne puisse pas les effacer (coller une valeur via « Collage spécial → Valeurs »).
 
 ## 6. Restitutions attendues
 
@@ -174,6 +184,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - Le chef de mission **crée la mission en ligne** : choix du TPR (existant ou nouveau), objet, période, chef de mission, chef de poste et membres. L'application **génère le N° de mission** (format `MIS-AAAA-NNN`) puis un **canevas pré-estampillé** (en-tête déjà rempli) à distribuer aux agents.
 - **Chef de poste** : reconduit par défaut (dernier chef connu du TPR), ou changé directement depuis la page du TPR avec date d'effet et historisation des périodes.
 - **Membres** : choisis parmi les informaticiens (sélection multiple) ; **contrôle de chevauchement** (un agent ne peut pas être sur deux missions simultanées) ; retrait possible depuis le détail de la mission.
+- **Chef de mission** : désigné **parmi les membres** de la mission (un et un seul).
 - **Contrôle des dates** : la date de fin ne peut pas être antérieure à la date de début.
 
 ### 9.3 Référentiels et création à la volée
@@ -186,6 +197,12 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Import** : lecture du canevas (Apache POI), contrôles (formats, champs obligatoires), aperçu, **validation explicite** avant prise en compte, puis intégration en base (rapprochement, affectations historisées, relevés datés).
 - **Configuration locale** non versionnée (`application-local.properties`) pour la connexion à la base.
 - **Tests** : test d'intégration du pipeline d'import sur PostgreSQL (Testcontainers).
+
+### 9.6 Canevas et matériel
+- **Agent traitant** : l'ancien « agent installateur » de l'ordinateur est renommé **agent traitant** et restreint aux **membres de la mission**.
+- **Attributaire** : choisi parmi les **agents du TPR** via la feuille « Agents TPR » (pré-remplie et complétable) ; les agents manquants sont **créés à l'import**.
+- **Caractéristiques d'ordinateur** ajoutées : **RAM**, **processeur**, **disque dur**.
+- **Garde-fous du canevas** : indicateur conforme/incomplet/non conforme, mises en forme conditionnelles (obligatoires en rouge, MAC invalide en orange), validation du format des MAC, et protection de la mise en forme contre le collage (voir §5.2).
 
 ### 9.5 Reste à faire
 - **Authentification et rôles** (admin / chef de mission / agent) — la sécurité est aujourd'hui ouverte en développement.
