@@ -12,7 +12,7 @@
     <div class="toolbar">
         <h1 style="margin:0">Missions</h1>
         <span class="spacer"></span>
-        <a class="btn" th:href="@{/missions/nouvelle}">+ Nouvelle mission</a>
+        <a class="btn" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">+ Nouvelle mission</a>
     </div>
     <table class="table">
         <thead><tr><th>N° mission</th><th>Objet</th><th>Poste</th><th>Période</th><th>État</th><th>Statut</th></tr></thead>

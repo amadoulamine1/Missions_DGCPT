@@ -40,6 +40,7 @@ h3{color:var(--gold-dark);font-size:1.02rem;margin:1rem 0 .4rem}
 .btn.small{padding:.3rem .65rem;font-size:.82rem}
 .toolbar{display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
 .spacer{flex:1}
+.topbar .userbox{color:#fff;font-size:.9rem;display:flex;align-items:center;gap:.6rem;white-space:nowrap}
 
 .form-row{display:flex;align-items:center;gap:1rem;margin:.7rem 0}
 .form-row label{width:250px;color:var(--muted)}
