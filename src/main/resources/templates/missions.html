@@ -15,14 +15,15 @@
         <a class="btn" th:href="@{/missions/nouvelle}">+ Nouvelle mission</a>
     </div>
     <table class="table">
-        <thead><tr><th>N° mission</th><th>Objet</th><th>Poste</th><th>Période</th><th>Statut</th></tr></thead>
+        <thead><tr><th>N° mission</th><th>Objet</th><th>Poste</th><th>Période</th><th>État</th><th>Statut</th></tr></thead>
         <tbody>
             <tr th:each="m : ${missions}">
                 <td><a th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
                 <td th:text="${m.objet}"></td><td th:text="${m.posteNom}"></td><td th:text="${m.periode}"></td>
+                <td><span class="badge" th:classappend="${m.etat == 'En cours' ? 'orange' : (m.etat == 'Terminée' ? 'green' : 'blue')}" th:text="${m.etat}"></span></td>
                 <td><span class="badge" th:classappend="${m.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${missions.isEmpty()}"><td colspan="5" class="empty">Aucune mission.</td></tr>
+            <tr th:if="${missions.isEmpty()}"><td colspan="6" class="empty">Aucune mission.</td></tr>
         </tbody>
     </table>
 </main>

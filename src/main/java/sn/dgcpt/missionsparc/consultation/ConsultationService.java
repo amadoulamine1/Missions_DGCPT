@@ -87,7 +87,18 @@ public class ConsultationService {
 
     private MissionVue versMissionVue(Mission m) {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
-        return new MissionVue(m.getId(), m.getReference(), m.getObjet(), poste, periode(m.getDateDebut(), m.getDateFin()), m.getStatut().name());
+        return new MissionVue(m.getId(), m.getReference(), m.getObjet(), poste,
+                periode(m.getDateDebut(), m.getDateFin()), m.getStatut().name(), etatTemporel(m));
+    }
+
+    /** État temporel dérivé des dates : Planifiée (à venir), En cours, Terminée. */
+    private String etatTemporel(Mission m) {
+        LocalDate today = LocalDate.now();
+        LocalDate debut = m.getDateDebut();
+        LocalDate fin = m.getDateFin();
+        if (debut != null && debut.isAfter(today)) return "Planifiée";
+        if (fin == null || !fin.isBefore(today)) return "En cours";
+        return "Terminée";
     }
 
     private ReleveVue versReleveVue(ReleveMateriel r) {

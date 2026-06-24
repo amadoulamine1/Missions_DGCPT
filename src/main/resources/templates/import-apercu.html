@@ -35,7 +35,7 @@
 
     <h3 th:if="${!canevas.ordinateurs.isEmpty()}">Ordinateurs</h3>
     <table class="table" th:if="${!canevas.ordinateurs.isEmpty()}">
-        <thead><tr><th>N° inv.</th><th>Nom machine</th><th>Modèle</th><th>MAC eth.</th><th>MAC wifi</th><th>Attributaire</th><th>Traitant</th><th>RAM</th><th>Processeur</th><th>Disque dur</th></tr></thead>
+        <thead><tr><th>N° inv.</th><th>Nom machine</th><th>Modèle</th><th>MAC eth.</th><th>MAC wifi</th><th>Affecté à</th><th>Traitant</th><th>RAM</th><th>Processeur</th><th>Disque dur</th></tr></thead>
         <tbody><tr th:each="o : ${canevas.ordinateurs}">
             <td th:text="${o.numeroInventaire}"></td><td th:text="${o.nomMachine}"></td><td th:text="${o.modele}"></td>
             <td th:text="${o.macEthernet}"></td><td th:text="${o.macWifi}"></td><td th:text="${o.agentAttributaire}"></td><td th:text="${o.agentInstallateur}"></td><td th:text="${o.ram}"></td><td th:text="${o.processeur}"></td><td th:text="${o.disqueDur}"></td>
