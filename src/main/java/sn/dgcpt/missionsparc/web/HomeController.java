@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import sn.dgcpt.missionsparc.consultation.StatsExporter;
 import sn.dgcpt.missionsparc.consultation.dto.StatPoste;
 import sn.dgcpt.missionsparc.domain.*;
@@ -37,12 +38,21 @@ public class HomeController {
 
     @GetMapping("/")
     @Transactional(readOnly = true)
-    public String index(Model model) {
-        model.addAttribute("nbPostes", posteRepo.count());
+    public String index(@RequestParam(required = false) Integer poste, Model model) {
+        List<Poste> postes = posteRepo.findAll();
+        model.addAttribute("postes", postes);
+        model.addAttribute("fPoste", poste);
+        model.addAttribute("posteNom", poste == null ? null :
+                postes.stream().filter(p -> p.getId().equals(poste)).map(Poste::getNom).findFirst().orElse(null));
+
+        model.addAttribute("nbPostes", postes.size());
         model.addAttribute("nbInfo", agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN).size());
         model.addAttribute("nbAgentsPoste", agentRepo.findByTypeAgent(TypeAgent.POSTE).size());
 
-        List<Materiel> parc = materielRepo.findAll();
+        List<Materiel> fullParc = materielRepo.findAll();
+        List<Materiel> parc = (poste == null) ? fullParc
+                : fullParc.stream().filter(m -> m.getPoste() != null && poste.equals(m.getPoste().getId())).toList();
+
         long matEnService = parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_SERVICE).count();
         long matEnPanne = parc.stream().filter(m -> m.getStatut() == StatutMateriel.EN_PANNE).count();
         long matAChanger = parc.stream().filter(m -> m.getStatut() == StatutMateriel.A_CHANGER).count();
@@ -76,13 +86,17 @@ public class HomeController {
         model.addAttribute("scnPan", c(parc, StatutMateriel.EN_PANNE, TypeMateriel.SCANNER_CHEQUE));
         model.addAttribute("scnChg", c(parc, StatutMateriel.A_CHANGER, TypeMateriel.SCANNER_CHEQUE));
 
-        List<StatPoste> parPosteAll = StatsExporter.parPoste(parc);
+        // Vue globale uniquement : matériel par poste + postes en alerte (calculés sur tout le parc)
+        List<StatPoste> parPosteAll = StatsExporter.parPoste(fullParc);
         List<StatPoste> parPoste = parPosteAll.stream().limit(8).toList();
         model.addAttribute("parPoste", parPoste);
         model.addAttribute("maxParPoste", parPoste.stream().mapToLong(StatPoste::getTotal).max().orElse(0));
         model.addAttribute("postesAlerte", parPosteAll.stream().filter(sp -> sp.getEnPanne() > 0).count());
 
         List<Mission> missions = missionRepo.findAll();
+        if (poste != null) {
+            missions = missions.stream().filter(m -> m.getPoste() != null && poste.equals(m.getPoste().getId())).toList();
+        }
         LocalDate today = LocalDate.now();
         long plan = missions.stream().filter(m -> m.getDateDebut() != null && m.getDateDebut().isAfter(today)).count();
         long enCours = missions.stream().filter(m ->
@@ -97,9 +111,16 @@ public class HomeController {
 
     @GetMapping("/tableau-bord/export")
     @Transactional(readOnly = true)
-    public ResponseEntity<byte[]> exportStats() throws IOException {
-        byte[] x = statsExporter.exporter(materielRepo.findAll(), missionRepo.findAll(),
-                posteRepo.count(),
+    public ResponseEntity<byte[]> exportStats(@RequestParam(required = false) Integer poste) throws IOException {
+        List<Materiel> parc = materielRepo.findAll();
+        List<Mission> missions = missionRepo.findAll();
+        long nbPostes = posteRepo.count();
+        if (poste != null) {
+            parc = parc.stream().filter(m -> m.getPoste() != null && poste.equals(m.getPoste().getId())).toList();
+            missions = missions.stream().filter(m -> m.getPoste() != null && poste.equals(m.getPoste().getId())).toList();
+            nbPostes = 1;
+        }
+        byte[] x = statsExporter.exporter(parc, missions, nbPostes,
                 agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN).size(),
                 agentRepo.findByTypeAgent(TypeAgent.POSTE).size());
         return ResponseEntity.ok()

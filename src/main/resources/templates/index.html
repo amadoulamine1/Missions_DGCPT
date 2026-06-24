@@ -18,36 +18,47 @@
         .scount{font-size:.79rem;color:var(--muted);margin:.2rem 0 0;padding-left:.1rem}
         .scount b{font-weight:700}
         .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:baseline}
-        .lgd{display:inline-block;margin-right:.1rem}
     </style>
 </head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
     <h1 style="margin-bottom:.2rem">Tableau de bord</h1>
-    <p class="muted">DGCPT — Gestion des missions et du parc informatique</p>
+    <p class="muted">
+        <span th:if="${fPoste == null}">DGCPT — Gestion des missions et du parc informatique</span>
+        <span th:if="${fPoste != null}">Statistiques du poste : <strong th:text="${posteNom}">TPR</strong></span>
+    </p>
 
     <div class="toolbar no-print" style="margin:.5rem 0 1.1rem">
-        <a class="btn secondary small" th:href="@{/tableau-bord/export}">⬇ Export Excel</a>
+        <form method="get" th:action="@{/}" style="display:flex;align-items:center;gap:.5rem;margin:0">
+            <label class="muted" style="font-size:.9rem">Poste :</label>
+            <select name="poste" onchange="this.form.submit()">
+                <option value="">Tous les postes</option>
+                <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
+            </select>
+        </form>
+        <span class="spacer"></span>
+        <a class="btn secondary small" th:href="@{/tableau-bord/export(poste=${fPoste})}">⬇ Export Excel</a>
         <button class="btn secondary small" type="button" onclick="window.print()">🖨 Export PDF</button>
     </div>
 
     <div class="kpis">
-        <a class="kpi" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
-        <a class="kpi" th:href="@{/parc}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
+        <a class="kpi" th:if="${fPoste == null}" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
+        <a class="kpi" th:href="@{/parc(poste=${fPoste})}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
         <div class="kpi" title="Disponibilité = matériels « En service » rapportés au matériel dont le statut est renseigné (en service + en panne + à changer). Les équipements sans statut ne sont pas comptés.">
             <div class="n" th:text="|${tauxDispo} %|">0</div>
             <div class="l">Disponibilité</div>
             <div class="l" style="margin-top:.2rem;font-size:.76rem" th:text="|${matEnService} en service / ${nbStatues} évalués|"></div>
         </div>
-        <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
-        <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
+        <a class="kpi" th:if="${fPoste == null}" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
+        <a class="kpi" th:if="${fPoste != null}" th:href="@{/parc(poste=${fPoste},statut='EN_PANNE')}"><div class="n" th:text="${matEnPanne}">0</div><div class="l">Matériel en panne</div></a>
+        <a class="kpi" th:href="@{/missions(poste=${fPoste})}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
     </div>
 
     <div class="grid">
         <div class="card">
             <h3 style="margin-top:0;border:none">Matériel par statut</h3>
-            <p class="cap">Tout le parc réparti par état. La barre indique la part du total ; le chiffre à droite, le nombre d'équipements.</p>
+            <p class="cap">Le parc <span th:if="${fPoste != null}">de ce poste </span>réparti par état. La barre indique la part du total ; le chiffre à droite, le nombre d'équipements.</p>
             <div class="bars">
                 <div class="bar-row"><span><span class="dot" style="background:#4f9d50"></span>En service</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnService} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnService}">0</span></div>
                 <div class="bar-row"><span><span class="dot" style="background:#cf4a3f"></span>En panne</span><span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnPanne} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnPanne}">0</span></div>
@@ -56,7 +67,7 @@
         </div>
         <div class="card">
             <h3 style="margin-top:0;border:none">Missions par état</h3>
-            <p class="cap">Missions réparties selon leur avancement (calculé à partir des dates).</p>
+            <p class="cap">Missions <span th:if="${fPoste != null}">de ce poste </span>réparties selon leur avancement (calculé à partir des dates).</p>
             <div class="bars">
                 <div class="bar-row"><span><span class="dot" style="background:#3f74b0"></span>Planifiées</span><span class="bar-track"><span class="bar-fill blue" th:style="'width:' + (${nbMissions} > 0 ? ${misPlan} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misPlan}">0</span></div>
                 <div class="bar-row"><span><span class="dot" style="background:#e0972f"></span>En cours</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${nbMissions} > 0 ? ${misEnCours} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misEnCours}">0</span></div>
@@ -97,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <div class="card">
+        <div class="card" th:if="${fPoste == null}">
             <h3 style="margin-top:0;border:none">Matériel par poste</h3>
             <p class="cap">Nombre d'équipements rattachés à chaque poste (TPR), du plus fourni au moins fourni.</p>
             <div class="bars">
