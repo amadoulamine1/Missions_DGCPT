@@ -5,7 +5,7 @@
     <a class="brand" th:href="@{/}">DGCPT · Parc &amp; Missions</a>
     <div class="links">
         <a th:href="@{/}">Accueil</a>
-        <a th:href="@{/postes}" th:if="${currentRole == 'ADMIN'}">Postes</a>
+        <a th:href="@{/postes}">Postes</a>
         <a th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}">Agents</a>
         <a th:href="@{/parc}">Parc</a>
         <a th:href="@{/missions}">Missions</a>

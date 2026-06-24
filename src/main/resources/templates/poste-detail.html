@@ -11,7 +11,7 @@
     <div class="toolbar">
         <h1 style="margin:0" th:text="${d.poste.nom}">Poste</h1>
         <span class="spacer"></span>
-        <a class="btn secondary" th:href="@{/postes/{id}/modifier(id=${d.poste.id})}">Modifier</a>
+        <a class="btn secondary" th:href="@{/postes/{id}/modifier(id=${d.poste.id})}" th:if="${currentRole == 'ADMIN'}">Modifier</a>
     </div>
     <div class="card">
         <table class="kv">
@@ -21,7 +21,7 @@
         </table>
     </div>
 
-    <div class="card">
+    <div class="card" th:if="${currentRole == 'ADMIN'}">
         <h2 style="margin-top:0;border:none">Changer le chef de poste</h2>
         <form method="post" th:action="@{/postes/{id}/chef(id=${d.poste.id})}">
             <div class="form-row">

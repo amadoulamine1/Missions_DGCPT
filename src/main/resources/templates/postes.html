@@ -12,7 +12,7 @@
     <div class="toolbar">
         <h1 style="margin:0">Postes régionaux</h1>
         <span class="spacer"></span>
-        <a class="btn" th:href="@{/postes/nouveau}">+ Nouveau poste</a>
+        <a class="btn" th:href="@{/postes/nouveau}" th:if="${currentRole == 'ADMIN'}">+ Nouveau poste</a>
     </div>
     <table class="table">
         <thead><tr><th>Code</th><th>Nom</th><th>Région</th><th>Matériel</th><th>Actions</th></tr></thead>
@@ -22,7 +22,7 @@
                 <td><a th:href="@{/postes/{id}(id=${p.id})}" th:text="${p.nom}"></a></td>
                 <td th:text="${p.region}"></td>
                 <td><span class="badge gold" th:text="${p.nbMateriel}">0</span></td>
-                <td><a class="btn small" th:href="@{/postes/{id}(id=${p.id})}">Détail</a> <a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}">Modifier</a></td>
+                <td><a class="btn small" th:href="@{/postes/{id}(id=${p.id})}">Détail</a> <a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}" th:if="${currentRole == 'ADMIN'}">Modifier</a></td>
             </tr>
             <tr th:if="${postes.isEmpty()}"><td colspan="5" class="empty">Aucun poste enregistré.</td></tr>
         </tbody>
