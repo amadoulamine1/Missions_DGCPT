@@ -37,3 +37,10 @@
 
 - Documenter la **procédure de restauration** (base + configuration) et le **temps de reprise** visé.
 - Conserver une **copie de ce dépôt de code** (source) sauvegardée, afin de pouvoir reconstruire l'application.
+
+## Mise en œuvre opérationnelle (fournie)
+
+- **Sauvegardes PostgreSQL** : scripts `scripts/sauvegarde-postgres.sh` (dump compressé `pg_dump -F c` + rotation configurable, `RETENTION_JOURS=30` par défaut) et `scripts/restauration-postgres.sh` (restauration avec confirmation). Planifier la sauvegarde via **cron** (ex. quotidienne à 1h) et **copier les dumps hors-serveur** (stockage distant) pour couvrir la perte du serveur.
+- **Profil de production** : `application-prod.properties` (activable par `--spring.profiles.active=prod`) — secrets par variables d'environnement, journaux allégés, **gabarit HTTPS** (keystore PKCS12) et **cookies de session sécurisés** prêts à activer.
+- **Protection CSRF** : **activée** (les formulaires Thymeleaf injectent automatiquement le jeton). 
+- **Rappels** : changer le compte initial `admin/admin` dès la première connexion ; restreindre l'accès réseau au serveur intranet ; tester périodiquement une **restauration**.
