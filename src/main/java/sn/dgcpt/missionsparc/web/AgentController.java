@@ -28,7 +28,8 @@ public class AgentController {
     @GetMapping
     public String liste(@RequestParam(defaultValue = "0") int pi,
                         @RequestParam(defaultValue = "0") int pp,
-                        @RequestParam(required = false) String q, Model model) {
+                        @RequestParam(required = false) String q,
+                        @RequestParam(required = false) Integer poste, Model model) {
         String t = q == null ? "" : q.trim().toLowerCase();
         var all = agentService.lister().stream()
                 .filter(a -> t.isEmpty()
@@ -37,10 +38,15 @@ public class AgentController {
                         || (a.getFonction() != null && a.getFonction().toLowerCase().contains(t)))
                 .toList();
         var info = all.stream().filter(a -> "INFORMATICIEN".equals(a.getType())).toList();
-        var poste = all.stream().filter(a -> "POSTE".equals(a.getType())).toList();
+        var poste2 = all.stream()
+                .filter(a -> "POSTE".equals(a.getType()))
+                .filter(a -> poste == null || poste.equals(a.getPosteId()))
+                .toList();
         model.addAttribute("pInfo", Pagination.page(info, pi, 25, null));
-        model.addAttribute("pPoste", Pagination.page(poste, pp, 25, null));
+        model.addAttribute("pPoste", Pagination.page(poste2, pp, 25, null));
         model.addAttribute("q", q);
+        model.addAttribute("postes", posteRepo.findAll());
+        model.addAttribute("fPoste", poste);
         return "agents";
     }
 

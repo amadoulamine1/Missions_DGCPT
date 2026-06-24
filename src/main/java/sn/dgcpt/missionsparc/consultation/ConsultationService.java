@@ -230,7 +230,12 @@ public class ConsultationService {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
         String statut = libelleStatut(m.getStatut());
         String obs = m.getObservation() == null ? "" : m.getObservation();
-        return new MaterielVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(), poste, statut, obs);
+        String ram = "", proc = "", disque = "";
+        if (m.getType() == TypeMateriel.ORDINATEUR) {
+            var o = ordinateurRepo.findById(m.getNumeroInventaire()).orElse(null);
+            if (o != null) { ram = nz(o.getRam()); proc = nz(o.getProcesseur()); disque = nz(o.getDisqueDur()); }
+        }
+        return new MaterielVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(), poste, statut, obs, ram, proc, disque);
     }
 
     private String libelleStatut(StatutMateriel s) {
