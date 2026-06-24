@@ -95,5 +95,6 @@ table.kv td.k{color:var(--muted);white-space:nowrap}
 .btn.disabled{opacity:.45;pointer-events:none}
 th a{color:inherit}
 
-.seg{height:100%}
+.seg{height:100%;cursor:default}
+.seg:hover{filter:brightness(1.12)}
 .seg.green{background:#5cb85c}.seg.red{background:#d9534f}.seg.orange{background:#f0ad4e}
