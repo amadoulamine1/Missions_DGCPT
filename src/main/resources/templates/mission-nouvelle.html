@@ -10,7 +10,7 @@
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
     <h1>Nouvelle mission</h1>
-    <p class="muted">Le N° de mission est généré automatiquement. Choisissez le TPR et les chefs dans les listes ; les blocs encadrés ne servent qu'à <strong>créer</strong> un élément absent. Les membres de la mission, eux, se saisissent dans le canevas.</p>
+    <p class="muted">Le N° de mission est généré automatiquement. Choisissez dans les listes ; les blocs encadrés ne servent qu'à <strong>créer</strong> un élément absent. Les membres se choisissent parmi les informaticiens, et le chef de mission se désigne parmi eux.</p>
     <div class="card">
         <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post" th:action="@{/missions/nouvelle}" th:object="${form}">
@@ -30,21 +30,6 @@
             </div>
 
             <div class="form-row">
-                <label>Chef de mission <span class="req">*</span></label>
-                <select th:field="*{chefMissionSel}">
-                    <option value="">➕ Ajouter un informaticien…</option>
-                    <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
-                </select>
-            </div>
-            <div id="nouveau-chefmission" class="subform">
-                <p class="legend">Nouvel informaticien (chef de mission)</p>
-                <p class="hint">À remplir uniquement si l'informaticien n'est pas dans la liste.</p>
-                <div class="form-row"><label>Matricule <span class="req">*</span></label><input type="text" th:field="*{chefMissionMat}"/></div>
-                <div class="form-row"><label>Nom</label><input type="text" th:field="*{chefMissionNom}"/></div>
-                <div class="form-row"><label>Prénom</label><input type="text" th:field="*{chefMissionPrenom}"/></div>
-            </div>
-
-            <div class="form-row">
                 <label>Chef de poste (du TPR) <span class="req">*</span></label>
                 <select th:field="*{chefPosteSel}">
                     <option value="">➕ Ajouter un agent…</option>
@@ -59,14 +44,22 @@
             </div>
 
             <div class="form-row" style="align-items:flex-start">
-                <label>Membres de la mission</label>
+                <label>Membres de la mission <span class="req">*</span></label>
                 <div style="flex:1;max-width:340px">
-                    <select multiple size="6" th:field="*{membres}" style="width:100%;padding:.4rem;border:1px solid #e7dcc1;border-radius:9px">
+                    <select multiple size="6" id="membres" th:field="*{membres}" onchange="majChefMission()" style="width:100%;padding:.4rem;border:1px solid #e7dcc1;border-radius:9px">
                         <option th:each="a : ${informaticiens}" th:value="${a.matricule}" th:text="${a.libelle}"></option>
                     </select>
-                    <p class="hint" style="color:#7a7163;font-size:.84rem;margin:.3rem 0 0">Informaticiens uniquement. Maintenez Ctrl (Cmd sur Mac) pour en choisir plusieurs.</p>
+                    <p class="hint" style="color:#7a7163;font-size:.84rem;margin:.3rem 0 0">Informaticiens uniquement. Ctrl (Cmd sur Mac) pour en choisir plusieurs. Liste vide ? Créez-les dans « Agents ».</p>
                 </div>
             </div>
+
+            <div class="form-row">
+                <label>Chef de mission <span class="req">*</span></label>
+                <select id="chefMissionSel" th:field="*{chefMissionSel}" required>
+                    <option value="">— Désigner le chef parmi les membres —</option>
+                </select>
+            </div>
+
             <div class="form-row"><label>Objet de la mission <span class="req">*</span></label><input type="text" th:field="*{objet}" required/></div>
             <div class="form-row"><label>Date de début</label><input type="date" th:field="*{dateDebut}"/></div>
             <div class="form-row"><label>Date de fin</label><input type="date" th:field="*{dateFin}"/></div>
@@ -84,7 +77,6 @@
         function _show(id, on){ var d=document.getElementById(id); if(d) d.style.display = on ? 'block' : 'none'; }
         function _req(id, on){ var e=document.getElementById(id); if(e) e.required = on; }
         function toggleNouveauTpr(){ var v=document.getElementById('posteId').value; _show('nouveau-tpr', v===''); _req('codePoste', v===''); }
-        function toggleChefMission(){ var v=document.getElementById('chefMissionSel').value; _show('nouveau-chefmission', v===''); _req('chefMissionMat', v===''); }
         function toggleChefPoste(){ var v=document.getElementById('chefPosteSel').value; _show('nouveau-chefposte', v===''); _req('chefPosteMat', v===''); }
         function majChefPoste(){
             var posteId = document.getElementById('posteId').value;
@@ -101,9 +93,23 @@
             }
             toggleChefPoste();
         }
+        function majChefMission(){
+            var membres = document.getElementById('membres');
+            var chef = document.getElementById('chefMissionSel');
+            var prev = chef.value;
+            chef.innerHTML = '<option value="">— Désigner le chef parmi les membres —</option>';
+            for (var i=0; i<membres.options.length; i++){
+                var opt = membres.options[i];
+                if (opt.selected){
+                    var o=document.createElement('option'); o.value=opt.value; o.textContent=opt.textContent;
+                    if (opt.value === prev) { o.selected = true; }
+                    chef.appendChild(o);
+                }
+            }
+        }
         function majDateFinMin(){ var dd=document.getElementById('dateDebut'), df=document.getElementById('dateFin'); if(dd&&df) df.min = dd.value || ''; }
         document.addEventListener('DOMContentLoaded', function(){
-            toggleNouveauTpr(); toggleChefMission(); majChefPoste(); majDateFinMin();
+            toggleNouveauTpr(); majChefPoste(); majChefMission(); majDateFinMin();
             document.getElementById('posteId').addEventListener('change', function(){ toggleNouveauTpr(); majChefPoste(); });
             var dd=document.getElementById('dateDebut'); if(dd) dd.addEventListener('change', majDateFinMin);
         });

@@ -56,16 +56,23 @@ public class MissionService {
 
         List<String> membres = (f.getMembres() == null) ? List.of()
                 : f.getMembres().stream().filter(s -> s != null && !s.isBlank()).map(String::trim).distinct().collect(Collectors.toList());
+        if (membres.isEmpty()) {
+            throw new IllegalArgumentException("Sélectionnez au moins un membre pour la mission.");
+        }
+
+        String chefMat = (f.getChefMissionSel() == null) ? "" : f.getChefMissionSel().trim();
+        if (chefMat.isEmpty() || !membres.contains(chefMat)) {
+            throw new IllegalArgumentException("Désignez le chef de mission parmi les membres sélectionnés (un seul).");
+        }
+
         verifierChevauchement(membres, debut, fin);
 
         Poste poste = (f.getPosteId() != null)
                 ? posteRepo.findById(f.getPosteId()).orElseThrow()
                 : referentiel.resoudrePoste(f.getCodePoste(), f.getNomPoste());
 
-        Agent chefMission = resoudreChef(f.getChefMissionSel(), f.getChefMissionMat(), f.getChefMissionNom(),
-                f.getChefMissionPrenom(), TypeAgent.INFORMATICIEN, null, "chef de mission");
-        Agent chefPoste = resoudreChef(f.getChefPosteSel(), f.getChefPosteMat(), f.getChefPosteNom(),
-                f.getChefPostePrenom(), TypeAgent.POSTE, poste, "chef de poste");
+        Agent chefMission = agentRepo.findById(chefMat).orElseThrow();
+        Agent chefPoste = resoudreChefPoste(f, poste);
 
         Mission m = new Mission();
         m.setReference(genererReference());
@@ -139,22 +146,22 @@ public class MissionService {
         return new AgentOption(a.getMatricule(), a.getMatricule() + " — " + a.getNom() + " " + a.getPrenom());
     }
 
-    private Agent resoudreChef(String sel, String mat, String nom, String prenom, TypeAgent type, Poste poste, String role) {
-        if (sel != null && !sel.isBlank()) {
-            return agentRepo.findById(sel.trim()).orElseThrow();
+    private Agent resoudreChefPoste(CreationMissionForm f, Poste poste) {
+        if (f.getChefPosteSel() != null && !f.getChefPosteSel().isBlank()) {
+            return agentRepo.findById(f.getChefPosteSel().trim()).orElseThrow();
         }
-        final String fm = (mat == null) ? "" : mat.trim();
+        final String fm = (f.getChefPosteMat() == null) ? "" : f.getChefPosteMat().trim();
         if (fm.isEmpty()) {
-            throw new IllegalArgumentException("Choisissez un " + role + " existant ou renseignez le matricule du nouvel agent.");
+            throw new IllegalArgumentException("Choisissez un chef de poste existant ou renseignez le matricule du nouvel agent.");
         }
-        final String fnom = nom, fprenom = prenom;
+        final String fnom = f.getChefPosteNom(), fprenom = f.getChefPostePrenom();
         return agentRepo.findById(fm).orElseGet(() -> {
             Agent a = new Agent();
             a.setMatricule(fm);
             a.setNom((fnom == null || fnom.isBlank()) ? fm : fnom.trim());
             a.setPrenom((fprenom == null || fprenom.isBlank()) ? "-" : fprenom.trim());
-            a.setTypeAgent(type);
-            a.setPoste(type == TypeAgent.POSTE ? poste : null);
+            a.setTypeAgent(TypeAgent.POSTE);
+            a.setPoste(poste);
             return agentRepo.save(a);
         });
     }
