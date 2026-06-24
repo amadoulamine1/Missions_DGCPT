@@ -26,6 +26,10 @@ public class Utilisateur {
     @Column(name = "nom_complet")
     private String nomComplet;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_matricule")
+    private Agent agent;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getUsername() { return username; }
@@ -38,4 +42,6 @@ public class Utilisateur {
     public void setActif(boolean actif) { this.actif = actif; }
     public String getNomComplet() { return nomComplet; }
     public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
+    public Agent getAgent() { return agent; }
+    public void setAgent(Agent agent) { this.agent = agent; }
 }

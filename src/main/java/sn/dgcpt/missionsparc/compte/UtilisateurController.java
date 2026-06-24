@@ -3,15 +3,27 @@ package sn.dgcpt.missionsparc.compte;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import sn.dgcpt.missionsparc.domain.Agent;
+import sn.dgcpt.missionsparc.domain.TypeAgent;
+import sn.dgcpt.missionsparc.repository.AgentRepository;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/utilisateurs")
 public class UtilisateurController {
 
     private final CompteService compte;
+    private final AgentRepository agentRepo;
 
-    public UtilisateurController(CompteService compte) {
+    public UtilisateurController(CompteService compte, AgentRepository agentRepo) {
         this.compte = compte;
+        this.agentRepo = agentRepo;
+    }
+
+    @ModelAttribute("informaticiens")
+    public List<Agent> informaticiens() {
+        return agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN);
     }
 
     @GetMapping

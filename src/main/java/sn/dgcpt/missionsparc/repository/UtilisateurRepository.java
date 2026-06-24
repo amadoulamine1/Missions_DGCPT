@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Integer> {
     Optional<Utilisateur> findByUsername(String username);
     boolean existsByUsername(String username);
+    Optional<Utilisateur> findByAgent_Matricule(String matricule);
 }

@@ -7,8 +7,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sn.dgcpt.missionsparc.domain.Agent;
 import sn.dgcpt.missionsparc.domain.RoleUtilisateur;
 import sn.dgcpt.missionsparc.domain.Utilisateur;
+import sn.dgcpt.missionsparc.repository.AgentRepository;
 import sn.dgcpt.missionsparc.repository.UtilisateurRepository;
 
 import java.util.List;
@@ -18,17 +20,20 @@ public class CompteService implements UserDetailsService {
 
     private final UtilisateurRepository repo;
     private final PasswordEncoder encoder;
+    private final AgentRepository agentRepo;
 
-    public CompteService(UtilisateurRepository repo, PasswordEncoder encoder) {
+    public CompteService(UtilisateurRepository repo, PasswordEncoder encoder, AgentRepository agentRepo) {
         this.repo = repo;
         this.encoder = encoder;
+        this.agentRepo = agentRepo;
     }
 
     @Transactional(readOnly = true)
     public List<UtilisateurLigne> lister() {
         return repo.findAll().stream()
                 .map(u -> new UtilisateurLigne(u.getId(), u.getUsername(),
-                        u.getNomComplet() == null ? "" : u.getNomComplet(), u.getRole().name(), u.isActif()))
+                        u.getNomComplet() == null ? "" : u.getNomComplet(), u.getRole().name(), u.isActif(),
+                        u.getAgent() == null ? null : u.getAgent().getMatricule()))
                 .toList();
     }
 
@@ -41,6 +46,7 @@ public class CompteService implements UserDetailsService {
         f.setNomComplet(u.getNomComplet());
         f.setRole(u.getRole().name());
         f.setActif(u.isActif());
+        f.setAgentMatricule(u.getAgent() == null ? null : u.getAgent().getMatricule());
         return f;
     }
 
@@ -54,21 +60,39 @@ public class CompteService implements UserDetailsService {
         u.setUsername(username);
         u.setMotDePasse(encoder.encode(f.getMotDePasse()));
         u.setRole(RoleUtilisateur.valueOf(f.getRole()));
-        u.setNomComplet(f.getNomComplet());
         u.setActif(true);
+        lierAgent(u, f);
         repo.save(u);
     }
 
     @Transactional
     public void modifier(UtilisateurForm f) {
         Utilisateur u = repo.findById(f.getId()).orElseThrow();
-        u.setNomComplet(f.getNomComplet());
         u.setRole(RoleUtilisateur.valueOf(f.getRole()));
         u.setActif(f.isActif());
         if (f.getMotDePasse() != null && !f.getMotDePasse().isBlank()) {
             u.setMotDePasse(encoder.encode(f.getMotDePasse()));
         }
+        lierAgent(u, f);
         repo.save(u);
+
+    }
+
+    /** Associe (ou détache) un agent informaticien au compte ; le nom est alors dérivé de l'agent. */
+    private void lierAgent(Utilisateur u, UtilisateurForm f) {
+        String mat = f.getAgentMatricule() == null ? "" : f.getAgentMatricule().trim();
+        if (mat.isEmpty()) {
+            u.setAgent(null);
+            u.setNomComplet(f.getNomComplet());
+            return;
+        }
+        repo.findByAgent_Matricule(mat).ifPresent(autre -> {
+            if (!autre.getId().equals(u.getId()))
+                throw new IllegalArgumentException("L'agent « " + mat + " » est déjà lié à un autre compte.");
+        });
+        Agent a = agentRepo.findById(mat).orElseThrow(() -> new IllegalArgumentException("Agent introuvable : " + mat));
+        u.setAgent(a);
+        u.setNomComplet(a.getNom() + " " + a.getPrenom());
     }
 
     @Override

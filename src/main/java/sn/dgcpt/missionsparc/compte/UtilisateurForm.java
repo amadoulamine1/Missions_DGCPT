@@ -7,6 +7,7 @@ public class UtilisateurForm {
     private String role = "AGENT";
     private String motDePasse;
     private boolean actif = true;
+    private String agentMatricule;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -20,4 +21,6 @@ public class UtilisateurForm {
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
+    public String getAgentMatricule() { return agentMatricule; }
+    public void setAgentMatricule(String agentMatricule) { this.agentMatricule = agentMatricule; }
 }

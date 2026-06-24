@@ -20,6 +20,15 @@
                 <input th:field="*{nomComplet}"/>
             </div>
             <div class="form-row">
+                <label>Agent informaticien lié</label>
+                <select th:field="*{agentMatricule}">
+                    <option value="">— Aucun (compte système) —</option>
+                    <option th:each="a : ${informaticiens}" th:value="${a.matricule}"
+                            th:text="${a.matricule + ' — ' + a.nom + ' ' + a.prenom}"></option>
+                </select>
+                <small class="muted">Si un agent est lié, le nom du compte en est dérivé.</small>
+            </div>
+            <div class="form-row">
                 <label>Rôle <span class="req">*</span></label>
                 <select th:field="*{role}">
                     <option value="ADMIN">Administrateur</option>
