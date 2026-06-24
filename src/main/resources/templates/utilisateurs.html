@@ -5,6 +5,7 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
+    <p th:if="${message}" class="alert ok" th:text="${message}">ok</p>
     <div class="toolbar">
         <h1 style="margin:0">Comptes utilisateurs</h1>
         <span class="spacer"></span>
@@ -20,7 +21,13 @@
                 <td><span class="badge" th:classappend="${u.role == 'ADMIN' ? 'gold' : (u.role == 'CHEF_MISSION' ? 'blue' : 'green')}"
                           th:text="${u.role == 'ADMIN' ? 'Administrateur' : (u.role == 'CHEF_MISSION' ? 'Chef de mission' : 'Agent')}"></span></td>
                 <td><span class="badge" th:classappend="${u.actif} ? 'green' : 'red'" th:text="${u.actif} ? 'Actif' : 'Désactivé'"></span></td>
-                <td><a class="btn small secondary" th:href="@{/utilisateurs/{id}/modifier(id=${u.id})}">Modifier</a></td>
+                <td>
+                    <a class="btn small secondary" th:href="@{/utilisateurs/{id}/modifier(id=${u.id})}">Modifier</a>
+                    <form method="post" th:action="@{/utilisateurs/{id}/reinitialiser(id=${u.id})}" style="display:inline;margin:0"
+                          onsubmit="return confirm('Réinitialiser le mot de passe de ce compte ?');">
+                        <button class="btn small secondary" type="submit">Réinitialiser MdP</button>
+                    </form>
+                </td>
             </tr>
             <tr th:if="${utilisateurs.isEmpty()}"><td colspan="6" class="empty">Aucun compte.</td></tr>
         </tbody>

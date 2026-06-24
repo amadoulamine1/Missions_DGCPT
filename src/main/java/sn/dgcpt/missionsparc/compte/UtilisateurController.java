@@ -8,6 +8,7 @@ import sn.dgcpt.missionsparc.domain.TypeAgent;
 import sn.dgcpt.missionsparc.repository.AgentRepository;
 
 import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/utilisateurs")
@@ -69,5 +70,12 @@ public class UtilisateurController {
             model.addAttribute("mode", "modification");
             return "utilisateur-form";
         }
+    }
+
+    @PostMapping("/{id}/reinitialiser")
+    public String reinitialiser(@PathVariable Integer id, RedirectAttributes ra) {
+        String temp = compte.reinitialiser(id);
+        ra.addFlashAttribute("message", "Mot de passe réinitialisé — mot de passe temporaire : " + temp + " (à communiquer puis à changer).");
+        return "redirect:/utilisateurs";
     }
 }

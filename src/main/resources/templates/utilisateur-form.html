@@ -12,21 +12,22 @@
           th:object="${form}">
         <div class="card">
             <div class="form-row">
+                <label>Agent informaticien lié</label>
+                <select id="agentSel" th:field="*{agentMatricule}" onchange="majAgent()">
+                    <option value="" data-nom="">— Aucun (compte système) —</option>
+                    <option th:each="a : ${informaticiens}" th:value="${a.matricule}"
+                            th:attr="data-nom=${a.nom + ' ' + a.prenom}"
+                            th:text="${a.matricule + ' — ' + a.nom + ' ' + a.prenom}"></option>
+                </select>
+                <small class="muted">Si un agent est lié, l'identifiant devient son matricule et le nom est repris automatiquement.</small>
+            </div>
+            <div class="form-row">
                 <label>Identifiant <span class="req">*</span></label>
-                <input th:field="*{username}" th:readonly="${mode != 'creation'}" required/>
+                <input id="username" th:field="*{username}" th:readonly="${mode != 'creation'}" required/>
             </div>
             <div class="form-row">
                 <label>Nom complet</label>
-                <input th:field="*{nomComplet}"/>
-            </div>
-            <div class="form-row">
-                <label>Agent informaticien lié</label>
-                <select th:field="*{agentMatricule}">
-                    <option value="">— Aucun (compte système) —</option>
-                    <option th:each="a : ${informaticiens}" th:value="${a.matricule}"
-                            th:text="${a.matricule + ' — ' + a.nom + ' ' + a.prenom}"></option>
-                </select>
-                <small class="muted">Si un agent est lié, le nom du compte en est dérivé.</small>
+                <input id="nomComplet" th:field="*{nomComplet}"/>
             </div>
             <div class="form-row">
                 <label>Rôle <span class="req">*</span></label>
@@ -38,7 +39,10 @@
             </div>
             <div class="form-row">
                 <label th:text="${mode == 'creation'} ? 'Mot de passe *' : 'Nouveau mot de passe (laisser vide pour conserver)'">Mot de passe</label>
-                <input th:field="*{motDePasse}" type="password" th:required="${mode == 'creation'}"/>
+                <div style="display:flex;gap:.4rem;align-items:center">
+                    <input id="motDePasse" th:field="*{motDePasse}" type="password" th:required="${mode == 'creation'}" style="flex:1"/>
+                    <button type="button" class="btn small secondary" onclick="toggleMdp()" title="Afficher / masquer le mot de passe">👁</button>
+                </div>
             </div>
             <div class="form-row" th:if="${mode != 'creation'}">
                 <label><input type="checkbox" th:field="*{actif}"/> Compte actif</label>
@@ -50,5 +54,25 @@
         </div>
     </form>
 </main>
+<script th:inline="javascript">
+    var MODE = /*[[${mode}]]*/ 'creation';
+    function majAgent() {
+        var sel = document.getElementById('agentSel');
+        var u = document.getElementById('username'), n = document.getElementById('nomComplet');
+        if (sel.value) {
+            var opt = sel.options[sel.selectedIndex];
+            u.value = sel.value; u.readOnly = true;
+            n.value = opt.getAttribute('data-nom'); n.readOnly = true;
+        } else {
+            u.readOnly = (MODE !== 'creation');
+            n.readOnly = false;
+        }
+    }
+    function toggleMdp() {
+        var p = document.getElementById('motDePasse');
+        p.type = (p.type === 'password') ? 'text' : 'password';
+    }
+    document.addEventListener('DOMContentLoaded', majAgent);
+</script>
 </body>
 </html>

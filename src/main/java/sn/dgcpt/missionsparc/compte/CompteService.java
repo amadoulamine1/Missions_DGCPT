@@ -52,16 +52,21 @@ public class CompteService implements UserDetailsService {
 
     @Transactional
     public void creer(UtilisateurForm f) {
-        String username = f.getUsername() == null ? "" : f.getUsername().trim();
-        if (username.isEmpty()) throw new IllegalArgumentException("L'identifiant est obligatoire.");
-        if (repo.existsByUsername(username)) throw new IllegalArgumentException("L'identifiant « " + username + " » existe déjà.");
-        if (f.getMotDePasse() == null || f.getMotDePasse().isBlank()) throw new IllegalArgumentException("Le mot de passe est obligatoire.");
+        if (f.getMotDePasse() == null || f.getMotDePasse().isBlank())
+            throw new IllegalArgumentException("Le mot de passe est obligatoire.");
         Utilisateur u = new Utilisateur();
-        u.setUsername(username);
-        u.setMotDePasse(encoder.encode(f.getMotDePasse()));
         u.setRole(RoleUtilisateur.valueOf(f.getRole()));
         u.setActif(true);
+        u.setMotDePasse(encoder.encode(f.getMotDePasse()));
         lierAgent(u, f);
+        if (u.getAgent() == null) {   // compte système : identifiant + nom saisis
+            String username = f.getUsername() == null ? "" : f.getUsername().trim();
+            if (username.isEmpty()) throw new IllegalArgumentException("L'identifiant est obligatoire.");
+            u.setUsername(username);
+            u.setNomComplet(f.getNomComplet());
+        }
+        if (repo.existsByUsername(u.getUsername()))
+            throw new IllegalArgumentException("L'identifiant « " + u.getUsername() + " » existe déjà.");
         repo.save(u);
     }
 
@@ -74,8 +79,20 @@ public class CompteService implements UserDetailsService {
             u.setMotDePasse(encoder.encode(f.getMotDePasse()));
         }
         lierAgent(u, f);
+        if (u.getAgent() == null) {
+            u.setNomComplet(f.getNomComplet());
+        }
         repo.save(u);
+    }
 
+    /** Réinitialise le mot de passe à une valeur temporaire (renvoyée en clair à l'administrateur). */
+    @Transactional
+    public String reinitialiser(Integer id) {
+        Utilisateur u = repo.findById(id).orElseThrow();
+        String temp = "Tmp" + (int) (Math.random() * 9000 + 1000);
+        u.setMotDePasse(encoder.encode(temp));
+        repo.save(u);
+        return temp;
     }
 
     /** Associe (ou détache) un agent informaticien au compte ; le nom est alors dérivé de l'agent. */
@@ -83,7 +100,6 @@ public class CompteService implements UserDetailsService {
         String mat = f.getAgentMatricule() == null ? "" : f.getAgentMatricule().trim();
         if (mat.isEmpty()) {
             u.setAgent(null);
-            u.setNomComplet(f.getNomComplet());
             return;
         }
         repo.findByAgent_Matricule(mat).ifPresent(autre -> {
@@ -92,6 +108,7 @@ public class CompteService implements UserDetailsService {
         });
         Agent a = agentRepo.findById(mat).orElseThrow(() -> new IllegalArgumentException("Agent introuvable : " + mat));
         u.setAgent(a);
+        u.setUsername(a.getMatricule());
         u.setNomComplet(a.getNom() + " " + a.getPrenom());
     }
 
