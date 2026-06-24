@@ -62,21 +62,12 @@ public class CanevasWriter {
                 }
             }
 
-            // 3) Référentiels : listes par rôle (remplace les exemples)
+            // 3) Référentiels : membres de la mission (colonne A) -> listes "agent saisisseur" et "agent traitant"
             Sheet ref = wb.getSheet("Referentiels");
             if (ref != null) {
-                // Colonne G : membres de la mission -> listes "agent saisisseur" et "agent traitant"
-                for (int rr = 3; rr < 210; rr++) { vider(ref, rr, 6); }
+                for (int rr = 3; rr < 210; rr++) { vider(ref, rr, 0); }
                 int rm = 3;
-                for (Agent a : m.getMembres()) { set(ligne(ref, rm++), 6, libelle(a)); }
-
-                if (m.getPoste() != null) {
-                    for (int rr = 3; rr < 210; rr++) { vider(ref, rr, 0); vider(ref, rr, 2); }
-                    int ra = 3;
-                    for (Agent a : agentRepo.findByPoste_Id(m.getPoste().getId())) { set(ligne(ref, ra++), 0, libelle(a)); }
-                    int ri = 3;
-                    for (Agent a : agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN)) { set(ligne(ref, ri++), 2, libelle(a)); }
-                }
+                for (Agent a : m.getMembres()) { set(ligne(ref, rm++), 0, libelle(a)); }
             }
 
             // 4) Feuille "Agents TPR" : agents du poste (attributaires), pré-chargés et complétables
