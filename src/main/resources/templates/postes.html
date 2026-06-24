@@ -22,7 +22,7 @@
                 <td><a th:href="@{/postes/{id}(id=${p.id})}" th:text="${p.nom}"></a></td>
                 <td th:text="${p.region}"></td>
                 <td><span class="badge gold" th:text="${p.nbMateriel}">0</span></td>
-                <td><a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}">Modifier</a></td>
+                <td><a class="btn small" th:href="@{/postes/{id}(id=${p.id})}">Détail</a> <a class="btn small secondary" th:href="@{/postes/{id}/modifier(id=${p.id})}">Modifier</a></td>
             </tr>
             <tr th:if="${postes.isEmpty()}"><td colspan="5" class="empty">Aucun poste enregistré.</td></tr>
         </tbody>
