@@ -38,7 +38,6 @@
         <div class="kpi"><div class="n" th:text="|${tauxDispo} %|">0</div><div class="l">Disponibilité (en service)</div></div>
         <a class="kpi" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
         <a class="kpi" th:href="@{/missions}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
-        <div class="kpi"><div class="n" th:text="|${nbInfo} / ${nbAgentsPoste}|">0</div><div class="l">Agents (info. / poste)</div></div>
     </div>
 
     <div class="grid">
