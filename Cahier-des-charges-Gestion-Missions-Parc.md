@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 5 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 6 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -171,7 +171,7 @@ Décidés lors du cadrage :
 - **Socle technique retenu** : **Java** — Spring Boot + Spring Data JPA (Hibernate) + Spring Security (gestion des rôles) + Thymeleaf (écrans) + Apache POI (canevas Excel).
 - **Volumétrie** : ~20 postes régionaux ; ~2 000 agents au total (Trésor), dont ~700 en poste (≈ 35 par poste en moyenne), le reste au niveau central (dont la Direction Informatique). Le **parc n'est pas encore connu** — son inventaire est précisément l'un des objectifs de l'application ; estimé à l'ordre du millier d'équipements. Volume modéré : la stack retenue est largement dimensionnée, sans enjeu de performance.
 
-À préciser en phase technique : le nombre de postes régionaux et le volume du parc matériel ; la politique de sauvegarde et de sécurité.
+À préciser en phase technique : le nombre de postes régionaux et le volume du parc matériel. La **politique de sauvegarde et de sécurité** fait l'objet d'un document dédié (« Politique-sauvegarde-securite.md »).
 
 
 ## 9. Évolutions et état de réalisation
@@ -224,7 +224,19 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Fiche détaillée d'un équipement** : caractéristiques par type (MAC, RAM, processeur, disque, logiciels, n° série…), statut, observations, **affectation courante** et **historique des relevés**.
 - **Page agents** : affichage séparé des **informaticiens** et des **agents de poste**.
 
-### 9.5 Reste à faire
-- **Arbitrage des conflits** de consolidation entre fichiers (valeurs divergentes).
-- **Inventaire à une date précise** (reconstitution fine au-delà du relevé par mission).
-- Politique de **sauvegarde et de sécurité**.
+### 9.9 Consolidation multi-fichiers et arbitrage des conflits
+- Chaque canevas chargé devient un **lot** rattaché à sa mission (stocké, contrôlé à l'upload) ; plusieurs lots s'accumulent pour une même mission.
+- Une **page de consolidation** par mission liste les lots en attente et **détecte les conflits** : un même matériel (clé = n° d'inventaire, sinon MAC / n° de série) saisi avec des **valeurs divergentes** entre deux fichiers.
+- Le **chef de mission arbitre** chaque conflit (choix de la version à retenir), puis **intègre l'ensemble** en une transaction (rapprochement par clé, affectations historisées, relevés datés) ; les lots passent à *intégré*. Un lot erroné peut être **retiré** avant intégration.
+
+### 9.10 Restitutions, recherche et exports
+- **Tableau de bord** (accueil) : chiffres clés (postes, matériel par statut et par type, missions par état, agents).
+- **Inventaire à une date** : reconstitution de la **composition et de la localisation** du parc à une date donnée, à partir de l'historique des affectations.
+- **Parc** : recherche (n°, nom, modèle) et filtres (poste, type, statut), avec **export Excel** de l'inventaire filtré.
+- **Missions** : recherche (n°, objet) et filtres (poste, état), et **export Excel des relevés** d'une mission.
+
+### 9.5 Pistes d'évolution
+Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :
+- **Snapshot exact des attributs** à une date passée (au-delà de la composition/localisation), en figeant la photo `etat_observe` à chaque intégration.
+- Affinements ergonomiques (pagination des listes, export PDF, notifications).
+- Mise en œuvre opérationnelle de la **politique de sauvegarde et de sécurité** (document dédié).
