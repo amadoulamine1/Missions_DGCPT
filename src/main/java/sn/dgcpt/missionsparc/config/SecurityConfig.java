@@ -41,8 +41,9 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
                 .permitAll())
-            // CSRF désactivé pour l'intranet (à réactiver en production)
-            .csrf(csrf -> csrf.disable());
+            // CSRF actif : protection des formulaires POST. Les formulaires Thymeleaf (th:action)
+            // injectent automatiquement le jeton _csrf (login, logout et tous les formulaires inclus).
+            .csrf(org.springframework.security.config.Customizer.withDefaults());
         return http.build();
     }
 }
