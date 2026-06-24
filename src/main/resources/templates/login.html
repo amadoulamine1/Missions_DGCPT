@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Connexion · DGCPT</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<main class="container" style="max-width:420px;margin-top:8vh">
+    <h1 style="text-align:center">DGCPT · Parc &amp; Missions</h1>
+    <div class="card">
+        <p th:if="${param.error}" class="alert err">Identifiant ou mot de passe incorrect.</p>
+        <p th:if="${param.logout}" class="alert ok">Vous êtes déconnecté.</p>
+        <form method="post" th:action="@{/login}">
+            <div class="form-row">
+                <label for="username">Identifiant</label>
+                <input id="username" name="username" autofocus required/>
+            </div>
+            <div class="form-row">
+                <label for="password">Mot de passe</label>
+                <input id="password" name="password" type="password" required/>
+            </div>
+            <button class="btn" type="submit" style="width:100%">Se connecter</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>
