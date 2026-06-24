@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 7 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 8 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -223,7 +223,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Observations** : champ libre par matériel, et une observation générale par mission.
 - **Statut temporel de la mission** dérivé des dates : **Planifiée** (à venir), **En cours**, **Terminée**.
 - **Fiche détaillée d'un équipement** : caractéristiques par type (MAC, RAM, processeur, disque, logiciels, n° série…), statut, observations, **affectation courante** et **historique des relevés**.
-- **Page agents** : affichage séparé des **informaticiens** et des **agents de poste**.
+- **Page agents** : présentation en **fiches (cartes)** séparées (**informaticiens** / **agents de poste**), avec **recherche** et **filtre par TPR**.
 
 ### 9.9 Consolidation multi-fichiers et arbitrage des conflits
 - Chaque canevas chargé devient un **lot** rattaché à sa mission (stocké, contrôlé à l'upload) ; plusieurs lots s'accumulent pour une même mission.
@@ -231,15 +231,20 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - Le **chef de mission arbitre** chaque conflit (choix de la version à retenir), puis **intègre l'ensemble** en une transaction (rapprochement par clé, affectations historisées, relevés datés) ; les lots passent à *intégré*. Un lot erroné peut être **retiré** avant intégration.
 
 ### 9.10 Restitutions, recherche et exports
-- **Tableau de bord** (accueil) : chiffres clés et **graphiques en barres** (matériel par statut et par type, missions par état, postes/agents).
+- **Tableau de bord** (accueil) : chiffres clés (postes, matériel, **taux de disponibilité**, **postes en alerte**, missions, agents) et **graphiques en barres** (matériel par statut, par type, **par poste**, et missions par état). **Exports des statistiques** : **Excel** (classeur synthèse / par type / par poste) et **PDF** (mise en page d'impression).
 - **Inventaire à une date** : reconstitution de la **composition et de la localisation** du parc à une date donnée, à partir de l'historique des affectations.
-- **Parc** : recherche (n°, nom, modèle), filtres (poste, type, statut), **tri par colonnes** et **pagination**, avec **export Excel** de l'inventaire filtré.
+- **Parc** : recherche (n°, nom, modèle), filtres rapides (**type** et **statut** en pastilles, poste), **tri par colonnes** et **pagination** ; pour les **ordinateurs**, affichage de la **RAM, du processeur et du disque** ; **export Excel** de l'inventaire filtré.
 - **Missions** : recherche (n°, objet), filtres (poste, état), tri et pagination, avec **export Excel des relevés** d'une mission.
-- **Agents** : listes paginées (informaticiens et agents de poste, séparés).
+- **Agents** : présentation en **fiches (cartes)** séparées (**informaticiens** / **agents de poste**), avec **recherche** et **filtre par TPR** pour les agents de poste ; listes paginées.
 - **Étiquettes** : page imprimable des **n° d'inventaire** (filtrable comme le parc), à imprimer ou enregistrer en **PDF** pour étiqueter physiquement les machines.
+
+### 9.11 Interface et navigation
+- **Menu latéral** (à gauche) : Accueil, Postes, Agents, Parc, Missions, Importer, Guide, Comptes — avec mise en évidence de la page courante, repli en barre horizontale sur petit écran et masquage à l'impression.
+- **Thème institutionnel** : fond clair neutre, accent **or** (DGCPT), typographie sans-serif ; tableaux à en-tête doré, **pastilles de statut** et **filtres en pastilles**.
+- **Présentation adaptée** : tableaux triables et paginés pour les listes volumineuses (parc, missions, postes), **fiches** pour les agents, indicateurs et graphiques pour le tableau de bord.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :
 - **Snapshot exact des attributs** à une date passée (au-delà de la composition/localisation), en figeant la photo `etat_observe` à chaque intégration.
-- Affinements ergonomiques (pagination des listes, export PDF, notifications).
+- Affinements ergonomiques (notifications, recherche avancée, exports complémentaires).
 - Mise en œuvre opérationnelle de la **politique de sauvegarde et de sécurité** (document dédié).

@@ -9,12 +9,42 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
-    <h1>Guide d'utilisation — Canevas et import</h1>
-    <p class="muted">L'application fonctionne en ligne. En cas de coupure réseau, la saisie se fait hors-ligne dans un canevas Excel, rechargé ensuite.</p>
-    <p><a class="btn" th:href="@{/import/canevas}">⬇ Télécharger un canevas vierge</a></p>
+    <h1>Guide d'utilisation</h1>
+    <p class="muted">DGCPT — Gestion des missions et du parc informatique. L'application fonctionne en ligne ; en cas de coupure réseau, la saisie se fait hors-ligne dans un canevas Excel, rechargé ensuite.</p>
 
     <div class="card">
-        <h2 style="margin-top:0;border:none">Les étapes</h2>
+        <h2 style="margin-top:0;border:none">Navigation</h2>
+        <p>Le <strong>menu de gauche</strong> donne accès aux écrans selon votre rôle : <strong>Accueil</strong> (tableau de bord), <strong>Postes</strong>, <strong>Agents</strong>, <strong>Parc</strong>, <strong>Missions</strong>, <strong>Importer</strong>, <strong>Guide</strong> et <strong>Comptes</strong>. La page courante est mise en évidence ; les actions réservées à l'administration n'apparaissent que pour les profils autorisés.</p>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Tableau de bord</h2>
+        <p>L'accueil présente les <strong>indicateurs clés</strong> (postes, matériel, taux de disponibilité, postes en alerte, missions, agents) et des <strong>graphiques</strong> : matériel par statut, par type et par poste, missions par état.</p>
+        <p>En haut de page : <strong>Export Excel</strong> (classeur de synthèse — indicateurs, par type, par poste) et <strong>Export PDF</strong> (via l'impression du navigateur, option « Enregistrer au format PDF »).</p>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Consulter le parc</h2>
+        <ul>
+            <li><strong>Rechercher</strong> par n° d'inventaire, nom ou modèle ; <strong>filtrer</strong> par type et statut (pastilles) et par poste.</li>
+            <li><strong>Trier</strong> en cliquant sur les en-têtes de colonnes ; les résultats sont <strong>paginés</strong>.</li>
+            <li>Pour les <strong>ordinateurs</strong>, la RAM, le processeur et le disque sont affichés.</li>
+            <li><strong>Export Excel</strong> de l'inventaire filtré, <strong>étiquettes</strong> imprimables (n° d'inventaire) et <strong>inventaire à une date</strong> passée.</li>
+            <li>Cliquez un n° d'inventaire pour la <strong>fiche détaillée</strong> (caractéristiques, statut, affectation, relevés).</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Agents et postes</h2>
+        <ul>
+            <li><strong>Agents</strong> : fiches séparées entre <strong>informaticiens</strong> (qui effectuent les missions) et <strong>agents de poste</strong> (qui utilisent le matériel). Utilisez la <strong>recherche</strong> et, pour les agents de poste, le <strong>filtre par TPR</strong>.</li>
+            <li><strong>Postes (TPR)</strong> : liste triable et paginée ; la fiche d'un poste montre le chef de poste, les agents et le matériel rattaché.</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;border:none">Saisie hors-ligne — canevas et import</h2>
+        <p><a class="btn" th:href="@{/import/canevas}">⬇ Télécharger un canevas vierge</a></p>
         <ol>
             <li><strong>Télécharger</strong> le canevas (idéalement le canevas pré-rempli d'une mission créée en ligne).</li>
             <li><strong>Remplir</strong> le canevas hors-ligne.</li>
@@ -32,13 +62,14 @@
             <li>Utilisez les <strong>menus déroulants</strong> (agents, catégorie, type, Oui/Non).</li>
             <li>Adresses <strong>MAC</strong> au format <code>AA:BB:CC:DD:EE:FF</code>.</li>
             <li><strong>Scanners de chèque</strong> : numéro de série (pas de MAC).</li>
+            <li>L'indicateur en tête de « 1-Mission et Réseau » signale si le canevas est <strong>conforme</strong>, <strong>incomplet</strong> ou <strong>non conforme</strong>.</li>
             <li>Le <strong>relevé réseau</strong> se renseigne une seule fois.</li>
         </ul>
     </div>
 
     <div class="card">
         <h2 style="margin-top:0;border:none">Plusieurs agents sur une même mission</h2>
-        <p>Chaque agent remplit son propre fichier : l'application les consolide grâce au N° de mission commun. Répartissez le travail par type de matériel ou par zone pour éviter les doublons.</p>
+        <p>Chaque agent remplit son propre fichier : l'application les consolide grâce au N° de mission commun. Répartissez le travail par type de matériel ou par zone pour éviter les doublons. En cas de valeurs divergentes sur un même matériel, le chef de mission <strong>arbitre les conflits</strong> sur la page de consolidation avant l'intégration.</p>
     </div>
     <p><a th:href="@{/import}">← Retour à l'import</a></p>
 </main>
