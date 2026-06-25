@@ -173,6 +173,8 @@ public class ConsultationController {
                            @RequestParam(required = false) String tri,
                            @RequestParam(required = false) String sens,
                            Model model) {
+        // Tri par défaut : N° de mission décroissant (missions les plus récentes en premier)
+        if (tri == null && sens == null) { tri = "ref"; sens = "desc"; }
         List<MissionVue> tout = consultation.listerMissions(q, poste, etat);
         Comparator<MissionVue> cmp = comparateurMissions(tri);
         if ("desc".equals(sens)) cmp = cmp.reversed();
