@@ -6,59 +6,133 @@
     <title>Accueil</title>
     <link rel="stylesheet" th:href="@{/css/app.css}"/>
     <style>
-        @media print {
-            .no-print { display:none !important; }
-            body { background:#fff; }
-            .card,.kpi { box-shadow:none; break-inside:avoid; }
-            .grid { display:block; }
-            .grid .card { margin-bottom:1rem; }
-        }
-        .cap{color:var(--muted);font-size:.82rem;margin:.15rem 0 .85rem;line-height:1.45}
+        .dash{--serif:Georgia,'Cambria','Times New Roman',serif}
+
+        /* En-tête éditorial */
+        .dash-head{position:relative;margin:.2rem 0 0}
+        .dash-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:1.2rem;flex-wrap:wrap}
+        .eyebrow{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin:0 0 .4rem}
+        .dash-title{font-family:var(--serif);font-size:2.15rem;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.05;margin:0}
+        .dash-sub{color:var(--muted);margin:.4rem 0 0;font-size:.95rem}
+        .dash-sub strong{color:var(--gold-dark)}
+        .hero-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+        .hero-actions select{padding:.42rem .6rem;border:1px solid var(--line);border-radius:7px;font-size:.9rem;background:#fff;color:var(--ink)}
+        .hero-rule{height:3px;width:100%;margin-top:1.05rem;border-radius:2px;
+          background:linear-gradient(90deg,var(--gold-dark),var(--gold) 22%,var(--gold-light) 55%,transparent)}
+
+        /* Vue d'ensemble : anneau de disponibilité + KPI */
+        .overview{display:grid;grid-template-columns:260px 1fr;gap:1rem;margin:1.35rem 0}
+        .ov-gauge{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.7rem}
+        .gauge{position:relative;width:172px;height:172px;border-radius:50%;
+          background:conic-gradient(from -90deg,var(--gold-dark) 0, var(--gold) calc(var(--p,0)*1%), var(--gold-pale) 0);
+          display:grid;place-items:center}
+        .gauge::after{content:"";position:absolute;inset:15px;border-radius:50%;background:#fff;box-shadow:inset 0 1px 4px rgba(20,24,31,.07)}
+        .g-in{position:relative;line-height:1}
+        .g-pct{font-family:var(--serif);font-size:2.5rem;font-weight:700;color:var(--gold-dark);font-variant-numeric:lining-nums tabular-nums}
+        .g-lab{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:.35rem;font-weight:600}
+        .g-detail{color:var(--muted);font-size:.82rem;max-width:200px}
+
+        .ov-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem}
+        .mkpi{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.05rem 1.15rem;
+          text-decoration:none;display:flex;flex-direction:column;justify-content:center;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
+        .mkpi::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--gold)}
+        .mkpi.alert::before{background:var(--red)}
+        a.mkpi:hover{box-shadow:0 7px 20px rgba(20,24,31,.10);transform:translateY(-2px);border-color:#d8dce3;text-decoration:none}
+        .m-n{font-family:var(--serif);font-size:2rem;font-weight:700;color:var(--gold-dark);line-height:1;font-variant-numeric:lining-nums tabular-nums}
+        .mkpi.alert .m-n{color:var(--red)}
+        .m-l{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.5rem;font-weight:700}
+        .m-x{font-size:.76rem;color:var(--muted);margin-top:.25rem}
+
+        /* Graphiques */
+        .charts{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .ch-title{font-family:var(--serif);font-size:1.06rem;font-weight:700;color:var(--ink);margin:0 0 .2rem;display:flex;align-items:center;gap:.55rem}
+        .ch-title::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--gold);transform:rotate(45deg);flex:0 0 8px}
+        .cap{color:var(--muted);font-size:.82rem;margin:.15rem 0 .9rem;line-height:1.45}
+        .dash .bars{display:flex;flex-direction:column;gap:.62rem;margin-top:.5rem}
+        .dash .bar-row{display:grid;grid-template-columns:118px 1fr 40px;align-items:center;gap:.7rem;font-size:.86rem;color:var(--ink)}
+        .dash .bar-track{background:#eceef2;border-radius:999px;height:9px;overflow:hidden;display:flex}
+        .dash .bar-fill{height:100%;border-radius:999px;transform-origin:left;animation:grow .9s cubic-bezier(.2,.7,.2,1) both}
+        .dash .seg{height:100%;transform-origin:left;animation:grow .9s cubic-bezier(.2,.7,.2,1) both}
+        .dash .bar-row .v{text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
         .typeblock{margin-bottom:.7rem}
-        .scount{font-size:.79rem;color:var(--muted);margin:.2rem 0 0;padding-left:.1rem}
-        .scount b{font-weight:700}
+        .scount{font-size:.78rem;color:var(--muted);margin:.25rem 0 0;padding-left:.1rem}
+        .scount b{font-weight:700;color:var(--ink)}
         .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:baseline}
+        .legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:.1rem}
+
+        /* Accès rapides */
+        .quick h2{font-family:var(--serif);font-weight:700}
+        .dash .tile h3{font-family:var(--serif)}
+
+        /* Animations */
+        @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+        @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+        .reveal{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+
+        @media (max-width:820px){.overview{grid-template-columns:1fr}.charts{grid-template-columns:1fr}}
+        @media (prefers-reduced-motion:reduce){
+          .reveal,.dash .bar-fill,.dash .seg{animation:none!important;transform:none!important;opacity:1!important}
+        }
+        @media print{
+            .no-print{display:none!important}
+            body{background:#fff}
+            .reveal,.dash .bar-fill,.dash .seg{animation:none!important;transform:none!important;opacity:1!important}
+            .card,.mkpi,.ov-gauge{box-shadow:none}
+            .overview,.charts,.ov-kpis{display:block}
+            .overview>*,.charts>*{margin-bottom:1rem;break-inside:avoid}
+        }
     </style>
 </head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
-<main class="container">
-    <h1 style="margin-bottom:.2rem">Tableau de bord</h1>
-    <p class="muted">
-        <span th:if="${fPoste == null}">DGCPT — Gestion des missions et du parc informatique</span>
-        <span th:if="${fPoste != null}">Statistiques du poste : <strong th:text="${posteNom}">TPR</strong></span>
-    </p>
+<main class="container dash">
 
-    <div class="toolbar no-print" style="margin:.5rem 0 1.1rem">
-        <form method="get" th:action="@{/}" style="display:flex;align-items:center;gap:.5rem;margin:0">
-            <label class="muted" style="font-size:.9rem">Poste :</label>
-            <select name="poste" onchange="this.form.submit()">
-                <option value="">Tous les postes</option>
-                <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
-            </select>
-        </form>
-        <span class="spacer"></span>
-        <a class="btn secondary small" th:href="@{/tableau-bord/export(poste=${fPoste})}">⬇ Export Excel</a>
-        <button class="btn secondary small" type="button" onclick="window.print()">🖨 Export PDF</button>
-    </div>
-
-    <div class="kpis">
-        <a class="kpi" th:if="${fPoste == null}" th:href="@{/postes}"><div class="n" th:text="${nbPostes}">0</div><div class="l">Postes (TPR)</div></a>
-        <a class="kpi" th:href="@{/parc(poste=${fPoste})}"><div class="n" th:text="${nbMateriel}">0</div><div class="l">Matériel</div></a>
-        <div class="kpi" title="Disponibilité = matériels « En service » rapportés au matériel dont le statut est renseigné (en service + en panne + à changer). Les équipements sans statut ne sont pas comptés.">
-            <div class="n" th:text="|${tauxDispo} %|">0</div>
-            <div class="l">Disponibilité</div>
-            <div class="l" style="margin-top:.2rem;font-size:.76rem" th:text="|${matEnService} en service / ${nbStatues} évalués|"></div>
+    <header class="dash-head reveal">
+        <div class="dash-hero">
+            <div>
+                <p class="eyebrow">DGCPT · Trésor public</p>
+                <h1 class="dash-title">Tableau de bord</h1>
+                <p class="dash-sub" th:if="${fPoste == null}">Gestion des missions et du parc informatique des postes régionaux</p>
+                <p class="dash-sub" th:if="${fPoste != null}">Poste régional : <strong th:text="${posteNom}">TPR</strong></p>
+            </div>
+            <div class="hero-actions no-print">
+                <form method="get" th:action="@{/}" style="display:flex;align-items:center;gap:.5rem;margin:0">
+                    <label class="muted" style="font-size:.85rem">Poste</label>
+                    <select name="poste" onchange="this.form.submit()" aria-label="Filtrer par poste">
+                        <option value="">Tous les postes</option>
+                        <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
+                    </select>
+                </form>
+                <a class="btn secondary small" th:href="@{/tableau-bord/export(poste=${fPoste})}">⬇ Excel</a>
+                <button class="btn secondary small" type="button" onclick="window.print()">🖨 PDF</button>
+            </div>
         </div>
-        <a class="kpi" th:if="${fPoste == null}" th:href="@{/parc(statut='EN_PANNE')}"><div class="n" th:text="${postesAlerte}">0</div><div class="l">Postes en alerte (≥1 panne)</div></a>
-        <a class="kpi" th:if="${fPoste != null}" th:href="@{/parc(poste=${fPoste},statut='EN_PANNE')}"><div class="n" th:text="${matEnPanne}">0</div><div class="l">Matériel en panne</div></a>
-        <a class="kpi" th:href="@{/missions(poste=${fPoste})}"><div class="n" th:text="${nbMissions}">0</div><div class="l">Missions</div></a>
-    </div>
+        <div class="hero-rule"></div>
+    </header>
 
-    <div class="grid">
+    <section class="overview reveal" style="animation-delay:.05s">
+        <article class="card ov-gauge">
+            <div class="gauge" th:style="'--p:' + ${tauxDispo}" role="img" th:aria-label="|Disponibilité ${tauxDispo} pour cent|">
+                <div class="g-in">
+                    <div class="g-pct" th:text="|${tauxDispo}%|">0%</div>
+                    <div class="g-lab">Disponibilité</div>
+                </div>
+            </div>
+            <p class="g-detail" th:text="|${matEnService} en service sur ${nbStatues} équipements évalués|">—</p>
+        </article>
+        <div class="ov-kpis">
+            <a class="mkpi" th:if="${fPoste == null}" th:href="@{/postes}"><span class="m-n" th:text="${nbPostes}">0</span><span class="m-l">Postes (TPR)</span></a>
+            <a class="mkpi" th:href="@{/parc(poste=${fPoste})}"><span class="m-n" th:text="${nbMateriel}">0</span><span class="m-l">Matériel</span></a>
+            <a class="mkpi alert" th:if="${fPoste == null}" th:href="@{/parc(statut='EN_PANNE')}"><span class="m-n" th:text="${postesAlerte}">0</span><span class="m-l">Postes en alerte</span><span class="m-x">≥ 1 panne</span></a>
+            <a class="mkpi alert" th:if="${fPoste != null}" th:href="@{/parc(poste=${fPoste},statut='EN_PANNE')}"><span class="m-n" th:text="${matEnPanne}">0</span><span class="m-l">Matériel en panne</span></a>
+            <a class="mkpi" th:href="@{/missions(poste=${fPoste})}"><span class="m-n" th:text="${nbMissions}">0</span><span class="m-l">Missions</span></a>
+        </div>
+    </section>
+
+    <section class="charts reveal" style="animation-delay:.1s">
         <div class="card">
-            <h3 style="margin-top:0;border:none">Matériel par statut</h3>
-            <p class="cap">Le parc <span th:if="${fPoste != null}">de ce poste </span>réparti par état. La barre indique la part du total ; le chiffre à droite, le nombre d'équipements.</p>
+            <h3 class="ch-title">Matériel par statut</h3>
+            <p class="cap">Le parc <span th:if="${fPoste != null}">de ce poste </span>réparti par état. La barre indique la part du total ; le chiffre, le nombre d'équipements.</p>
             <div class="bars">
                 <div class="bar-row"><span><span class="dot" style="background:#4f9d50"></span>En service</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnService} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnService}">0</span></div>
                 <div class="bar-row"><span><span class="dot" style="background:#cf4a3f"></span>En panne</span><span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${nbMateriel} > 0 ? ${matEnPanne} * 100 / ${nbMateriel} : 0) + '%'"></span></span><span class="v" th:text="${matEnPanne}">0</span></div>
@@ -66,7 +140,7 @@
             </div>
         </div>
         <div class="card">
-            <h3 style="margin-top:0;border:none">Missions par état</h3>
+            <h3 class="ch-title">Missions par état</h3>
             <p class="cap">Missions <span th:if="${fPoste != null}">de ce poste </span>réparties selon leur avancement (calculé à partir des dates).</p>
             <div class="bars">
                 <div class="bar-row"><span><span class="dot" style="background:#3f74b0"></span>Planifiées</span><span class="bar-track"><span class="bar-fill blue" th:style="'width:' + (${nbMissions} > 0 ? ${misPlan} * 100 / ${nbMissions} : 0) + '%'"></span></span><span class="v" th:text="${misPlan}">0</span></div>
@@ -75,41 +149,42 @@
             </div>
         </div>
         <div class="card">
-            <h3 style="margin-top:0;border:none">Matériel par type</h3>
-            <p class="cap">Pour chaque type d'équipement : le <b>total</b> (à droite) et sa répartition par état.
-                <span style="white-space:nowrap"><span class="dot" style="background:#4f9d50"></span>en service</span>
-                <span style="white-space:nowrap"><span class="dot" style="background:#cf4a3f"></span>en panne</span>
-                <span style="white-space:nowrap"><span class="dot" style="background:#e0972f"></span>à changer</span>.
-                Chaque barre est à l'échelle de son propre type (elle vaut 100 % de ce type).</p>
-            <div class="bars">
+            <h3 class="ch-title">Matériel par type</h3>
+            <p class="cap">Pour chaque type : le <b>total</b> (à droite) et sa répartition par état. Chaque barre est à l'échelle de son propre type.</p>
+            <div class="legend">
+                <span><span class="dot" style="background:#4f9d50"></span>en service</span>
+                <span><span class="dot" style="background:#cf4a3f"></span>en panne</span>
+                <span><span class="dot" style="background:#e0972f"></span>à changer</span>
+            </div>
+            <div class="bars" style="margin-top:.7rem">
                 <div class="typeblock">
                     <div class="bar-row"><span>Ordinateurs</span>
                         <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbOrdi} > 0 ? ${ordSvc} * 100 / ${nbOrdi} : 0) + '%'" th:title="|En service : ${ordSvc}|"></span><span class="seg red" th:style="'width:' + (${nbOrdi} > 0 ? ${ordPan} * 100 / ${nbOrdi} : 0) + '%'" th:title="|En panne : ${ordPan}|"></span><span class="seg orange" th:style="'width:' + (${nbOrdi} > 0 ? ${ordChg} * 100 / ${nbOrdi} : 0) + '%'" th:title="|À changer : ${ordChg}|"></span></span>
                         <span class="v" th:text="${nbOrdi}">0</span></div>
-                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${ordSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${ordPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${ordChg}">0</b> à changer</span></div>
+                    <div class="scount"><b th:text="${ordSvc}">0</b> en service · <b th:text="${ordPan}">0</b> en panne · <b th:text="${ordChg}">0</b> à changer</div>
                 </div>
                 <div class="typeblock">
                     <div class="bar-row"><span>Imprimantes</span>
                         <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbImp} > 0 ? ${impSvc} * 100 / ${nbImp} : 0) + '%'" th:title="|En service : ${impSvc}|"></span><span class="seg red" th:style="'width:' + (${nbImp} > 0 ? ${impPan} * 100 / ${nbImp} : 0) + '%'" th:title="|En panne : ${impPan}|"></span><span class="seg orange" th:style="'width:' + (${nbImp} > 0 ? ${impChg} * 100 / ${nbImp} : 0) + '%'" th:title="|À changer : ${impChg}|"></span></span>
                         <span class="v" th:text="${nbImp}">0</span></div>
-                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${impSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${impPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${impChg}">0</b> à changer</span></div>
+                    <div class="scount"><b th:text="${impSvc}">0</b> en service · <b th:text="${impPan}">0</b> en panne · <b th:text="${impChg}">0</b> à changer</div>
                 </div>
                 <div class="typeblock">
                     <div class="bar-row"><span>Switchs / AP</span>
                         <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbReseau} > 0 ? ${resSvc} * 100 / ${nbReseau} : 0) + '%'" th:title="|En service : ${resSvc}|"></span><span class="seg red" th:style="'width:' + (${nbReseau} > 0 ? ${resPan} * 100 / ${nbReseau} : 0) + '%'" th:title="|En panne : ${resPan}|"></span><span class="seg orange" th:style="'width:' + (${nbReseau} > 0 ? ${resChg} * 100 / ${nbReseau} : 0) + '%'" th:title="|À changer : ${resChg}|"></span></span>
                         <span class="v" th:text="${nbReseau}">0</span></div>
-                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${resSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${resPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${resChg}">0</b> à changer</span></div>
+                    <div class="scount"><b th:text="${resSvc}">0</b> en service · <b th:text="${resPan}">0</b> en panne · <b th:text="${resChg}">0</b> à changer</div>
                 </div>
                 <div class="typeblock">
                     <div class="bar-row"><span>Scanners</span>
                         <span class="bar-track"><span class="seg green" th:style="'width:' + (${nbScan} > 0 ? ${scnSvc} * 100 / ${nbScan} : 0) + '%'" th:title="|En service : ${scnSvc}|"></span><span class="seg red" th:style="'width:' + (${nbScan} > 0 ? ${scnPan} * 100 / ${nbScan} : 0) + '%'" th:title="|En panne : ${scnPan}|"></span><span class="seg orange" th:style="'width:' + (${nbScan} > 0 ? ${scnChg} * 100 / ${nbScan} : 0) + '%'" th:title="|À changer : ${scnChg}|"></span></span>
                         <span class="v" th:text="${nbScan}">0</span></div>
-                    <div class="scount"><span style="color:#2e7d32"><span class="dot" style="background:#4f9d50"></span><b th:text="${scnSvc}">0</b> en service</span> &nbsp;·&nbsp; <span style="color:#c0392b"><span class="dot" style="background:#cf4a3f"></span><b th:text="${scnPan}">0</b> en panne</span> &nbsp;·&nbsp; <span style="color:#9c5700"><span class="dot" style="background:#e0972f"></span><b th:text="${scnChg}">0</b> à changer</span></div>
+                    <div class="scount"><b th:text="${scnSvc}">0</b> en service · <b th:text="${scnPan}">0</b> en panne · <b th:text="${scnChg}">0</b> à changer</div>
                 </div>
             </div>
         </div>
         <div class="card" th:if="${fPoste == null}">
-            <h3 style="margin-top:0;border:none">Matériel par poste</h3>
+            <h3 class="ch-title">Matériel par poste</h3>
             <p class="cap">Nombre d'équipements rattachés à chaque poste (TPR), du plus fourni au moins fourni.</p>
             <div class="bars">
                 <div class="bar-row" th:each="sp : ${parPoste}" th:title="|${sp.total} matériel(s) · ${sp.enPanne} en panne|">
@@ -120,10 +195,10 @@
                 <p class="muted" th:if="${parPoste.isEmpty()}" style="margin:.3rem 0 0">Aucun matériel.</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="no-print">
-        <h2 style="margin-top:1.6rem">Accès rapides</h2>
+    <section class="quick no-print reveal" style="animation-delay:.15s">
+        <h2>Accès rapides</h2>
         <div class="grid">
             <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
             <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
@@ -134,7 +209,7 @@
             <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
             <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
         </div>
-    </div>
+    </section>
 </main>
 </body>
 </html>
