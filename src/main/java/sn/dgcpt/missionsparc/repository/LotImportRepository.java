@@ -9,4 +9,5 @@ import java.util.List;
 public interface LotImportRepository extends JpaRepository<LotImport, Integer> {
     List<LotImport> findByMission_IdAndStatut(Integer missionId, StatutLot statut);
     List<LotImport> findByMission_Id(Integer missionId);
+    List<LotImport> findByMission_Poste_IdOrderByDateChargementDesc(Integer posteId);
 }

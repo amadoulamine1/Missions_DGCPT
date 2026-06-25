@@ -38,6 +38,7 @@ class ConsultationServiceTest {
     @Mock ScannerChequeRepository scannerRepo;
     @Mock AffectationMaterielRepository affectationRepo;
     @Mock CategorieMaterielRepository categorieMaterielRepo;
+    @Mock LotImportRepository lotImportRepo;
     @InjectMocks ConsultationService service;
 
     // ---------- fabriques ----------

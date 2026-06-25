@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface MissionRepository extends JpaRepository<Mission, Integer> {
     Optional<Mission> findByReference(String reference);
     long countByReferenceStartingWith(String prefixe);
+    List<Mission> findByPoste_IdOrderByDateDebutDesc(Integer posteId);
 
     /**
      * Missions où l'agent est membre et dont la période chevauche [debut, fin].

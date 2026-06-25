@@ -71,6 +71,53 @@
             <tr th:if="${d.materiels.isEmpty()}"><td colspan="8" class="empty">Aucun matériel.</td></tr>
         </tbody>
     </table>
+
+    <h2>Missions du poste</h2>
+    <table class="table">
+        <thead><tr><th scope="col">N° mission</th><th scope="col">Objet</th><th scope="col">Période</th><th scope="col">État</th></tr></thead>
+        <tbody>
+            <tr th:each="m : ${d.missions}">
+                <td class="mono" th:text="${m[0]}"></td><td th:text="${m[1]}"></td><td th:text="${m[2]}"></td>
+                <td><span class="badge" th:classappend="${m[3] == 'En cours' ? 'orange' : (m[3] == 'Terminée' ? 'green' : 'blue')}" th:text="${m[3]}"></span></td>
+            </tr>
+            <tr th:if="${d.missions.isEmpty()}"><td colspan="4" class="empty">Aucune mission.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Fichiers chargés (canevas)</h2>
+    <table class="table">
+        <thead><tr><th scope="col">Mission</th><th scope="col">Fichier</th><th scope="col">Saisi par</th><th scope="col">Date</th><th scope="col">Statut</th></tr></thead>
+        <tbody>
+            <tr th:each="f : ${d.fichiers}">
+                <td class="mono" th:text="${f[0]}"></td><td th:text="${f[1]}"></td><td th:text="${f[2]}"></td><td th:text="${f[3]}"></td>
+                <td><span class="badge" th:classappend="${f[4] == 'Intégré'} ? 'green' : 'gold'" th:text="${f[4]}"></span></td>
+            </tr>
+            <tr th:if="${d.fichiers.isEmpty()}"><td colspan="5" class="empty">Aucun fichier chargé.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Historique des affectations de matériel</h2>
+    <table class="table">
+        <thead><tr><th scope="col">N° inventaire</th><th scope="col">Matériel</th><th scope="col">Agent</th><th scope="col">Depuis</th><th scope="col">Jusqu'à</th></tr></thead>
+        <tbody>
+            <tr th:each="a : ${d.affectations}">
+                <td class="mono" th:text="${a[0]}"></td><td th:text="${a[1]}"></td><td th:text="${a[2]}"></td><td th:text="${a[3]}"></td><td th:text="${a[4]}"></td>
+            </tr>
+            <tr th:if="${d.affectations.isEmpty()}"><td colspan="5" class="empty">Aucune affectation.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Historique des chefs de poste</h2>
+    <table class="table">
+        <thead><tr><th scope="col">Agent</th><th scope="col">Depuis</th><th scope="col">Jusqu'à</th></tr></thead>
+        <tbody>
+            <tr th:each="c : ${d.chefsPoste}">
+                <td th:text="${c[0]}"></td><td th:text="${c[1]}"></td><td th:text="${c[2]}"></td>
+            </tr>
+            <tr th:if="${d.chefsPoste.isEmpty()}"><td colspan="3" class="empty">Aucun historique.</td></tr>
+        </tbody>
+    </table>
+
     <p style="margin-top:1rem"><a th:href="@{/postes}">← Liste des postes</a></p>
 
     <script>

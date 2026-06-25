@@ -229,13 +229,14 @@ public class IntegrationService {
         ord.setRam(nullSiVide(o.getRam()));
         ord.setProcesseur(nullSiVide(o.getProcesseur()));
         ord.setDisqueDur(nullSiVide(o.getDisqueDur()));
-        ord.setAgentInstallateur(resoudreAgent(o.getAgentInstallateur(), TypeAgent.INFORMATICIEN, null));
+        Agent traitant = resoudreAgent(o.getAgentInstallateur(), TypeAgent.INFORMATICIEN, null);
+        ord.setAgentInstallateur(traitant); // « dernier agent traitant » conservé sur la machine
         ord.setLogiciels(logicielsDe(o));
         ordinateurRepo.save(ord);
 
         Agent attributaire = resoudreAgent(o.getAgentAttributaire(), TypeAgent.POSTE, poste);
         majAffectation(mat, attributaire, poste, jour);
-        majReleve(mission, mat, saisisseur, zone, jour);
+        majReleve(mission, mat, saisisseur, traitant, zone, jour); // agent traitant historisé sur le relevé
     }
 
     private void integrerImprimante(LigneImprimante i, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
@@ -249,7 +250,7 @@ public class IntegrationService {
         imp.setIp(nullSiVide(i.getIp()));
         imprimanteRepo.save(imp);
         majAffectation(mat, null, poste, jour);
-        majReleve(mission, mat, saisisseur, zone, jour);
+        majReleve(mission, mat, saisisseur, null, zone, jour);
     }
 
     private void integrerReseau(LigneEquipementReseau eq, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
@@ -263,7 +264,7 @@ public class IntegrationService {
         er.setIp(nullSiVide(eq.getIp()));
         reseauRepo.save(er);
         majAffectation(mat, null, poste, jour);
-        majReleve(mission, mat, saisisseur, zone, jour);
+        majReleve(mission, mat, saisisseur, null, zone, jour);
     }
 
     private void integrerScanner(LigneScanner s, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
@@ -276,7 +277,7 @@ public class IntegrationService {
         sc.setMarque(nullSiVide(s.getMarque()));
         scannerRepo.save(sc);
         majAffectation(mat, null, poste, jour);
-        majReleve(mission, mat, saisisseur, zone, jour);
+        majReleve(mission, mat, saisisseur, null, zone, jour);
     }
 
     /** Matériel d'un type paramétrable (famille AUTRE) : attributs communs uniquement. */
@@ -291,7 +292,7 @@ public class IntegrationService {
         if (!vide(a.getIp())) mat.setIp(a.getIp().trim());
         materielRepo.save(mat);
         majAffectation(mat, null, poste, jour);
-        majReleve(mission, mat, saisisseur, zone, jour);
+        majReleve(mission, mat, saisisseur, null, zone, jour);
     }
 
     // ---------- noyau ----------
@@ -354,11 +355,12 @@ public class IntegrationService {
         affectationRepo.save(nouvelle);
     }
 
-    private void majReleve(Mission mission, Materiel mat, Agent saisisseur, String zone, LocalDate jour) {
+    private void majReleve(Mission mission, Materiel mat, Agent saisisseur, Agent traitant, String zone, LocalDate jour) {
         ReleveMateriel r = releveRepo.findByMissionAndMateriel(mission, mat).orElseGet(ReleveMateriel::new);
         r.setMission(mission);
         r.setMateriel(mat);
         r.setAgentSaisisseur(saisisseur);
+        r.setAgentTraitant(traitant);
         r.setZone(zone);
         r.setDateReleve(jour);
         r.setEtatObserve(construireEtatObserve(mat));

@@ -28,13 +28,15 @@ public class ConsultationService {
     private final ScannerChequeRepository scannerRepo;
     private final AffectationMaterielRepository affectationRepo;
     private final CategorieMaterielRepository categorieMaterielRepo;
+    private final LotImportRepository lotImportRepo;
 
     public ConsultationService(PosteRepository posteRepo, MaterielRepository materielRepo,
                                ChefPosteRepository chefPosteRepo, AgentRepository agentRepo,
                                MissionRepository missionRepo, ReleveMaterielRepository releveRepo,
                                OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
                                EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
-                               AffectationMaterielRepository affectationRepo, CategorieMaterielRepository categorieMaterielRepo) {
+                               AffectationMaterielRepository affectationRepo, CategorieMaterielRepository categorieMaterielRepo,
+                               LotImportRepository lotImportRepo) {
         this.posteRepo = posteRepo;
         this.materielRepo = materielRepo;
         this.chefPosteRepo = chefPosteRepo;
@@ -47,6 +49,7 @@ public class ConsultationService {
         this.scannerRepo = scannerRepo;
         this.affectationRepo = affectationRepo;
         this.categorieMaterielRepo = categorieMaterielRepo;
+        this.lotImportRepo = lotImportRepo;
     }
 
     /** Libellés des types paramétrables actifs (chips de filtre du parc). */
@@ -68,7 +71,30 @@ public class ConsultationService {
         String chefMat = courant.map(cp -> cp.getAgent().getMatricule()).orElse("");
         List<AgentVue> agents = agentRepo.findByPoste_Id(id).stream().map(this::versAgentVue).toList();
         List<MaterielLignePoste> materiels = materielRepo.findByPoste_Id(id).stream().map(this::versLignePoste).toList();
-        return new PosteDetailVue(versPosteVue(p), chef, chefMat, agents, materiels);
+
+        List<String[]> missions = missionRepo.findByPoste_IdOrderByDateDebutDesc(id).stream()
+                .map(m -> new String[]{ nz(m.getReference()), nz(m.getObjet()), periode(m.getDateDebut(), m.getDateFin()), etatTemporel(m) }).toList();
+        List<String[]> fichiers = lotImportRepo.findByMission_Poste_IdOrderByDateChargementDesc(id).stream()
+                .map(l -> new String[]{
+                        l.getMission() == null ? "" : nz(l.getMission().getReference()),
+                        nz(l.getSourceFichier()),
+                        nz(l.getAgentSaisisseur()),
+                        l.getDateChargement() == null ? "" : l.getDateChargement().toString().substring(0, 10),
+                        l.getStatut() == StatutLot.INTEGRE ? "Intégré" : "En attente" }).toList();
+        List<String[]> affectations = affectationRepo.findByPoste_IdOrderByDateDebutDesc(id).stream()
+                .map(a -> new String[]{
+                        a.getMateriel() == null ? "" : nz(a.getMateriel().getNumeroInventaire()),
+                        a.getMateriel() == null ? "" : nz(a.getMateriel().getNom()),
+                        a.getAgent() == null ? "(poste)" : a.getAgent().getMatricule() + " — " + a.getAgent().getNom() + " " + a.getAgent().getPrenom(),
+                        a.getDateDebut() == null ? "" : a.getDateDebut().toString(),
+                        a.getDateFin() == null ? "En cours" : a.getDateFin().toString() }).toList();
+        List<String[]> chefsPoste = chefPosteRepo.findByPoste_IdOrderByDateDebutDesc(id).stream()
+                .map(cp -> new String[]{
+                        cp.getAgent() == null ? "" : cp.getAgent().getMatricule() + " — " + cp.getAgent().getNom() + " " + cp.getAgent().getPrenom(),
+                        cp.getDateDebut() == null ? "" : cp.getDateDebut().toString(),
+                        cp.getDateFin() == null ? "En cours" : cp.getDateFin().toString() }).toList();
+
+        return new PosteDetailVue(versPosteVue(p), chef, chefMat, agents, materiels, missions, fichiers, affectations, chefsPoste);
     }
 
     // ---- Parc ----
@@ -153,6 +179,8 @@ public class ConsultationService {
                         r.getMission() == null ? "" : r.getMission().getReference(),
                         r.getDateReleve() == null ? "" : r.getDateReleve().toString(),
                         r.getAgentSaisisseur() == null ? "" : r.getAgentSaisisseur().getMatricule(),
+                        r.getAgentTraitant() == null ? "" :
+                                r.getAgentTraitant().getMatricule() + " — " + r.getAgentTraitant().getPrenom() + " " + r.getAgentTraitant().getNom(),
                         nz(r.getZone())
                 }).toList();
         List<String[]> histo = affectationRepo.findByMaterielOrderByDateDebutDesc(m).stream()

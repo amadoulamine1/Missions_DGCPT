@@ -15,6 +15,8 @@ public interface AffectationMaterielRepository extends JpaRepository<Affectation
 
     java.util.List<AffectationMateriel> findByMaterielOrderByDateDebutDesc(Materiel materiel);
 
+    List<AffectationMateriel> findByPoste_IdOrderByDateDebutDesc(Integer posteId);
+
     @Query("select a from AffectationMateriel a where a.dateDebut <= :d and (a.dateFin is null or a.dateFin > :d)")
     List<AffectationMateriel> actives(@Param("d") LocalDate d);
 }

@@ -195,7 +195,7 @@ public class CanevasWriter {
                     if (o != null) {
                         set(row, 3, o.getMacEthernet());
                         set(row, 4, o.getMacWifi());
-                        set(row, 6, libelle(o.getAgentInstallateur()));
+                        // Agent traitant (col. 6) NON pré-rempli : historisé par mission, à ressaisir à chaque mission.
                         Set<String> logs = o.getLogiciels().stream().map(Logiciel::getNom).collect(Collectors.toSet());
                         set(row, 7, logs.contains("Aster") ? "Oui" : "Non");
                         set(row, 8, logs.contains("Antivirus") ? "Oui" : "Non");

@@ -24,6 +24,11 @@ public class ReleveMateriel {
     @JoinColumn(name = "agent_saisisseur_matricule")
     private Agent agentSaisisseur;
 
+    /** Agent informaticien ayant traité le matériel lors de cette mission (historisé par relevé). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_traitant_matricule")
+    private Agent agentTraitant;
+
     private String zone;
 
     @Column(name = "source_fichier")
@@ -43,6 +48,8 @@ public class ReleveMateriel {
     public void setMateriel(Materiel materiel) { this.materiel = materiel; }
     public Agent getAgentSaisisseur() { return agentSaisisseur; }
     public void setAgentSaisisseur(Agent agentSaisisseur) { this.agentSaisisseur = agentSaisisseur; }
+    public Agent getAgentTraitant() { return agentTraitant; }
+    public void setAgentTraitant(Agent agentTraitant) { this.agentTraitant = agentTraitant; }
     public String getZone() { return zone; }
     public void setZone(String zone) { this.zone = zone; }
     public String getSourceFichier() { return sourceFichier; }
