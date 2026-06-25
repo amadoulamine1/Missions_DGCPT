@@ -17,7 +17,7 @@
             <h1 th:text="${d.mission.reference}">Mission</h1>
         </div>
         <div class="actions no-print">
-            <form th:if="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') and d.mission.statut != 'CLOTUREE'}" method="post" th:action="@{/missions/{id}/cloturer(id=${d.mission.id})}" style="display:inline;margin:0" onsubmit="return confirm('Clôturer définitivement cette mission ?');">
+            <form th:if="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') and d.mission.statut != 'CLOTUREE'}" method="post" th:action="@{/missions/{id}/cloturer(id=${d.mission.id})}" class="inline-form" onsubmit="return confirm('Clôturer définitivement cette mission ?');">
                 <button class="btn secondary" type="submit">Clôturer</button>
             </form>
             <a class="btn secondary" th:href="@{/missions/{id}/modifier(id=${d.mission.id})}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Modifier</a>

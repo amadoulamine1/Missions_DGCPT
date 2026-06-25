@@ -1,0 +1,29 @@
+name: CI
+
+# Intégration continue : build + suite de tests à chaque push / pull request sur main.
+# Les runners GitHub disposent de Docker, donc Testcontainers exécute réellement
+# ImportIntegrationTest (chaîne import → intégration + rejeu Flyway sur base vierge),
+# au lieu de l'ignorer comme sur un poste sans Docker.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Java 17 (Temurin) + cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build et tests
+        run: mvn -B -ntp verify

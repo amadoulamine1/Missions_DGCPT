@@ -30,7 +30,7 @@
     </div>
 
     <div class="card" th:if="${currentRole == 'ADMIN'}">
-        <h2 style="margin-top:0;border:none">Changer le chef de poste</h2>
+        <h2 class="flush">Changer le chef de poste</h2>
         <form method="post" th:action="@{/postes/{id}/chef(id=${d.poste.id})}">
             <div class="form-row">
                 <label>Chef de poste <span class="req">*</span></label>

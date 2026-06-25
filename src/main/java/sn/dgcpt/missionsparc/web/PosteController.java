@@ -1,7 +1,9 @@
 package sn.dgcpt.missionsparc.web;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Poste;
@@ -43,12 +45,12 @@ public class PosteController {
     }
 
     @PostMapping
-    public String creer(@ModelAttribute("form") PosteForm form, Model model) {
+    public String creer(@Valid @ModelAttribute("form") PosteForm form, BindingResult br, Model model) {
         String code = form.getCode() == null ? "" : form.getCode().trim();
-        if (posteRepo.findByCode(code).isPresent()) {
-            model.addAttribute("form", form);
+        if (!br.hasFieldErrors("code") && posteRepo.findByCode(code).isPresent())
+            br.rejectValue("code", "duplicate", "Un poste avec le code « " + code + " » existe déjà.");
+        if (br.hasErrors()) {
             model.addAttribute("mode", "creation");
-            model.addAttribute("erreur", "Un poste avec le code « " + code + " » existe déjà.");
             return "poste-form";
         }
         Poste p = new Poste();
@@ -60,7 +62,12 @@ public class PosteController {
     }
 
     @PostMapping("/{id}")
-    public String mettreAJour(@PathVariable Integer id, @ModelAttribute("form") PosteForm form) {
+    public String mettreAJour(@PathVariable Integer id, @Valid @ModelAttribute("form") PosteForm form,
+                              BindingResult br, Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("mode", "modification");
+            return "poste-form";
+        }
         Poste p = posteRepo.findById(id).orElseThrow();
         p.setCode(form.getCode() == null ? p.getCode() : form.getCode().trim());
         p.setNom(form.getNom());

@@ -23,7 +23,7 @@
                 <td th:text="${l.date}"></td><td th:text="${l.nbLignes}"></td>
                 <td>
                     <form method="post" th:action="@{/missions/{id}/consolidation/lots/{lid}/supprimer(id=${missionId},lid=${l.id})}"
-                          style="display:inline;margin:0" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"
+                          class="inline-form" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"
                           onsubmit="return confirm('Retirer ce lot de la consolidation ?');">
                         <button class="btn small secondary" type="submit">Retirer</button>
                     </form>
@@ -44,7 +44,7 @@
             </div>
         </div>
         <p th:if="${conflits.isEmpty()}" class="alert ok">Aucun conflit — les fichiers sont cohérents.</p>
-        <div class="toolbar" style="margin-top:1rem" th:if="${not lots.isEmpty()}">
+        <div class="toolbar mt-1" th:if="${not lots.isEmpty()}">
             <button class="btn" type="submit" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Valider et intégrer</button>
             <span th:if="${currentRole == 'AGENT'}" class="muted">L'intégration de la consolidation est réservée au chef de mission.</span>
         </div>

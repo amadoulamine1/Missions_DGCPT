@@ -23,7 +23,7 @@
                 <td><span class="badge" th:classappend="${u.actif} ? 'green' : 'red'" th:text="${u.actif} ? 'Actif' : 'Désactivé'"></span></td>
                 <td>
                     <a class="btn small secondary" th:href="@{/utilisateurs/{id}/modifier(id=${u.id})}">Modifier</a>
-                    <form method="post" th:action="@{/utilisateurs/{id}/reinitialiser(id=${u.id})}" style="display:inline;margin:0"
+                    <form method="post" th:action="@{/utilisateurs/{id}/reinitialiser(id=${u.id})}" class="inline-form"
                           onsubmit="return confirm('Réinitialiser le mot de passe de ce compte ?');">
                         <button class="btn small secondary" type="submit">Réinitialiser MdP</button>
                     </form>

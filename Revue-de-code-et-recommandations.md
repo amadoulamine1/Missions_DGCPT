@@ -21,14 +21,14 @@ Les priorités suivent la convention de la revue : **P1** = impact direct (perfo
 |------|------|--------|
 | Forçage du changement de mot de passe à la première connexion (drapeau `mot_de_passe_a_changer`, V13, intercepteur, page self-service) | ✅ Implémenté | `cae93a1` |
 | Réinitialisation par un administrateur repositionne le drapeau (l'utilisateur devra changer son mot de passe) | ✅ Implémenté | `cae93a1` |
+| **Bean Validation** déclarative sur `PosteForm` et `AgentForm` (`@NotBlank`, `@Size`, `@Email`) ; contrôleurs `@Valid` + `BindingResult` ; erreurs affichées par champ (`th:errors`, `.field-err`) ; test `FormValidationTest` | ✅ Implémenté | — |
+| **Création à la volée à l'import journalisée** (WARN « Import (création à la volée) ») pour poste / agent / agent de poste / catégorie de câble inconnus — audit a posteriori par un administrateur | ✅ Implémenté | — |
 
-### Préconisations P2 restantes (non implémentées)
-
-- **Bean Validation** sur les paramètres/DTO des formulaires (`@NotBlank`, `@Size`, `@Email`…) plutôt que des
-  contrôles manuels dispersés dans les services. Gain : messages d'erreur homogènes et validation déclarative.
-- **Durcir la création à la volée à l'import.** Aujourd'hui certains référentiels peuvent être créés
-  implicitement lors d'une intégration ; tracer ces créations (journal) et/ou les soumettre à validation
-  d'un administrateur évite l'introduction silencieuse de données de mauvaise qualité.
+> Périmètre Bean Validation : les formulaires à logique inter-champs / conditionnelle
+> (`UtilisateurForm` — compte lié à un agent vs compte système, mot de passe obligatoire à la création
+> seulement ; formulaires mission — chef « existant/nouveau », liste des membres) conservent volontairement
+> leur validation métier dans les services. La validation déclarative couvre la présence et le format des
+> champs inconditionnels ; les règles métier et d'unicité (clés en base) restent au service (défense en profondeur).
 
 ---
 
@@ -42,23 +42,22 @@ Les priorités suivent la convention de la revue : **P1** = impact direct (perfo
     (type paramétrable : libellé + préfixe). Invariant `categorie.famille == type`, garanti à l'intégration.
   - `ReleveMateriel.etatObserve` / `statutObserve` / `agentTraitant` : instantanés (snapshots) figés de
     l'état du matériel à la date du relevé, jamais réécrits — duplication assumée pour l'historisation (§9.5).
+- **Intégration continue (CI).** Workflow GitHub Actions `.github/workflows/ci.yml` : build + suite de tests
+  (`mvn -B -ntp verify`) sur `ubuntu-latest` à chaque push / pull request sur `main`. Les runners disposant de
+  Docker, **Testcontainers exécute réellement `ImportIntegrationTest`** (chaîne import → intégration + rejeu
+  Flyway sur base `V1`…`V13` vierge) au lieu de l'ignorer comme sur un poste sans Docker. Verrou contre les
+  régressions de migration / SQL natif avant la production.
+- **Nettoyage des styles inline (partiel).** Les motifs répétés ont été factorisés en classes utilitaires
+  d'`app.css` (`.flush`, `.inline-form`, `.toolbar.mt-1`, `.m-0`, `.mt-sm`, `.text-center`) et appliqués aux
+  gabarits concernés. Les `style="…"` restants sont soit ponctuels (un seul usage), soit **dynamiques**
+  (`th:style` calculé — jauges du tableau de bord), et restent volontairement inline.
 
 ### Préconisations P3 restantes (non implémentées)
 
-- **Intégration continue (CI) exécutant le test d'intégration existant.** `ImportIntegrationTest`
-  (Testcontainers, `@SpringBootTest`) couvre déjà la chaîne import → intégration sur une vraie PostgreSQL
-  **et**, de fait, le rejeu Flyway sur base vierge (le conteneur neuf applique `V1`…`V13` au démarrage : une
-  migration cassée fait échouer le test). Mais il est **ignoré automatiquement quand Docker n'est pas
-  disponible** (`@EnabledIf("dockerDisponible")`) — c'est le cas en poste de dev sans Docker Desktop. Le
-  manque réel est une CI avec service Docker qui l'exécute systématiquement, afin qu'il cesse d'être ignoré
-  et garde les régressions de migration / SQL natif hors production. Les tests unitaires restent mockés
-  (contrainte JDK 25 : ByteBuddy n'instrumente pas les classes concrètes), d'où l'intérêt de ce test réel.
-- **Renforcer l'idempotence Flyway en local.** À défaut de Docker, vérifier régulièrement à la main que
-  `mvn spring-boot:run` sur une base vide applique toute la chaîne sans erreur (régressions « colonne déjà
-  existante » / « type incompatible » déjà rencontrées en V8/V10).
-- **Nettoyage des styles inline.** Plusieurs gabarits Thymeleaf portent encore des attributs `style="…"`
-  ponctuels (ex. largeurs, marges). Les migrer vers des classes utilitaires d'`app.css` améliore la cohérence
-  visuelle et la maintenabilité (point cosmétique, sans urgence).
+- **Renforcer l'idempotence Flyway en local.** À défaut de Docker en poste de dev, vérifier régulièrement à
+  la main que `mvn spring-boot:run` sur une base vide applique toute la chaîne sans erreur (régressions
+  « colonne déjà existante » / « type incompatible » déjà rencontrées en V8/V10). En CI, c'est désormais
+  couvert automatiquement par `ImportIntegrationTest`.
 
 ---
 

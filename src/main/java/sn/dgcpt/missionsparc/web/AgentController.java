@@ -1,7 +1,9 @@
 package sn.dgcpt.missionsparc.web;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,7 +87,12 @@ public class AgentController {
     }
 
     @PostMapping
-    public String creer(@ModelAttribute("form") AgentForm form, Model model) {
+    public String creer(@Valid @ModelAttribute("form") AgentForm form, BindingResult br, Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("postes", posteRepo.findAll());
+            model.addAttribute("mode", "creation");
+            return "agent-form";
+        }
         try {
             agentService.creer(form);
             return "redirect:/agents";
@@ -98,8 +105,15 @@ public class AgentController {
     }
 
     @PostMapping("/{matricule}")
-    public String mettreAJour(@PathVariable String matricule, @ModelAttribute("form") AgentForm form, Model model) {
+    public String mettreAJour(@PathVariable String matricule, @Valid @ModelAttribute("form") AgentForm form,
+                              BindingResult br, Model model) {
         form.setMatricule(matricule);
+        if (br.hasErrors()) {
+            model.addAttribute("postes", posteRepo.findAll());
+            model.addAttribute("historique", agentService.historiqueRattachement(matricule));
+            model.addAttribute("mode", "modification");
+            return "agent-form";
+        }
         try {
             agentService.modifier(form);
             return "redirect:/agents";

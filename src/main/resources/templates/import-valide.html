@@ -14,7 +14,7 @@
         <p class="alert ok">Le canevas de la mission <strong th:text="${reference}">M-…</strong> a été validé.</p>
         <p><strong th:text="${nbMateriels}">0</strong> matériel(s) et <strong th:text="${nbMembres}">0</strong> membre(s) pris en compte.</p>
         <p class="muted">Les données ont été intégrées en base : matériel créé ou mis à jour (numéros attribués aux nouveaux), affectations historisées et relevé daté rattaché à la mission.</p>
-        <div class="toolbar" style="margin-top:1rem">
+        <div class="toolbar mt-1">
             <a class="btn" th:href="@{/import}">Nouvel import</a>
             <a class="btn secondary" th:href="@{/parc}">Voir le parc</a>
         </div>

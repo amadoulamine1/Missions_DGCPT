@@ -12,7 +12,7 @@
 
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
         <div class="card">
-            <h2 style="margin-top:0;border:none">Logiciels</h2>
+            <h2 class="flush">Logiciels</h2>
             <p class="muted" style="margin-top:-.2rem">Logiciels installables sur les ordinateurs (cases Oui/Non du canevas).</p>
             <form method="post" th:action="@{/referentiels/logiciels}" class="toolbar" style="margin-bottom:.8rem">
                 <input type="text" name="nom" placeholder="Nouveau logiciel…" required
@@ -30,7 +30,7 @@
                             </form>
                         </td>
                         <td style="text-align:right;white-space:nowrap">
-                            <form method="post" th:action="@{/referentiels/logiciels/{id}/supprimer(id=${l.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer ce logiciel ?');">
+                            <form method="post" th:action="@{/referentiels/logiciels/{id}/supprimer(id=${l.id})}" class="inline-form" onsubmit="return confirm('Supprimer ce logiciel ?');">
                                 <button class="btn small secondary" type="submit">Supprimer</button>
                             </form>
                         </td>
@@ -41,7 +41,7 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-top:0;border:none">Catégories de câble</h2>
+            <h2 class="flush">Catégories de câble</h2>
             <p class="muted" style="margin-top:-.2rem">Catégories utilisées dans le relevé réseau des missions.</p>
             <form method="post" th:action="@{/referentiels/cables}" class="toolbar" style="margin-bottom:.8rem">
                 <input type="text" name="libelle" placeholder="Nouvelle catégorie…" required
@@ -59,7 +59,7 @@
                             </form>
                         </td>
                         <td style="text-align:right;white-space:nowrap">
-                            <form method="post" th:action="@{/referentiels/cables/{id}/supprimer(id=${cc.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                            <form method="post" th:action="@{/referentiels/cables/{id}/supprimer(id=${cc.id})}" class="inline-form" onsubmit="return confirm('Supprimer cette catégorie ?');">
                                 <button class="btn small secondary" type="submit">Supprimer</button>
                             </form>
                         </td>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-top:0;border:none">Types de matériel</h2>
+            <h2 class="flush">Types de matériel</h2>
             <p class="muted" style="margin-top:-.2rem">Types affichés dans le parc et le canevas. Le préfixe alimente le n° d'inventaire. Les types système ne sont pas modifiables.</p>
             <form method="post" th:action="@{/referentiels/types}" class="toolbar" style="margin-bottom:.8rem">
                 <input type="text" name="libelle" placeholder="Nouveau type…" required
@@ -93,7 +93,7 @@
                         </td>
                         <td><span class="mono" th:if="${t.systeme}" th:text="${t.prefixe}"></span></td>
                         <td style="text-align:right;white-space:nowrap">
-                            <form th:if="${!t.systeme}" method="post" th:action="@{/referentiels/types/{id}/supprimer(id=${t.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer ce type ?');">
+                            <form th:if="${!t.systeme}" method="post" th:action="@{/referentiels/types/{id}/supprimer(id=${t.id})}" class="inline-form" onsubmit="return confirm('Supprimer ce type ?');">
                                 <button class="btn small secondary" type="submit">Supprimer</button>
                             </form>
                             <span th:if="${t.systeme}" class="muted" style="font-size:.8rem">système</span>

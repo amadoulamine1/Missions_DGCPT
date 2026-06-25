@@ -92,6 +92,9 @@ h3{color:var(--ink);font-size:1rem;font-weight:600;margin:1rem 0 .4rem}
 .alert.ok{background:#eaf6eb;border:1px solid #c4e3c5;color:var(--green)}
 .alert.warn{background:var(--gold-pale);border:1px solid var(--gold-light);color:var(--gold-dark)}
 .alert.err{background:#fceae8;border:1px solid #f3c7c1;color:var(--red)}
+/* erreurs de validation par champ (Bean Validation) */
+.field-err{flex-basis:100%;margin:.25rem 0 0 calc(250px + 1rem);color:var(--red);font-size:.82rem}
+.input-err,.input-err:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,57,43,.14)}
 td.BLOQUANT,span.BLOQUANT{color:var(--red);font-weight:700}
 td.AVERTISSEMENT,span.AVERTISSEMENT{color:var(--gold-dark);font-weight:700}
 
@@ -213,3 +216,11 @@ td.tech{font-family:'Consolas','SFMono-Regular',Menlo,monospace;font-size:.81rem
 .glyph.t-net{background:#e3f3e4;color:#2e7d32}
 .glyph.t-scn{background:#efe9fb;color:#5b3da8}
 .glyph.t-aut{background:#eef1f5;color:#6b7280}
+
+/* classes utilitaires — factorisent les styles inline répétés dans les gabarits */
+.m-0{margin:0}
+.mt-1{margin-top:1rem}
+.mt-sm{margin-top:.6rem}
+.inline-form{display:inline;margin:0}
+.text-center{text-align:center}
+.flush{margin-top:0;border:none}   /* titre dans une carte : sans marge haute ni filet doré */

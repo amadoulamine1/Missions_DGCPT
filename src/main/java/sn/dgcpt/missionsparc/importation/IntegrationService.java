@@ -26,7 +26,9 @@ import java.util.function.Supplier;
  *
  * NB : pour rester testable de bout en bout, les entités référencées absentes
  * (poste, mission, agents, catégorie) sont créées à la volée. En production,
- * leur absence devrait constituer un contrôle bloquant.
+ * leur absence devrait constituer un contrôle bloquant. À défaut, chaque création
+ * implicite est <b>journalisée au niveau WARN</b> (préfixe « Import (création à la volée) »)
+ * afin qu'un administrateur puisse auditer et valider a posteriori les données introduites.
  */
 @Service
 public class IntegrationService {
@@ -132,6 +134,7 @@ public class IntegrationService {
             Poste p = new Poste();
             p.setCode(c);
             p.setNom(vide(nom) ? c : nom.trim());
+            log.warn("Import (création à la volée) : poste inconnu « {} » (nom={}) créé — à valider par un administrateur.", c, p.getNom());
             return posteRepo.save(p);
         });
     }
@@ -164,6 +167,7 @@ public class IntegrationService {
             a.setPrenom("-");
             a.setTypeAgent(type);
             a.setPoste(type == TypeAgent.POSTE ? poste : null);
+            log.warn("Import (création à la volée) : agent {} inconnu « {} » créé (nom/prénom à compléter) — à valider par un administrateur.", type, mat);
             return agentRepo.save(a);
         });
     }
@@ -179,6 +183,8 @@ public class IntegrationService {
             a.setMatricule(mat);
             a.setTypeAgent(TypeAgent.POSTE);
             a.setPoste(poste);
+            log.warn("Import (création à la volée) : agent de poste « {} » créé pour le poste {} — à valider par un administrateur.",
+                    mat, poste == null ? "?" : poste.getCode());
         }
         if (!vide(l.getNom())) a.setNom(l.getNom().trim());
         else if (nouveau) a.setNom(mat);
@@ -205,6 +211,7 @@ public class IntegrationService {
         return categorieRepo.findByLibelle(lib).orElseGet(() -> {
             CategorieCable c = new CategorieCable();
             c.setLibelle(lib);
+            log.warn("Import (création à la volée) : catégorie de câble inconnue « {} » créée — à valider par un administrateur.", lib);
             return categorieRepo.save(c);
         });
     }

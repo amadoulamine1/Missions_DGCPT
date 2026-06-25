@@ -15,10 +15,16 @@
         <form method="post"
               th:action="${form.id != null} ? @{/postes/{id}(id=${form.id})} : @{/postes}"
               th:object="${form}">
-            <div class="form-row"><label>Code <span class="req">*</span></label><input type="text" th:field="*{code}" required/></div>
-            <div class="form-row"><label>Nom <span class="req">*</span></label><input type="text" th:field="*{nom}" required/></div>
-            <div class="form-row"><label>Région</label><input type="text" th:field="*{region}"/></div>
-            <div class="toolbar" style="margin-top:1rem">
+            <div class="form-row"><label>Code <span class="req">*</span></label>
+                <input type="text" th:field="*{code}" th:errorclass="input-err" required/>
+                <p class="field-err" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></p></div>
+            <div class="form-row"><label>Nom <span class="req">*</span></label>
+                <input type="text" th:field="*{nom}" th:errorclass="input-err" required/>
+                <p class="field-err" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></p></div>
+            <div class="form-row"><label>Région</label>
+                <input type="text" th:field="*{region}" th:errorclass="input-err"/>
+                <p class="field-err" th:if="${#fields.hasErrors('region')}" th:errors="*{region}"></p></div>
+            <div class="toolbar mt-1">
                 <button class="btn" type="submit">Enregistrer</button>
                 <a class="btn secondary" th:href="@{/postes}">Annuler</a>
             </div>

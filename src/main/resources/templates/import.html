@@ -15,7 +15,7 @@
         <a class="btn secondary" th:href="@{/import/guide}">Guide d'utilisation</a>
     </div>
     <div class="card">
-        <h2 style="margin-top:0;border:none">Analyser un canevas rempli</h2>
+        <h2 class="flush">Analyser un canevas rempli</h2>
         <p th:if="${erreur}" class="alert err" th:text="${erreur}">erreur</p>
         <form method="post" th:action="@{/import}" enctype="multipart/form-data">
             <div class="form-row"><label>Fichier .xlsx</label><input type="file" name="fichier" accept=".xlsx" required/></div>
