@@ -81,6 +81,10 @@ public class IntegrationService {
         Poste poste = resoudrePoste(e.getCodePoste(), e.getNomPoste());
         Mission mission = resoudreMission(e, poste, jour);
         if (!vide(e.getObservations())) mission.setObservations(e.getObservations().trim());
+        // Relevé réseau : la mission est créée en ligne sans ces champs ; ils sont renseignés dans le
+        // canevas par l'agent. On les reporte donc à l'intégration, même si la mission existe déjà.
+        if (!vide(e.getEtatCablage())) mission.setEtatCablage(e.getEtatCablage().trim());
+        if (!vide(e.getCategorieCable())) mission.setCategorieCable(resoudreCategorie(e.getCategorieCable()));
         Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
         String zone = vide(e.getZone()) ? null : e.getZone();
 
