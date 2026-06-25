@@ -42,6 +42,7 @@ L'agent complète son **matricule de saisisseur**, éventuellement sa **zone**, 
 | 4-Imprimantes | `materiel` + `imprimante` | |
 | 5-Switchs et AP | `materiel` + `equipement_reseau` | colonne **Type** → `materiel.type` (`SWITCH` ou `ACCESS_POINT`) |
 | 6-Scanners chèque | `materiel` + `scanner_cheque` | clé physique = **numéro de série** |
+| 7-Autres matériels | `materiel` (+ `categorie_materiel`) | **types paramétrables** (famille *Autre*) ; colonne **Type** → liste déroulante du référentiel ; MAC/IP portées par `materiel` |
 
 ## 5. Contrôles à l'import
 
@@ -62,6 +63,8 @@ Deux niveaux de sévérité : **Bloquant** (la ligne ou le fichier est rejeté t
 | N° d'inventaire renseigné mais inconnu en base | Bloquant |
 | Doublon **intra-fichier** (même clé deux fois dans le fichier) | Bloquant |
 | MAC ou n° de série déjà connu sous **un autre** numéro d'inventaire (ligne sans n°) | Avertissement (rapprochement proposé) |
+| Onglet *7-Autres matériels* : **Type** et **Nom** renseignés | Bloquant |
+| Onglet *7-Autres matériels* : **Type** correspondant à un type connu du référentiel | Bloquant (type inconnu) |
 
 ## 6. Rapprochement du matériel (clé d'identité)
 
@@ -73,7 +76,7 @@ Pour chaque ligne de matériel, l'application applique cette logique :
 2. **Filet de sécurité (avant création)** — on recherche une fiche existante par **adresse MAC** (ordinateur, imprimante, équipement réseau) ou par **numéro de série** (scanner de chèque).
    - Correspondance trouvée → **avertissement** « ce matériel existe peut-être déjà » ; le chef de mission choisit : rattacher à l'existant (mise à jour) ou créer quand même.
    - Aucune correspondance → **nouveau matériel**.
-3. **Attribution du numéro** — à l'intégration, chaque nouveau matériel reçoit un **numéro d'inventaire généré** : `CODEPOSTE-TYPE-SÉQUENCE` (ex. `DKR-PC-0042`).
+3. **Attribution du numéro** — à l'intégration, chaque nouveau matériel reçoit un **numéro d'inventaire généré** : `CODEPOSTE-PRÉFIXE-SÉQUENCE` (ex. `DKR-PC-0042`). Le **préfixe** provient du **type de matériel** (référentiel paramétrable) : `PC`, `IMP`, `SW`, `AP`, `SCN`, `AUT` pour les types système, ou le préfixe saisi pour un type ajouté. Pour les types génériques (onglet *Autres*), la clé anti-doublon est la **MAC** portée par le matériel.
 
 > La clé officielle reste le **numéro d'inventaire**. La MAC et le numéro de série ne servent que de garde-fou anti-doublon.
 

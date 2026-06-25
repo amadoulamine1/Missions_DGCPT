@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 9 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 10 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -80,7 +80,7 @@ Identité commune à tous les types :
 | Champ | Description |
 |---|---|
 | **Numéro d'inventaire** | Clé d'identité, **généré par l'application**. Étiquette physique. |
-| Type | Ordinateur, imprimante, switch, access point, scanner de chèque, autre |
+| Type | Ordinateur, imprimante, switch, access point, scanner de chèque, autre — **liste paramétrable** (voir §3.8 et §9.12) |
 | Poste de rattachement | Historisé (le matériel peut changer de poste) |
 | Nom | |
 | Modèle | |
@@ -102,7 +102,7 @@ Lien matériel ↔ agent (et/ou poste) avec période. Permet de savoir à qui/o�
 ### 3.8 Référentiels (paramétrables)
 - **Logiciels** (extensible : on pourra en ajouter au-delà des 5 actuels) ;
 - **Catégories de câble** ;
-- **Types de matériel**.
+- **Types de matériel** — chaque type porte un **libellé** et un **préfixe** de n° d'inventaire ; les types ajoutés par l'administrateur enrichissent le parc et le canevas (voir §9.12).
 
 ### 3.9 Utilisateurs et rôles
 - **Administrateur** : référentiels, postes, agents, comptes utilisateurs.
@@ -246,6 +246,12 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Menu latéral** (à gauche) : Accueil, Postes, Agents, Parc, Missions, Importer, Guide, Comptes — avec mise en évidence de la page courante, repli en barre horizontale sur petit écran et masquage à l'impression.
 - **Thème institutionnel** : fond clair neutre, accent **or** (DGCPT), typographie sans-serif ; tableaux à en-tête doré, **pastilles de statut** et **filtres en pastilles**.
 - **Présentation adaptée** : tableaux triables et paginés pour les listes volumineuses (parc, missions, postes), **fiches** pour les agents, indicateurs et graphiques pour le tableau de bord.
+
+### 9.12 Types de matériel paramétrables
+- Les **types de matériel** deviennent un **référentiel** administrable (écran *Référentiels*) : l'administrateur ajoute un type avec son **libellé** et son **préfixe** de n° d'inventaire (2 à 4 lettres, unique). Les six types historiques (Ordinateur, Imprimante, Switch, Access point, Scanner chèque, Autre) sont **système** : non modifiables et non supprimables.
+- Conception : l'application conserve une **famille technique** (le comportement câblé des types riches — sous-type, feuille de caractéristiques, regroupement réseau — reste inchangé) ; les types ajoutés sont des matériels **génériques** de famille « Autre », limités aux **attributs communs** (nom, modèle, MAC, IP, statut, observation).
+- **Canevas** : un onglet **« 7-Autres matériels »** accueille ces types via une **liste déroulante** alimentée par le référentiel. À l'import, le **préfixe** du type alimente le numéro d'inventaire (`CODEPOSTE-PRÉFIXE-SÉQUENCE`) ; un type inconnu est signalé comme anomalie bloquante.
+- **Observation** : le champ d'observation du matériel, déjà saisi dans le canevas, est désormais **affiché** sur la fiche du poste (colonne) et en infobulle dans le parc.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

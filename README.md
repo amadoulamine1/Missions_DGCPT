@@ -24,10 +24,12 @@ Un **mode hors-ligne** (canevas Excel) permet la saisie en cas de coupure résea
 | `schema-postgresql.sql` | Schéma PostgreSQL (tables, contraintes, index, référentiels) |
 | `Canevas-Saisie-Mission-Parc.xlsx` | Canevas Excel de saisie hors-ligne |
 | `Specification-import-canevas.md` | Spécification de l'import et de la consolidation des canevas |
+| `Confrontation-cahier-vs-application.md` | Écarts entre le cahier des charges et l'application livrée |
+| `Politique-sauvegarde-securite.md` | Recommandations de sauvegarde et de sécurité (opérationnel) |
 
 ## Statut
 
-Application **en cours de développement** (Spring Boot/PostgreSQL). Réalisés : gestion des TPR et des agents, création de missions (avec chefs, membres et contrôles), import des canevas (aperçu → validation → intégration), et consultation (parc, postes, missions). Reste notamment l'**authentification avec les rôles**. Voir le §9 du cahier des charges pour le détail des évolutions.
+Application **fonctionnelle** (Spring Boot/PostgreSQL), cœur métier couvert. Réalisés : gestion des TPR et des agents (historisation des chefs de poste, mutation d'agent) ; missions (chefs, membres, contrôle de chevauchement, édition, clôture) ; import des canevas (aperçu → validation → intégration) avec **consolidation multi-fichiers et arbitrage des conflits** ; **historisation des affectations** (réaffectation, historique des propriétaires) ; restitutions (parc, postes, missions, **inventaire à une date** avec état observé figé) ; recherche / filtres / tri / pagination ; tableau de bord et **exports** (Excel, PDF) ; **authentification et 3 rôles** (administrateur, chef de mission, agent) ; administration des référentiels — logiciels, catégories de câble et **types de matériel paramétrables**. Suite de **tests automatisés** (unitaires + intégration de l'import). Voir le §9 du cahier des charges pour le détail des évolutions.
 
 ## Développement
 
@@ -44,7 +46,9 @@ Adapter `src/main/resources/application.properties` (URL, utilisateur et mot de 
 ### Lancer
     mvn spring-boot:run
 
-Au démarrage, **Flyway** applique la migration `db/migration/V1__schema_initial.sql` (tables et référentiels), puis l'application est disponible sur http://localhost:8080.
+Au démarrage, **Flyway** applique les migrations `db/migration/V1…V9` (schéma initial, caractéristiques, statut/observations, utilisateurs, lots d'import, rattachements, snapshot daté, types de matériel paramétrables), puis l'application est disponible sur http://localhost:8080.
+
+> Si une migration déjà appliquée a été retouchée (commentaire, idempotence), Flyway peut signaler un *checksum mismatch* : exécuter une fois `flyway repair` sur l'environnement concerné pour réaligner l'historique.
 
 ### Structure
 - `domain/` — entités JPA et énumérations
