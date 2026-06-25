@@ -4,6 +4,17 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+/**
+ * Relevé d'un matériel lors d'une mission, à une date donnée — brique de l'historisation.
+ *
+ * <p><b>Champs « instantané » (snapshot) volontairement dénormalisés.</b> {@link #etatObserve},
+ * {@link #statutObserve} et {@link #agentTraitant} sont des <i>copies figées</i> de l'état du
+ * matériel au moment du relevé, et non des références vivantes : ils ne sont jamais réécrits
+ * a posteriori. Ils dupliquent donc l'état courant du {@link Materiel} (statut, observation,
+ * agent traitant) à dessein, afin de reconstituer l'historique « tel qu'observé » à chaque date
+ * (cf. cahier §9.5, inventaire à une date) sans dépendre des valeurs actuelles de l'équipement.
+ * Conséquence assumée : modifier le matériel ne modifie pas les relevés passés.
+ */
 @Entity
 @Table(name = "releve_materiel")
 public class ReleveMateriel {

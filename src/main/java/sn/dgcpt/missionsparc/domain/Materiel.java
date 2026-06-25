@@ -4,6 +4,23 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
+/**
+ * Équipement du parc, identifié par son numéro d'inventaire.
+ *
+ * <p><b>Redondance maîtrisée {@link #type} ↔ {@link #categorie}.</b> Le champ {@code type}
+ * est la <i>famille technique</i> (enum {@link TypeMateriel}) : il est figé dans le code et
+ * pilote les comportements câblés (sous-entités dédiées, onglets du canevas, regroupement
+ * réseau, {@code switch} exhaustifs de {@code ConsultationService}, {@code IntegrationService},
+ * {@code CanevasWriter}, {@code StatsExporter}). Le champ {@code categorie} est le <i>type
+ * paramétrable</i> ({@link CategorieMateriel} : libellé affiché + préfixe d'inventaire), que
+ * l'administrateur gère dans les référentiels. <b>Invariant :</b> {@code categorie.famille == type},
+ * garanti à l'intégration ({@code IntegrationService}) — la famille est dérivée de la catégorie,
+ * jamais saisie de façon indépendante. Cette duplication est volontaire : elle évite de dynamiser
+ * les {@code switch} métier tout en rendant le libellé/préfixe paramétrable (cf. cahier §3.8).
+ *
+ * <p>{@link #mac}/{@link #ip} ne sont renseignés que pour la famille générique {@code AUTRE} ;
+ * les familles câblées portent ces informations dans leur sous-entité dédiée.
+ */
 @Entity
 @Table(name = "materiel")
 public class Materiel {
