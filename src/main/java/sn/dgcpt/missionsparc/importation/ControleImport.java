@@ -51,6 +51,7 @@ public class ControleImport {
             obligatoire(o.getAgentInstallateur(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "Agent traitant", r);
             macObligatoire(o.getMacEthernet(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "MAC ethernet", r);
             macSiPresent(o.getMacWifi(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), "MAC wifi", r);
+            statutObligatoire(o.getStatut(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), r);
             if (estNouveau(o.getNumeroInventaire()) && macValide(o.getMacEthernet())
                     && ordinateurRepo.findByMacEthernet(o.getMacEthernet()).isPresent()) {
                 alerteDoublon("MAC " + o.getMacEthernet(), CanevasReader.SHEET_ORDINATEURS, o.getNumLigne(), r);
@@ -61,6 +62,7 @@ public class ControleImport {
             obligatoire(i.getNom(), CanevasReader.SHEET_IMPRIMANTES, i.getNumLigne(), "Nom", r);
             macObligatoire(i.getMac(), CanevasReader.SHEET_IMPRIMANTES, i.getNumLigne(), "MAC", r);
             macSiPresent(i.getMacWifi(), CanevasReader.SHEET_IMPRIMANTES, i.getNumLigne(), "MAC wifi", r);
+            statutObligatoire(i.getStatut(), CanevasReader.SHEET_IMPRIMANTES, i.getNumLigne(), r);
             if (estNouveau(i.getNumeroInventaire()) && macValide(i.getMac())
                     && imprimanteRepo.findByMac(i.getMac()).isPresent()) {
                 alerteDoublon("MAC " + i.getMac(), CanevasReader.SHEET_IMPRIMANTES, i.getNumLigne(), r);
@@ -71,6 +73,7 @@ public class ControleImport {
             obligatoire(eq.getType(), CanevasReader.SHEET_RESEAU, eq.getNumLigne(), "Type", r);
             obligatoire(eq.getNom(), CanevasReader.SHEET_RESEAU, eq.getNumLigne(), "Nom", r);
             macObligatoire(eq.getMac(), CanevasReader.SHEET_RESEAU, eq.getNumLigne(), "MAC", r);
+            statutObligatoire(eq.getStatut(), CanevasReader.SHEET_RESEAU, eq.getNumLigne(), r);
             if (estNouveau(eq.getNumeroInventaire()) && macValide(eq.getMac())
                     && reseauRepo.findByMac(eq.getMac()).isPresent()) {
                 alerteDoublon("MAC " + eq.getMac(), CanevasReader.SHEET_RESEAU, eq.getNumLigne(), r);
@@ -79,6 +82,7 @@ public class ControleImport {
         for (LigneScanner sc : c.getScanners()) {
             r.incrementerLignesLues();
             obligatoire(sc.getNumeroSerie(), CanevasReader.SHEET_SCANNERS, sc.getNumLigne(), "Numéro de série", r);
+            statutObligatoire(sc.getStatut(), CanevasReader.SHEET_SCANNERS, sc.getNumLigne(), r);
             if (estNouveau(sc.getNumeroInventaire()) && !estVide(sc.getNumeroSerie())
                     && scannerRepo.findByNumeroSerie(sc.getNumeroSerie()).isPresent()) {
                 alerteDoublon("n° de série " + sc.getNumeroSerie(), CanevasReader.SHEET_SCANNERS, sc.getNumLigne(), r);
@@ -94,6 +98,7 @@ public class ControleImport {
                         "Type de matériel inconnu : « " + a.getTypeLibelle() + " ». Créez-le dans les référentiels avant l'import."));
             }
             macSiPresent(a.getMac(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), "MAC", r);
+            statutObligatoire(a.getStatut(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), r);
             if (estNouveau(a.getNumeroInventaire()) && macValide(a.getMac())
                     && materielRepo.findByMac(a.getMac()).isPresent()) {
                 alerteDoublon("MAC " + a.getMac(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), r);
@@ -109,6 +114,30 @@ public class ControleImport {
         obligatoireEntete(e.getAgentSaisisseur(), "Agent saisisseur", r);
         obligatoireEntete(e.getChefMission(), "Chef de mission", r);
         obligatoireEntete(e.getChefPoste(), "Chef de poste", r);
+        if (!estVide(e.getEtatCablage()) && !etatReseauConforme(e.getEtatCablage())) {
+            r.ajouter(new AnomalieImport(Severite.BLOQUANT, CanevasReader.SHEET_MISSION, null,
+                    "État du réseau invalide : « " + e.getEtatCablage() + " ». Valeurs attendues : Neuf, Bon, Pas bon."));
+        }
+    }
+
+    private boolean etatReseauConforme(String v) {
+        String x = v.trim().toLowerCase();
+        return x.equals("neuf") || x.equals("bon") || x.equals("pas bon");
+    }
+
+    /** Le statut du matériel est obligatoire et doit valoir En service / En panne / À changer. */
+    private void statutObligatoire(String v, String onglet, int ligne, RapportImport r) {
+        if (estVide(v)) {
+            r.ajouter(new AnomalieImport(Severite.BLOQUANT, onglet, ligne, "Champ obligatoire manquant : Statut"));
+        } else if (!statutConforme(v)) {
+            r.ajouter(new AnomalieImport(Severite.BLOQUANT, onglet, ligne,
+                    "Statut invalide : « " + v + " ». Valeurs attendues : En service, En panne, À changer."));
+        }
+    }
+
+    private boolean statutConforme(String v) {
+        String x = v.trim().toLowerCase();
+        return x.startsWith("en service") || x.startsWith("en panne") || x.startsWith("à changer") || x.startsWith("a changer");
     }
 
     private void obligatoireEntete(String v, String champ, RapportImport r) {

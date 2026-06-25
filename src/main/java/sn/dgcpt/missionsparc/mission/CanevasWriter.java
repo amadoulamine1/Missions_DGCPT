@@ -65,6 +65,11 @@ public class CanevasWriter {
     }
 
     public byte[] prestamper(Mission m) throws IOException {
+        return prestamper(m, null);
+    }
+
+    /** Variante par agent : pré-renseigne l'agent saisisseur (cellule B11 de « 1-Mission et Réseau »). */
+    public byte[] prestamper(Mission m, Agent saisisseur) throws IOException {
         try (InputStream is = new ClassPathResource("canevas/canevas-vierge.xlsx").getInputStream();
              Workbook wb = new XSSFWorkbook(is)) {
 
@@ -81,6 +86,9 @@ public class CanevasWriter {
             remplir(s, "chef de mission", libelle(m.getChefMission()));
             remplir(s, "chef de poste", libelle(m.getChefPosteFige()));
             remplir(s, "observations", m.getObservations());
+            if (saisisseur != null) remplir(s, "agent saisisseur", libelle(saisisseur));
+            // État du réseau contraint à : Neuf / Bon / Pas bon
+            listeDeroulanteCelluleLabel(s, "état du câblage", new String[]{"Neuf", "Bon", "Pas bon"});
 
             // 2) Membres de la mission
             Sheet mem = wb.getSheet("2-Membres mission");
@@ -213,7 +221,7 @@ public class CanevasWriter {
         Sheet s = wb.getSheet("7-Autres matériels");
         if (s == null) s = wb.createSheet("7-Autres matériels");
 
-        String[] entetes = {"N° inventaire", "Type*", "Nom*", "Modèle", "MAC", "IP", "Statut", "Observation"};
+        String[] entetes = {"N° inventaire", "Type*", "Nom*", "Modèle", "MAC", "IP", "Statut*", "Observation"};
         Row tete = ligne(s, 0);
         for (int i = 0; i < entetes.length; i++) set(tete, i, entetes[i]);
 
@@ -242,6 +250,30 @@ public class CanevasWriter {
             set(row, 6, statutLabel(mat.getStatut()));
             set(row, 7, mat.getObservation());
         }
+    }
+
+    /** Indice de la ligne dont la colonne A commence par le libellé donné, ou -1. */
+    private int ligneLabel(Sheet s, String prefixeLabel) {
+        if (s == null) return -1;
+        for (Row row : s) {
+            Cell a = row.getCell(0);
+            if (a == null || a.getCellType() != CellType.STRING) continue;
+            String lab = a.getStringCellValue().replace("*", "").trim().toLowerCase();
+            if (lab.startsWith(prefixeLabel)) return row.getRowNum();
+        }
+        return -1;
+    }
+
+    /** Pose une liste déroulante sur la cellule B (valeur) de la ligne portant le libellé donné. */
+    private void listeDeroulanteCelluleLabel(Sheet s, String prefixeLabel, String[] valeurs) {
+        int r = ligneLabel(s, prefixeLabel);
+        if (r < 0 || valeurs.length == 0) return;
+        DataValidationHelper helper = s.getDataValidationHelper();
+        DataValidationConstraint c = helper.createExplicitListConstraint(valeurs);
+        DataValidation v = helper.createValidation(c, new CellRangeAddressList(r, r, 1, 1));
+        v.setSuppressDropDownArrow(true);
+        v.setShowErrorBox(true);
+        s.addValidationData(v);
     }
 
     /** Pose une validation « liste » sur une colonne (lignes 2 à 500). Excel limite la liste à 255 caractères. */

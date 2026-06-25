@@ -21,9 +21,6 @@ import java.io.IOException;
 @Controller
 public class MissionController {
 
-    private static final String TYPE_XLSX =
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
     private final MissionService missionService;
     private final PosteRepository posteRepo;
 
@@ -100,11 +97,11 @@ public class MissionController {
 
     @GetMapping("/missions/{id}/canevas")
     public ResponseEntity<byte[]> canevas(@PathVariable Integer id) throws IOException {
-        byte[] data = missionService.genererCanevas(id);
+        byte[] data = missionService.genererCanevasZip(id);
         String ref = missionService.reference(id);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Canevas-" + ref + ".xlsx\"")
-                .contentType(MediaType.parseMediaType(TYPE_XLSX))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Canevas-" + ref + ".zip\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
                 .body(data);
     }
 }

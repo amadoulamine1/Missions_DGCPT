@@ -8,9 +8,12 @@ import sn.dgcpt.missionsparc.repository.ChefPosteRepository;
 import sn.dgcpt.missionsparc.repository.MissionRepository;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -102,7 +105,10 @@ public class MissionService {
         for (String mat : membres) {
             for (Mission c : missionRepo.membreEnConflit(mat, debut, finEff)) {
                 if (exclureMissionId != null && c.getId().equals(exclureMissionId)) continue;
-                conflits.add(mat + " (déjà sur " + c.getReference() + ")");
+                String nom = agentRepo.findById(mat).map(a -> (a.getNom() + " " + a.getPrenom()).trim()).orElse("");
+                String objet = (c.getObjet() == null || c.getObjet().isBlank()) ? "" : " « " + c.getObjet().trim() + " »";
+                String tpr = (c.getPoste() == null || c.getPoste().getNom() == null) ? "" : " au TPR " + c.getPoste().getNom();
+                conflits.add(mat + (nom.isEmpty() ? "" : " — " + nom) + " (déjà sur " + c.getReference() + objet + tpr + ")");
                 break;
             }
         }
@@ -198,6 +204,36 @@ public class MissionService {
     public byte[] genererCanevas(Integer missionId) throws IOException {
         return canevasWriter.prestamper(missionRepo.findById(missionId).orElseThrow());
     }
+
+    /**
+     * Un canevas par agent membre (informaticien), regroupés dans un ZIP : chaque fichier porte le nom
+     * de l'agent et a son matricule pré-renseigné comme agent saisisseur (cellule B11 de « 1-Mission et Réseau »).
+     */
+    @Transactional(readOnly = true)
+    public byte[] genererCanevasZip(Integer missionId) throws IOException {
+        Mission m = missionRepo.findById(missionId).orElseThrow();
+        List<Agent> membres = new ArrayList<>(m.getMembres());
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(bos)) {
+            if (membres.isEmpty()) {
+                zip.putNextEntry(new ZipEntry("Canevas-" + m.getReference() + ".xlsx"));
+                zip.write(canevasWriter.prestamper(m));
+                zip.closeEntry();
+            } else {
+                for (Agent a : membres) {
+                    String nom = (nz(a.getNom()) + " " + nz(a.getPrenom())).trim();
+                    String fichier = nettoyer("Canevas-" + m.getReference() + "-" + a.getMatricule() + "-" + nom) + ".xlsx";
+                    zip.putNextEntry(new ZipEntry(fichier));
+                    zip.write(canevasWriter.prestamper(m, a));
+                    zip.closeEntry();
+                }
+            }
+        }
+        return bos.toByteArray();
+    }
+
+    private String nz(String s) { return s == null ? "" : s; }
+    private String nettoyer(String s) { return s.replaceAll("[\\\\/:*?\"<>|]", " ").replaceAll("\\s+", "-"); }
 
     @Transactional(readOnly = true)
     public String reference(Integer missionId) {

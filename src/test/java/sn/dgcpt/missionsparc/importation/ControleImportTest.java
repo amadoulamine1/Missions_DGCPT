@@ -63,6 +63,7 @@ class ControleImportTest {
         o.setAgentAttributaire("A1");
         o.setAgentInstallateur("A2");
         o.setMacEthernet(mac);
+        o.setStatut("En service"); // le statut est désormais obligatoire
         return o;
     }
 
@@ -163,6 +164,59 @@ class ControleImportTest {
 
         assertThat(r.estIntegrable()).isFalse();
         assertThat(r.nbBloquants()).isEqualTo(6); // référence, code poste, objet, saisisseur, chef mission, chef poste
+    }
+
+    // ---------- statut obligatoire & état du réseau ----------
+
+    @Test
+    void statut_du_materiel_obligatoire() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        LigneOrdinateur o = ordinateurValide("ORD-1", MAC_VALIDE);
+        o.setStatut("");
+        c.getOrdinateurs().add(o);
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "manquant : Statut")).isTrue();
+    }
+
+    @Test
+    void statut_du_materiel_invalide_est_bloquant() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        LigneOrdinateur o = ordinateurValide("ORD-1", MAC_VALIDE);
+        o.setStatut("Marche");
+        c.getOrdinateurs().add(o);
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(contient(r, Severite.BLOQUANT, "Statut invalide")).isTrue();
+    }
+
+    @Test
+    void etat_du_reseau_hors_liste_est_bloquant() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getEntete().setEtatCablage("Excellent");
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(contient(r, Severite.BLOQUANT, "État du réseau invalide")).isTrue();
+    }
+
+    @Test
+    void etat_du_reseau_conforme_est_accepte() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getEntete().setEtatCablage("Bon");
+        c.getOrdinateurs().add(ordinateurValide("ORD-1", MAC_VALIDE));
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isTrue();
+        assertThat(contient(r, Severite.BLOQUANT, "État du réseau")).isFalse();
     }
 
     // ---------- onglet « Autres matériels » (types paramétrables) ----------

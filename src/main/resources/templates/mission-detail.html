@@ -19,7 +19,7 @@
         </form>
         <a class="btn secondary" th:href="@{/missions/{id}/modifier(id=${d.mission.id})}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Modifier</a>
         <a class="btn secondary" th:href="@{/missions/{id}/consolidation(id=${d.mission.id})}">Consolidation des imports</a>
-        <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger le canevas pré-rempli</a>
+        <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger les canevas (un par agent)</a>
     </div>
     <div class="card">
         <table class="kv">
