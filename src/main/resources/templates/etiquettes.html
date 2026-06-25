@@ -24,7 +24,7 @@
     <div class="toolbar no-print">
         <h1 style="margin:0">Étiquettes</h1>
         <span class="spacer"></span>
-        <button class="btn" type="button" onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button>
+        <button class="btn" type="button" onclick="window.print()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="15" width="10" height="6" rx="1"/></svg>Imprimer / Enregistrer en PDF</button>
         <a class="btn secondary" th:href="@{/parc}">← Parc</a>
     </div>
     <p class="muted no-print"><span th:text="${materiels.size()}">0</span> étiquette(s). Utilisez « Imprimer » puis choisissez votre imprimante ou « Enregistrer au format PDF ».</p>

@@ -11,9 +11,9 @@
             <h1>Inventaire du parc</h1>
         </div>
         <div class="actions no-print">
-            <a class="btn secondary small" th:href="@{/inventaire}">📅 Inventaire à une date</a>
-            <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
-            <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
+            <a class="btn secondary small" th:href="@{/inventaire}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/></svg>Inventaire à une date</a>
+            <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Export Excel</a>
+            <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l9 9-7 7-9-9z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>Étiquettes</a>
         </div>
     </header>
 

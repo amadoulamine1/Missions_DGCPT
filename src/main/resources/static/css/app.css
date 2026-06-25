@@ -73,6 +73,8 @@ h3{color:var(--ink);font-size:1rem;font-weight:600;margin:1rem 0 .4rem}
 .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.secondary:hover{background:var(--hover);color:var(--ink);border-color:#cfd4db}
 .btn.small{padding:.28rem .65rem;font-size:.82rem}
+.btn svg{width:15px;height:15px;vertical-align:-2px;margin-right:.35rem;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .toolbar{display:flex;gap:.6rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
 .spacer{flex:1}
 
@@ -156,6 +158,14 @@ th a{color:inherit}
   .topbar .userbox{margin-top:0;border:none;flex-direction:row;align-items:center;gap:.5rem;padding:.35rem .7rem;width:auto}
   .topbar .userbox .btn{width:auto}
   .topbar ~ .container{margin-left:auto}
+}
+
+/* Formulaires sur petit écran : label au-dessus du champ (plus de largeur figée) */
+@media (max-width:640px){
+  .form-row{flex-direction:column;align-items:stretch;gap:.3rem;margin:.9rem 0}
+  .form-row label{width:auto}
+  .form-row input,.form-row select,.form-row textarea{max-width:none}
+  .field-err{margin-left:0}
 }
 
 /* ===== Style maquette : filtres, recherche, cartes, glyphes ===== */

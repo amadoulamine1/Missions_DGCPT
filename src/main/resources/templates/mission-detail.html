@@ -22,7 +22,7 @@
             </form>
             <a class="btn secondary" th:href="@{/missions/{id}/modifier(id=${d.mission.id})}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">Modifier</a>
             <a class="btn secondary" th:href="@{/missions/{id}/consolidation(id=${d.mission.id})}">Consolidation des imports</a>
-            <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}">⬇ Télécharger les canevas (un par agent)</a>
+            <a class="btn" th:href="@{/missions/{id}/canevas(id=${d.mission.id})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Télécharger les canevas (un par agent)</a>
         </div>
     </header>
     <div class="card">
@@ -61,7 +61,7 @@
         </table>
     </div>
     <div class="toolbar"><h2 style="margin:0">Inventaire relevé</h2><span class="spacer"></span>
-        <a class="btn small secondary" th:href="@{/missions/{id}/releves/export(id=${d.mission.id})}">⬇ Export Excel</a></div>
+        <a class="btn small secondary" th:href="@{/missions/{id}/releves/export(id=${d.mission.id})}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Export Excel</a></div>
     <table class="table">
         <thead><tr><th scope="col">N° inventaire</th><th scope="col">Type</th><th scope="col">Nom</th><th scope="col">Saisi par</th><th scope="col">Statut</th><th scope="col">Date</th></tr></thead>
         <tbody>
