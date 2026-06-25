@@ -135,6 +135,8 @@ th a{color:inherit}
 @media print{
   .topbar{display:none}
   .topbar ~ .container{margin-left:0}
+  .no-print{display:none!important}
+  .table.sticky thead th{position:static}
 }
 @media (max-width:860px){
   .topbar{position:static;width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;
@@ -166,6 +168,23 @@ th a{color:inherit}
 .search input{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;
   padding:.5rem .7rem .5rem 2rem;font-size:.9rem;color:var(--ink);outline:none;font-family:inherit}
 .search input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.16)}
+
+/* ===== En-têtes de page, barres de filtres, tableaux denses (réutilisables) ===== */
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap}
+.page-head .actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.filterbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
+  border-radius:var(--r);padding:.65rem .85rem;box-shadow:var(--e1);margin:1.1rem 0 .8rem}
+.filterbar .search{min-width:230px;flex:1}
+.filterbar input[type=text]{padding:.5rem .7rem;border:1px solid var(--line);border-radius:var(--r-sm);
+  font-size:.9rem;background:#fff;color:var(--ink);min-width:200px;font-family:inherit}
+.filterbar input[type=text]:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.16)}
+.filterbar select{padding:.46rem .6rem;border:1px solid var(--line);border-radius:var(--r-sm);font-size:.9rem;background:#fff;color:var(--ink)}
+.filterbar .count{margin-left:auto;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.filterbar .count b{color:var(--ink);font-weight:700}
+.chiprow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.chiprow .lbl{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:.1rem}
+.table.sticky thead th{position:sticky;top:0;z-index:2}
+td.tech{font-family:'Consolas','SFMono-Regular',Menlo,monospace;font-size:.81rem;color:var(--muted);white-space:nowrap}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:1rem}
 .acard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;

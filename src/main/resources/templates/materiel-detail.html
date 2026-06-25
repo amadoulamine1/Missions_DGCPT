@@ -9,11 +9,15 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
-    <div class="toolbar">
-        <h1 style="margin:0" th:text="${d.base.numeroInventaire}">Matériel</h1>
-        <span class="spacer"></span>
-        <span class="badge" th:classappend="${d.base.famille}" th:text="${d.base.type}"></span>
-    </div>
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Équipement</p>
+            <h1 th:text="${d.base.numeroInventaire}">Matériel</h1>
+        </div>
+        <div class="actions">
+            <span class="badge" th:classappend="${d.base.famille}" th:text="${d.base.type}"></span>
+        </div>
+    </header>
 
     <p th:if="${message}" class="alert ok" th:text="${message}"></p>
     <p th:if="${erreur}" class="alert err" th:text="${erreur}"></p>

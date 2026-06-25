@@ -9,13 +9,17 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
-    <div class="toolbar">
-        <h1 style="margin:0">Postes régionaux</h1>
-        <span class="spacer"></span>
-        <a class="btn" th:href="@{/postes/nouveau}" th:if="${currentRole == 'ADMIN'}">+ Nouveau poste</a>
-    </div>
-    <p class="muted"><span th:text="${page.total}">0</span> poste(s)</p>
-    <table class="table">
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Réseau régional</p>
+            <h1>Postes régionaux</h1>
+        </div>
+        <div class="actions no-print">
+            <a class="btn" th:href="@{/postes/nouveau}" th:if="${currentRole == 'ADMIN'}">+ Nouveau poste</a>
+        </div>
+    </header>
+    <p class="muted" style="margin-top:.8rem"><span th:text="${page.total}">0</span> poste(s)</p>
+    <table class="table sticky">
         <thead><tr>
             <th scope="col"><a th:href="@{/postes(tri='code',sens=${(tri == 'code' and sens != 'desc') ? 'desc' : 'asc'})}">Code</a><span th:if="${tri == 'code'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/postes(tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>

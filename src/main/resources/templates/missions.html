@@ -5,28 +5,34 @@
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
 <main class="container">
-    <div class="toolbar">
-        <h1 style="margin:0">Missions</h1>
-        <span class="spacer"></span>
-        <a class="btn" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">+ Nouvelle mission</a>
-    </div>
-    <form method="get" th:action="@{/missions}" class="toolbar" style="flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem">
-        <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, objet)…" style="min-width:200px"/>
-        <select name="poste">
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Missions d'inventaire</p>
+            <h1>Missions</h1>
+        </div>
+        <div class="actions no-print">
+            <a class="btn" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">+ Nouvelle mission</a>
+        </div>
+    </header>
+
+    <form method="get" th:action="@{/missions}" class="filterbar no-print">
+        <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, objet)…" aria-label="Rechercher une mission"/>
+        <select name="poste" aria-label="Filtrer par poste">
             <option value="">Tous les postes</option>
             <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
         </select>
-        <select name="etat">
+        <select name="etat" aria-label="Filtrer par état">
             <option value="">Tous les états</option>
             <option value="Planifiée" th:selected="${fEtat == 'Planifiée'}">Planifiée</option>
             <option value="En cours" th:selected="${fEtat == 'En cours'}">En cours</option>
             <option value="Terminée" th:selected="${fEtat == 'Terminée'}">Terminée</option>
         </select>
-        <button class="btn" type="submit">Filtrer</button>
-        <a class="btn secondary" th:href="@{/missions}">Réinitialiser</a>
+        <button class="btn small" type="submit">Filtrer</button>
+        <a class="btn secondary small" th:href="@{/missions}">Réinitialiser</a>
+        <span class="count"><b th:text="${page.total}">0</b> mission(s)</span>
     </form>
-    <p class="muted"><span th:text="${page.total}">0</span> mission(s)</p>
-    <table class="table">
+
+    <table class="table sticky">
         <thead><tr>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
@@ -37,7 +43,7 @@
         </tr></thead>
         <tbody>
             <tr th:each="m : ${missions}">
-                <td><a th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
+                <td><a class="mono" th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
                 <td th:text="${m.objet}"></td><td th:text="${m.posteNom}"></td><td th:text="${m.periode}"></td>
                 <td><span class="badge" th:classappend="${m.etat == 'En cours' ? 'orange' : (m.etat == 'Terminée' ? 'green' : 'blue')}" th:text="${m.etat}"></span></td>
                 <td><span class="badge" th:classappend="${m.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${m.statut}"></span></td>
@@ -45,7 +51,8 @@
             <tr th:if="${page.vide}"><td colspan="6" class="empty">Aucune mission.</td></tr>
         </tbody>
     </table>
-    <div class="toolbar" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
+
+    <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
         <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"
            th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
         <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>

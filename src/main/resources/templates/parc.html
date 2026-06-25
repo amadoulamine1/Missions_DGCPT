@@ -1,32 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Parc</title><link rel="stylesheet" th:href="@{/css/app.css}"/>
-<style>
-    .parc-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap}
-    .parc-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-    .filterbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
-        border-radius:var(--r);padding:.65rem .85rem;box-shadow:var(--e1);margin:1.1rem 0 .8rem}
-    .filterbar .search{min-width:230px;flex:1}
-    .filterbar select{padding:.46rem .6rem;border:1px solid var(--line);border-radius:var(--r-sm);font-size:.9rem;background:#fff;color:var(--ink)}
-    .filterbar .count{margin-left:auto;font-size:.82rem;color:var(--muted);white-space:nowrap}
-    .filterbar .count b{color:var(--ink);font-weight:700}
-    .chiprow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
-    .chiprow .lbl{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:.1rem}
-    .parc thead th{position:sticky;top:0;z-index:2}
-    .parc td.tech{font-family:'Consolas','SFMono-Regular',Menlo,monospace;font-size:.81rem;color:var(--muted);white-space:nowrap}
-    @media print{.no-print{display:none!important}.parc thead th{position:static}}
-</style>
-</head>
+<title>Parc</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
-<main class="container wide parc">
-    <header class="parc-head">
+<main class="container wide">
+    <header class="page-head">
         <div>
             <p class="eyebrow">Parc informatique</p>
             <h1>Inventaire du parc</h1>
         </div>
-        <div class="parc-actions no-print">
+        <div class="actions no-print">
             <a class="btn secondary small" th:href="@{/inventaire}">📅 Inventaire à une date</a>
             <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
             <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
@@ -62,7 +46,7 @@
         <a class="chip sm" th:classappend="${fStatut == 'A_CHANGER'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='A_CHANGER')}">À changer</a>
     </div>
 
-    <table class="table">
+    <table class="table sticky">
         <thead><tr>
             <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
