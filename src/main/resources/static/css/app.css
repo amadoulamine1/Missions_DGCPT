@@ -6,6 +6,7 @@
   /* échelle de rayons & d'élévation (harmonisation) */
   --r-sm:6px; --r:8px; --r-lg:12px; --r-pill:999px;
   --e1:0 1px 2px rgba(20,24,31,.05); --e2:0 6px 18px rgba(20,24,31,.09);
+  --serif:Georgia,'Cambria','Times New Roman',serif;   /* titres : caractère éditorial institutionnel */
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -41,11 +42,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
 
 .container{max-width:1080px;margin:1.6rem auto;padding:0 1.2rem}
 .topbar ~ .container{margin-left:222px;margin-right:auto}
-h1{color:var(--gold-dark);font-size:1.5rem;font-weight:700;margin:.2rem 0 1rem;letter-spacing:-.2px}
-h2{color:var(--ink);font-size:1.12rem;font-weight:600;margin:1.4rem 0 .6rem;
+h1{font-family:var(--serif);color:var(--ink);font-size:1.6rem;font-weight:700;margin:.2rem 0 1rem;letter-spacing:-.01em}
+/* filet doré sous le titre de page (identité éditoriale ; le dashboard a son propre filet) */
+.container h1:not(.dash-title){position:relative;padding-bottom:.5rem}
+.container h1:not(.dash-title)::after{content:"";position:absolute;left:0;bottom:0;width:52px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light))}
+h2{font-family:var(--serif);color:var(--ink);font-size:1.16rem;font-weight:700;margin:1.4rem 0 .6rem;
   border-bottom:1px solid var(--line);padding-bottom:.35rem}
 h3{color:var(--ink);font-size:1rem;font-weight:600;margin:1rem 0 .4rem}
 .muted{color:var(--muted);font-size:.92rem}
+.eyebrow{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dark);font-weight:700;margin:0 0 .3rem}
 
 .card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);
   padding:1.15rem 1.35rem;margin-bottom:1.1rem;box-shadow:var(--e1)}
