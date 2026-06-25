@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 11 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 12 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -59,11 +59,11 @@ Contient :
 - les **membres** de la mission (des agents informaticiens) ;
 - la **période** (début → fin) ;
 - le **poste** où elle se déroule ;
-- le **chef de poste en fonction au moment de la mission**, figé dans la mission (même si le chef change plus tard, la mission garde le bon nom).
+- le **chef de poste en fonction au moment de la mission**, figé dans la mission (même si le chef change plus tard, la mission garde le bon nom). Ce chef de poste peut être **inconnu à la création** de la mission : il est alors **renseigné plus tard via le fichier canevas** (à l'import).
 
 La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission.
 
-Les **membres** sont choisis parmi les informaticiens (sélection multiple). **Règle :** un agent ne peut pas être membre de deux missions dont les **périodes se chevauchent** — l'application le bloque et signale la mission en conflit ; il faut d'abord l'en retirer.
+Les **membres** sont choisis parmi les informaticiens (sélection multiple). Pour la **souplesse opérationnelle**, un même agent **peut** figurer sur plusieurs missions dont les **périodes se chevauchent** : aucun blocage n'est appliqué.
 
 ### 3.5 Relevé de mission *(photo datée)*
 Produit pendant la mission, rattaché au poste et à la mission, daté :
@@ -89,7 +89,7 @@ Identité commune à tous les types :
 
 Attributs spécifiques par type :
 
-- **Ordinateur** : MAC ethernet, MAC wifi, nom de la machine, **RAM**, **processeur**, **disque dur**, **agent attributaire** (agent de poste), **agent traitant** (agent informaticien **membre de la mission** ; anciennement « agent installateur »), **logiciels installés** (Aster, Antivirus, SicCDD, CIC, Sysbudget — liste paramétrable).
+- **Ordinateur** : MAC ethernet, MAC wifi, nom de la machine, **RAM**, **processeur**, **disque dur**, **agent attributaire** (agent de poste), **agent traitant** (agent informaticien **membre de la mission** ; anciennement « agent installateur »), **logiciels installés** (Aster, Antivirus, SicCDD, CIC, Sysbudget, AD — colonnes Oui/Non du canevas).
 - **Imprimante** : MAC, wifi, IP, nom, modèle, et toute information de paramétrage.
 - **Switch / Access point** : attributs identiques — informations réseau (MAC, IP, nom, modèle…).
 - **Scanner de chèque** : **numéro de série** (clé d'identification physique), **marque**, **modèle**. Pas d'adresse MAC.
@@ -184,12 +184,12 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **TPR** = poste régional, terme employé dans toute l'application.
 
 ### 9.2 Cycle de vie d'une mission
-- Le chef de mission **crée la mission en ligne** : choix du TPR (existant ou nouveau), objet, période, chef de mission, chef de poste et membres. L'application **génère le N° de mission** (format `MIS-AAAA-NNN`) puis un **canevas pré-estampillé** (en-tête déjà rempli) à distribuer aux agents.
-- **Chef de poste** : reconduit par défaut (dernier chef connu du TPR), ou changé directement depuis la page du TPR avec date d'effet et historisation des périodes.
-- **Membres** : choisis parmi les informaticiens (sélection multiple) ; **contrôle de chevauchement** (un agent ne peut pas être sur deux missions simultanées) ; retrait possible depuis le détail de la mission.
+- Le chef de mission **crée la mission en ligne** : choix du TPR (existant ou nouveau), objet, période, chef de mission, membres et — **facultativement** — chef de poste. L'application **génère le N° de mission** (format `MIS-AAAA-NNN`) puis un **canevas pré-estampillé** (en-tête déjà rempli) à distribuer aux agents.
+- **Chef de poste** : **facultatif à la création** (reconduit par défaut s'il est connu — dernier chef du TPR) ; s'il est laissé vide, il est **renseigné depuis le canevas à l'import**. Il peut aussi être changé directement depuis la page du TPR avec date d'effet et historisation des périodes.
+- **Membres** : choisis parmi les informaticiens (sélection multiple) ; **chevauchement de périodes autorisé** (un agent peut être sur plusieurs missions simultanées) ; retrait possible depuis le détail de la mission.
 - **Chef de mission** : désigné **parmi les membres** de la mission (un et un seul).
-- **Contrôle des dates** : la date de fin ne peut pas être antérieure à la date de début.
-- **Édition d'une mission** après création : objet, dates, **statut** (en consolidation / clôturée), observations, **membres** et **chef de mission** modifiables (le N° de mission, le TPR et le chef de poste figé restent inchangés). Le contrôle de chevauchement **exclut la mission éditée**.
+- **Contrôle des dates** : la date de fin ne peut pas être antérieure à la date de début. Les **dates de mission** saisies dans le canevas sont **reportées à la mission lors de l'import** (elles peuvent donc y être ajustées).
+- **Édition d'une mission** après création : objet, dates, **statut** (en consolidation / clôturée), observations, **membres** et **chef de mission** modifiables (le N° de mission, le TPR et le chef de poste figé restent inchangés). Aucun contrôle de chevauchement n'est appliqué.
 
 ### 9.3 Référentiels et création à la volée
 - Écrans dédiés de **gestion des TPR** (créer/modifier) et des **agents** (créer/modifier, type informaticien ou agent de poste).
@@ -262,6 +262,14 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Canevas par agent** : le téléchargement produit **un canevas par agent membre** (regroupés en ZIP), chacun nommé d'après l'agent et avec son matricule pré-renseigné comme agent saisisseur. Onglets réordonnés (Agents TPR juste après l'en-tête, « 7-Autres matériels » avant les référentiels) ; l'onglet générique est mis en forme (en-têtes, listes, surlignage des champs manquants).
 - **Restitutions** : les relevés d'une mission affichent l'agent saisisseur en « matricule — prénom nom » et le statut ; la liste des missions est triée du plus récent par défaut.
 - **Refonte de l'interface** : tableau de bord repensé (anneau de disponibilité, KPI), **identité éditoriale** (titres serif, filet doré) déployée sur toutes les pages, parc en mode large, et améliorations d'**accessibilité** (contrastes, focus clavier, repères ARIA).
+
+### 9.14 Logiciel « AD », souplesse des missions et sécurité
+- **Logiciel « AD »** : ajout d'« AD » (Active Directory) aux logiciels relevés sur les ordinateurs — colonne **Oui/Non** du canevas, juste après *Sysbudget*. Les colonnes logiciels du canevas sont désormais : Aster, Antivirus, SicCDD, CIC, Sysbudget, **AD**.
+- **Chef de poste facultatif** : il peut être **laissé vide à la création** de la mission et **renseigné via le fichier canevas** à l'import ; il n'est donc plus bloquant, ni au formulaire ni au contrôle d'import.
+- **Dates de mission via le canevas** : les dates (début / fin) saisies dans le canevas sont **reportées à la mission** à l'import (elles peuvent y être ajustées).
+- **Chevauchement autorisé** : le contrôle bloquant de chevauchement de périodes est **supprimé** — un agent peut figurer sur plusieurs missions simultanées (à la création comme à la modification).
+- **Sécurité — changement de mot de passe forcé** : à la première connexion (compte initial) et après chaque **réinitialisation** par un administrateur, l'utilisateur **doit changer son mot de passe** avant toute navigation.
+- **Qualité** : validation déclarative (Bean Validation) des formulaires agent et poste ; **journalisation** des créations « à la volée » à l'import (audit administrateur) ; **intégration continue** (build et tests à chaque évolution).
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

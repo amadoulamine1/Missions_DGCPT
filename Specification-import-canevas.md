@@ -27,7 +27,7 @@ Transformer un canevas rempli hors-ligne en données fiables dans la base, en :
 Parce que le chef crée la mission en ligne d'abord, le téléchargement produit **un canevas par agent membre** (regroupés en ZIP). Chaque canevas est distribué avec :
 
 - le **N° de mission** et le **code poste** déjà renseignés (en-tête) ;
-- l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste) ;
+- l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste — ce dernier **facultatif** : s'il était inconnu à la création, l'agent le renseigne ici) ;
 - l'**agent saisisseur pré-renseigné** avec le matricule de l'agent destinataire ;
 - les machines déjà connues du poste **pré-chargées** — sauf l'**agent traitant**, laissé vide (historisé par mission, à ressaisir) ;
 - les **listes déroulantes** alimentées avec les référentiels du poste (agents, catégories de câble, logiciels, types de matériel paramétrables).
@@ -40,7 +40,7 @@ L'agent vérifie/complète l'**inventaire**, renseigne l'**agent traitant** des 
 |---|---|---|
 | 1-Mission et Réseau | `mission` | N° de mission → `mission.reference` ; relevé réseau → `etat_cablage`, `categorie_cable_id` ; agent saisisseur et zone repris sur chaque ligne du lot |
 | 2-Membres mission | `mission_membre` | matricules d'informaticiens |
-| 3-Ordinateurs | `materiel` + `ordinateur` (+ `ordinateur_logiciel`) | colonnes logiciels Oui/Non → lignes `ordinateur_logiciel` |
+| 3-Ordinateurs | `materiel` + `ordinateur` (+ `ordinateur_logiciel`) | colonnes logiciels Oui/Non (Aster, Antivirus, SicCDD, CIC, Sysbudget, **AD**) → lignes `ordinateur_logiciel` |
 | 4-Imprimantes | `materiel` + `imprimante` | |
 | 5-Switchs et AP | `materiel` + `equipement_reseau` | colonne **Type** → `materiel.type` (`SWITCH` ou `ACCESS_POINT`) |
 | 6-Scanners chèque | `materiel` + `scanner_cheque` | clé physique = **numéro de série** |
@@ -59,6 +59,7 @@ Deux niveaux de sévérité : **Bloquant** (la ligne ou le fichier est rejeté t
 | Champs obligatoires (marqués `*`) renseignés sur chaque ligne | Bloquant |
 | **Statut** du matériel renseigné et conforme (En service / En panne / À changer) | Bloquant |
 | En-tête : **état du câblage** (Neuf / Bon / Pas bon) et **catégorie de câble** renseignés | Bloquant |
+| En-tête : **chef de poste** (facultatif — renseigné s'il était inconnu à la création) | *Non bloquant* |
 | Format des adresses MAC `AA:BB:CC:DD:EE:FF` | Bloquant |
 | Format IP, e-mail, dates | Bloquant |
 | Valeurs des listes conformes (catégorie de câble, type, Oui/Non) | Bloquant |
@@ -109,7 +110,7 @@ Ses actions : corriger ou exclure une ligne, **arbitrer un conflit** (choisir la
 L'intégration s'effectue en **transaction** (tout ou rien sur le lot validé) :
 
 - création ou mise à jour de `materiel` et de la table de sous-type correspondante ;
-- **report du relevé réseau sur la mission** (état du câblage, catégorie de câble) — même si la mission, créée en ligne, existait déjà sans ces champs ;
+- **report sur la mission** des champs saisis dans le canevas — relevé réseau (état du câblage, catégorie de câble), **dates de mission** (début / fin) et **chef de poste** s'il n'avait pas été fixé à la création — même si la mission, créée en ligne, existait déjà ;
 - attribution du **numéro d'inventaire** aux nouveaux matériels (préfixe issu du **type**) ;
 - mise à jour des **affectations** : si l'attributaire ou le poste change, l'affectation en cours est **clôturée** (`date_fin`) et une **nouvelle** est ouverte (`affectation_materiel`) ;
 - mise à jour des **logiciels installés** (`ordinateur_logiciel`) ;

@@ -34,7 +34,7 @@ erDiagram
 | Agent | `agent` | `matricule` | nom, prénom, fonction, téléphone, email, type_agent (POSTE/INFORMATICIEN), poste_id |
 | ChefPoste *(historisé)* | `chef_poste` | `id` | poste_id, agent_matricule, date_debut, date_fin |
 | RattachementAgent *(historisé)* | `rattachement_agent` | `id` | agent_matricule, poste_id, date_debut, date_fin |
-| Mission | `mission` | `id` | reference (MIS-AAAA-NNN), objet, date_debut, date_fin, poste_id, chef_mission, chef_poste figé, statut (EN_CONSOLIDATION/CLOTUREE), etat_cablage, categorie_cable_id, observations |
+| Mission | `mission` | `id` | reference (MIS-AAAA-NNN), objet, date_debut, date_fin, poste_id, chef_mission, chef_poste figé *(nullable — facultatif)*, statut (EN_CONSOLIDATION/CLOTUREE), etat_cablage, categorie_cable_id, observations |
 | Matériel | `materiel` | `numero_inventaire` | type, poste_id, nom, modele, statut (EN_SERVICE/EN_PANNE/A_CHANGER), observation, date_creation |
 | Ordinateur | `ordinateur` | `numero_inventaire` (= matériel) | mac_ethernet, mac_wifi, nom_machine, ram, processeur, disque_dur, agent installateur/traitant, logiciels (n-n) |
 | Imprimante | `imprimante` | idem | mac, mac_wifi, ip |
@@ -59,6 +59,13 @@ erDiagram
 | **V6** | Lot d'import (fichier BYTEA) |
 | **V7** | Rattachement agent↔TPR historisé (+ reprise des rattachements courants) |
 | **V8** | Relevé : colonne `etat_observe` (photo datée des attributs) — idempotente |
+| **V9** | Types de matériel paramétrables : table `categorie_materiel` (+ `materiel.categorie_id`, `mac`, `ip`) |
+| **V10** | Correctif : `releve.etat_observe` ramené de `jsonb` à `TEXT` |
+| **V11** | Relevé : `agent_traitant_matricule` (agent traitant historisé par mission) |
+| **V12** | Relevé : `statut_observe` (historique des statuts du matériel) |
+| **V13** | Utilisateur : `mot_de_passe_a_changer` (changement de mot de passe forcé) |
+| **V14** | Référentiel logiciels : semis du logiciel **« AD »** (idempotent) |
+| **V15** | Mission : `chef_poste_fige_matricule` rendu **nullable** (chef de poste facultatif) |
 
 Le schéma est **géré exclusivement par Flyway** (`ddl-auto=none`).
 

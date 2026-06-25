@@ -43,8 +43,9 @@ L'accès est filtré par rôle (Spring Security) et la **navigation s'adapte** (
 
 ## 5. Domaine « Missions »
 
-- **Création** (admin/chef) : TPR (existant ou nouveau), objet, période (début → fin, fin ≥ début), **chef de mission** (désigné parmi les membres), **membres** (informaticiens, sélection multiple), chef de poste reconduit par défaut et **figé** sur la mission. Génération du **N° de mission** (`MIS-AAAA-NNN`) puis d'un **canevas pré-estampillé**.
-- **Règle de chevauchement** : un agent ne peut pas être membre de deux missions dont les périodes se chevauchent ; la mission en conflit est signalée. Le contrôle **exclut la mission éditée**.
+- **Création** (admin/chef) : TPR (existant ou nouveau), objet, période (début → fin, fin ≥ début), **chef de mission** (désigné parmi les membres), **membres** (informaticiens, sélection multiple), **chef de poste facultatif** (figé sur la mission s'il est fourni). Génération du **N° de mission** (`MIS-AAAA-NNN`) puis d'un **canevas pré-estampillé**.
+- **Chevauchement de périodes autorisé** : un agent peut être membre de plusieurs missions dont les périodes se chevauchent (aucun contrôle bloquant, ni à la création ni à l'édition).
+- **Renseignement via le canevas** : à l'import, le **chef de poste** (s'il était inconnu) et les **dates de mission** saisis dans le canevas sont reportés à la mission.
 - **Édition** : objet, dates, statut, observations, membres, chef de mission.
 - **Statut de consolidation** : *en consolidation* → *clôturée* (bouton **Clôturer**, réservé admin/chef).
 - **Statut temporel** dérivé des dates : Planifiée / En cours / Terminée.

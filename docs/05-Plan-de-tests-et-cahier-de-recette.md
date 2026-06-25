@@ -32,8 +32,9 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R07 | Agents | Filtre TPR | Onglet « Agents de poste » → choisir un TPR | Liste filtrée sur ce TPR |
 | R08 | Agents | Muter un agent | Fiche agent → Mutation vers un autre TPR + date | Historique des rattachements mis à jour ; matériel inchangé |
 | R09 | Mission | Créer une mission | Nouvelle mission : TPR, objet, dates, membres, chef | N° `MIS-AAAA-NNN` généré ; canevas téléchargeable |
-| R10 | Mission | Chevauchement | Ajouter un agent déjà membre d'une mission concomitante | Blocage + signalement de la mission en conflit |
-| R11 | Hors-ligne | Canevas pré-rempli | Mission → Télécharger le canevas pré-rempli | Fichier `.xlsx` avec en-tête, membres, agents TPR, inventaire connu |
+| R10 | Mission | Chevauchement autorisé | Ajouter un agent déjà membre d'une mission concomitante | Création acceptée (l'agent figure sur les deux missions ; aucun blocage) |
+| R10b | Mission | Chef de poste facultatif | Créer une mission en laissant le chef de poste vide | Mission créée sans chef de poste ; renseignable ensuite via le canevas |
+| R11 | Hors-ligne | Canevas pré-rempli | Mission → Télécharger le canevas pré-rempli | Fichier `.xlsx` avec en-tête, membres, agents TPR, inventaire connu (logiciels dont **AD**) |
 | R12 | Import | Contrôles | Charger un canevas avec un champ obligatoire vide / MAC invalide | Anomalies **bloquantes** signalées dans l'aperçu |
 | R13 | Import | Anti-doublon | Charger une ligne sans n° mais avec une MAC déjà connue | **Avertissement** « ce matériel existe peut-être déjà » |
 | R14 | Consolidation | Conflit | Charger deux fichiers divergents pour un même matériel | Conflit listé ; arbitrage par le chef puis intégration |
