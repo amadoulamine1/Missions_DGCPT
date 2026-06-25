@@ -28,12 +28,12 @@
     <p class="muted"><span th:text="${page.total}">0</span> mission(s)</p>
     <table class="table">
         <thead><tr>
-            <th><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th>Période</th>
-            <th><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='etat',sens=${(tri == 'etat' and sens != 'desc') ? 'desc' : 'asc'})}">État</a><span th:if="${tri == 'etat'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col">Période</th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='etat',sens=${(tri == 'etat' and sens != 'desc') ? 'desc' : 'asc'})}">État</a><span th:if="${tri == 'etat'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
         </tr></thead>
         <tbody>
             <tr th:each="m : ${missions}">

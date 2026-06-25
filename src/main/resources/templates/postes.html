@@ -17,11 +17,11 @@
     <p class="muted"><span th:text="${page.total}">0</span> poste(s)</p>
     <table class="table">
         <thead><tr>
-            <th><a th:href="@{/postes(tri='code',sens=${(tri == 'code' and sens != 'desc') ? 'desc' : 'asc'})}">Code</a><span th:if="${tri == 'code'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/postes(tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/postes(tri='region',sens=${(tri == 'region' and sens != 'desc') ? 'desc' : 'asc'})}">Région</a><span th:if="${tri == 'region'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/postes(tri='materiel',sens=${(tri == 'materiel' and sens != 'desc') ? 'desc' : 'asc'})}">Matériel</a><span th:if="${tri == 'materiel'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th>Actions</th>
+            <th scope="col"><a th:href="@{/postes(tri='code',sens=${(tri == 'code' and sens != 'desc') ? 'desc' : 'asc'})}">Code</a><span th:if="${tri == 'code'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/postes(tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/postes(tri='region',sens=${(tri == 'region' and sens != 'desc') ? 'desc' : 'asc'})}">Région</a><span th:if="${tri == 'region'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/postes(tri='materiel',sens=${(tri == 'materiel' and sens != 'desc') ? 'desc' : 'asc'})}">Matériel</a><span th:if="${tri == 'materiel'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col">Actions</th>
         </tr></thead>
         <tbody>
             <tr th:each="p : ${postes}">

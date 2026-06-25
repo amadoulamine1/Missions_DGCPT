@@ -41,15 +41,15 @@
     <p class="muted"><span th:text="${page.total}">0</span> matériel(s)</p>
     <table class="table">
         <thead><tr>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='type',sens=${(tri == 'type' and sens != 'desc') ? 'desc' : 'asc'})}">Type</a><span th:if="${tri == 'type'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='modele',sens=${(tri == 'modele' and sens != 'desc') ? 'desc' : 'asc'})}">Modèle</a><span th:if="${tri == 'modele'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th>RAM</th>
-            <th>Processeur</th>
-            <th>Disque</th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='nom',sens=${(tri == 'nom' and sens != 'desc') ? 'desc' : 'asc'})}">Nom</a><span th:if="${tri == 'nom'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='type',sens=${(tri == 'type' and sens != 'desc') ? 'desc' : 'asc'})}">Type</a><span th:if="${tri == 'type'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='modele',sens=${(tri == 'modele' and sens != 'desc') ? 'desc' : 'asc'})}">Modèle</a><span th:if="${tri == 'modele'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col">RAM</th>
+            <th scope="col">Processeur</th>
+            <th scope="col">Disque</th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
         </tr></thead>
         <tbody>
             <tr th:each="m : ${materiels}">
