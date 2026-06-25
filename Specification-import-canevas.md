@@ -113,7 +113,7 @@ L'intégration s'effectue en **transaction** (tout ou rien sur le lot validé) :
 - attribution du **numéro d'inventaire** aux nouveaux matériels (préfixe issu du **type**) ;
 - mise à jour des **affectations** : si l'attributaire ou le poste change, l'affectation en cours est **clôturée** (`date_fin`) et une **nouvelle** est ouverte (`affectation_materiel`) ;
 - mise à jour des **logiciels installés** (`ordinateur_logiciel`) ;
-- écriture des lignes `releve_materiel`, avec l'**agent saisisseur**, l'**agent traitant** (historisé par mission pour les ordinateurs), le **snapshot `etat_observe`** (résumé textuel des attributs observés) et la `date_releve` ;
+- écriture des lignes `releve_materiel`, avec l'**agent saisisseur**, l'**agent traitant** (historisé par mission pour les ordinateurs), le **statut observé** (`statut_observe`, historique des statuts), le **snapshot `etat_observe`** (résumé textuel des attributs observés) et la `date_releve` ;
 - la photo datée est ainsi **figée** : elle ne change plus, même si la fiche matériel évolue ensuite.
 
 **Idempotence** — recharger un fichier corrigé ne crée pas de doublon : le rapprochement par clé met à jour la même entrée.

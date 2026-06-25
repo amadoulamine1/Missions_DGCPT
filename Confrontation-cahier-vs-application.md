@@ -25,7 +25,8 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 ## 5. Résolus
 
 - **Agent traitant historisé par mission** (§3.5/§3.6) — l'agent traitant est porté par le **relevé** (migration **V11**) ; le canevas ne le pré-remplit plus (ressaisie à chaque mission) ; l'ordinateur conserve le « dernier traitant » pour l'affichage ; historique visible sur la fiche équipement.
-- **Historiques sur la fiche poste** — missions, fichiers (canevas) chargés, affectations de matériel et chefs de poste successifs.
+- **Historique des statuts** — le statut observé est conservé sur chaque relevé (migration **V12**) ; colonne « Statut » dans l'historique des relevés de la fiche équipement.
+- **Historiques sur la fiche poste** — missions, fichiers (canevas) chargés, affectations de matériel et chefs de poste successifs, avec un **menu « Aller à »** en tête de fiche pour les repérer.
 - **Statut du matériel obligatoire** — contrôle bloquant à l'import (tous onglets) **et** surlignage rouge sur le canevas si vide.
 - **Relevé réseau obligatoire** — état du câblage (Neuf / Bon / Pas bon) et catégorie de câble obligatoires ; valeurs **reportées sur la mission à l'import** (la mission est créée en ligne sans ces champs, l'agent les saisit dans le canevas).
 - **Canevas par agent** — le téléchargement produit **un canevas par agent membre** (ZIP), pré-renseigné (agent saisisseur en B11) ; onglets réordonnés (Agents TPR après l'en-tête, « 7-Autres matériels » avant les référentiels) ; onglet générique stylé (en-têtes dorés, volet figé) et garde-fous (validation MAC, mises en forme conditionnelles).

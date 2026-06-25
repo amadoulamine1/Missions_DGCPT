@@ -46,7 +46,7 @@ Adapter `src/main/resources/application.properties` (URL, utilisateur et mot de 
 ### Lancer
     mvn spring-boot:run
 
-Au démarrage, **Flyway** applique les migrations `db/migration/V1…V11` (schéma initial, caractéristiques, statut/observations, utilisateurs, lots d'import, rattachements, snapshot daté, types de matériel paramétrables, correctif `etat_observe`, agent traitant historisé), puis l'application est disponible sur http://localhost:8080.
+Au démarrage, **Flyway** applique les migrations `db/migration/V1…V12` (schéma initial, caractéristiques, statut/observations, utilisateurs, lots d'import, rattachements, snapshot daté, types de matériel paramétrables, correctif `etat_observe`, agent traitant historisé, historique des statuts), puis l'application est disponible sur http://localhost:8080.
 
 > Si une migration déjà appliquée a été retouchée (commentaire, idempotence), Flyway peut signaler un *checksum mismatch* : exécuter une fois `flyway repair` sur l'environnement concerné pour réaligner l'historique.
 
