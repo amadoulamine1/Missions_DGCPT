@@ -1,0 +1,78 @@
+# 02 — Spécifications fonctionnelles détaillées (SFD)
+
+Réf. métier : *Cahier des charges v9*. Ce document décrit les fonctions telles que réalisées.
+
+## 1. Acteurs et matrice des droits
+
+| Fonction | Admin | Chef de mission | Agent |
+|---|:--:|:--:|:--:|
+| Tableau de bord, consultation (postes, parc, missions, inventaire à une date) | ✓ | ✓ | ✓ |
+| Créer / modifier un poste (TPR) | ✓ | | |
+| Désigner le chef d'un poste | ✓ | | |
+| Créer / modifier un agent ; muter un agent | ✓ | | |
+| Créer / éditer / clôturer une mission ; membres | ✓ | ✓ | |
+| Télécharger un canevas, téléverser un fichier rempli | ✓ | ✓ | ✓ |
+| Valider / arbitrer la consolidation d'import | ✓ | ✓ | |
+| Réaffecter un matériel à un agent | ✓ | | |
+| Gérer les référentiels (logiciels, catégories de câble) | ✓ | | |
+| Gérer les comptes utilisateurs | ✓ | | |
+
+L'accès est filtré par rôle (Spring Security) et la **navigation s'adapte** (les liens et actions réservés sont masqués).
+
+## 2. Domaine « Postes (TPR) »
+
+- **Lister** les postes : code, nom, région, nombre de matériels ; **tri** par colonnes et **pagination**.
+- **Fiche poste** : chef de poste courant, agents rattachés, matériel du poste (avec affectataire et caractéristiques).
+- **Créer/Modifier** (admin) : code (unique), nom, région.
+- **Chef de poste (historisé)** : désignation/changement depuis la fiche du TPR, avec **date d'effet** ; l'application clôt la période précédente et ouvre la nouvelle.
+
+## 3. Domaine « Agents »
+
+- Présentation en **fiches (cartes)**, séparées en **informaticiens** et **agents de poste** ; **recherche** (matricule, nom, fonction) et, pour les agents de poste, **filtre par TPR** (boutons).
+- **Créer/Modifier** (admin) : matricule (clé), nom, prénom, fonction, téléphone, e-mail, type (informaticien / agent de poste), TPR de rattachement pour un agent de poste.
+- **Mutation d'un agent (historisée)** : changement de TPR de rattachement avec **date d'effet** ; l'historique des rattachements est conservé. *La mutation ne déplace pas le matériel.*
+
+## 4. Domaine « Parc » (matériel)
+
+- **Identité commune** : n° d'inventaire (clé, **généré** par l'application), type, poste de rattachement (historisé), nom, modèle, statut, observation.
+- **Types et attributs** : Ordinateur (MAC ethernet/wifi, nom machine, RAM, processeur, disque, agent attributaire, agent traitant, logiciels), Imprimante (MAC, wifi, IP), Switch / Access point (MAC, IP), Scanner de chèque (n° de série, marque).
+- **Statut** : En service / En panne / À changer.
+- **Liste du parc** : recherche (n°, nom, modèle), filtres rapides (**type** et **statut** en pastilles, **poste**), **tri** par colonnes, **pagination** ; pour les ordinateurs, RAM/processeur/disque affichés ; **export Excel** de l'inventaire filtré ; **étiquettes** imprimables.
+- **Fiche équipement** : caractéristiques par type, statut, observation, **affectation courante**, **historique des propriétaires**, **historique des relevés**.
+- **Réaffectation (admin, historisée)** : depuis la fiche, réaffectation à un autre agent **du même TPR** (contrôlé côté liste **et** serveur), avec date d'effet ; clôture/ouverture de période.
+
+## 5. Domaine « Missions »
+
+- **Création** (admin/chef) : TPR (existant ou nouveau), objet, période (début → fin, fin ≥ début), **chef de mission** (désigné parmi les membres), **membres** (informaticiens, sélection multiple), chef de poste reconduit par défaut et **figé** sur la mission. Génération du **N° de mission** (`MIS-AAAA-NNN`) puis d'un **canevas pré-estampillé**.
+- **Règle de chevauchement** : un agent ne peut pas être membre de deux missions dont les périodes se chevauchent ; la mission en conflit est signalée. Le contrôle **exclut la mission éditée**.
+- **Édition** : objet, dates, statut, observations, membres, chef de mission.
+- **Statut de consolidation** : *en consolidation* → *clôturée* (bouton **Clôturer**, réservé admin/chef).
+- **Statut temporel** dérivé des dates : Planifiée / En cours / Terminée.
+- **Fiche mission** : en-tête, relevé réseau (état câblage, catégorie de câble), membres, inventaire relevé, **export Excel des relevés**, accès à la **consolidation** et au **canevas pré-rempli**.
+
+## 6. Domaine « Hors-ligne : canevas et import »
+
+1. **Canevas pré-rempli** généré pour la mission (en-tête, membres, agents du TPR, listes déroulantes, inventaire déjà connu du poste).
+2. **Saisie hors-ligne** par les agents (un fichier par agent possible).
+3. **Chargement** → **aperçu** + **contrôles** : champs obligatoires, format des adresses MAC (`AA:BB:CC:DD:EE:FF`), et **alerte anti-doublon** (ligne sans n° d'inventaire mais MAC/n° de série déjà connu en base → avertissement).
+4. **Consolidation multi-fichiers** : chaque fichier devient un **lot** rattaché à la mission ; rapprochement par clé (n° d'inventaire, sinon MAC / n° de série) ; **détection des conflits** (valeurs divergentes) **arbitrés par le chef**.
+5. **Intégration** (validation explicite) : photo datée figée, fiches matériel créées/mises à jour, **n° d'inventaire attribués** aux nouveaux, affectations historisées.
+
+**Garde-fous du canevas** : indicateur conforme / incomplet / non conforme, mises en forme conditionnelles (obligatoires en rouge, MAC invalide en orange), validation de saisie des MAC, protection de la mise en forme contre le collage.
+
+## 7. Restitutions et tableau de bord
+
+- **Inventaire à une date** : composition et localisation du parc à une date donnée (à partir de l'historique des affectations) + **état observé** (photo datée du relevé au plus proche ≤ date).
+- **Tableau de bord** (accueil), **filtrable par poste** : indicateurs (postes, matériel, **disponibilité** = en service / matériel statué, postes en alerte, missions) et graphiques (matériel par statut, par type, par poste, missions par état). **Exports** des statistiques en **Excel** (synthèse / par type / par poste) et **PDF** (impression).
+
+## 8. Référentiels et comptes
+
+- **Référentiels** (admin) : logiciels et catégories de câble — ajout, renommage, suppression (bloquée si l'élément est utilisé).
+- **Comptes** (admin) : création, modification, **réinitialisation** du mot de passe, activation/désactivation ; un compte chef de mission / agent est **rattaché à un agent informaticien** (identifiant = matricule, nom repris de l'agent) ; mot de passe **affichable** à la saisie.
+
+## 9. Règles de gestion transverses (rappel)
+
+- **Historisation** (jamais d'écrasement) : chef de poste, rattachement agent↔TPR, affectation matériel↔agent.
+- **Photo datée** : chaque relevé est figé à sa date (composition, localisation, attributs observés).
+- **Clé matériel** : le n° d'inventaire ; case vide à l'import ⇒ nouveau matériel numéroté automatiquement.
+- **Cohérence des rôles** : chef de mission et membres = informaticiens ; chef de poste et attributaire = agents de poste.

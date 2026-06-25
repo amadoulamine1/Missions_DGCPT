@@ -1,0 +1,45 @@
+# 07 — Manuel utilisateur
+
+## 1. Connexion et navigation
+
+Se connecter avec son **identifiant** (matricule pour les comptes liés à un agent) et son mot de passe. Le **menu de gauche** donne accès aux écrans selon le rôle : Accueil, Postes, Agents, Parc, Missions, Importer, Guide, Référentiels, Comptes. La page courante est mise en évidence ; les actions réservées sont masquées.
+
+## 2. Tableau de bord (Accueil)
+
+Indicateurs clés (postes, matériel, **disponibilité**, postes en alerte, missions) et graphiques (matériel par statut, par type, par poste ; missions par état). Un **sélecteur de poste** recentre tout le tableau de bord sur un TPR. Deux exports : **Excel** (synthèse) et **PDF** (impression). La *disponibilité* = matériels « En service » rapportés au matériel **dont le statut est renseigné**.
+
+## 3. Postes (TPR)
+
+Liste triable et paginée. La **fiche d'un poste** montre le chef de poste, les agents rattachés et le matériel (avec affectataire et caractéristiques). L'administrateur peut créer/modifier un poste et **désigner son chef** (avec date d'effet, historisé).
+
+## 4. Agents
+
+Fiches séparées : **informaticiens** (effectuent les missions) et **agents de poste** (utilisent le matériel). Utiliser la **recherche** et, pour les agents de poste, les **boutons de TPR**. L'administrateur peut créer/modifier un agent et, depuis sa fiche, le **muter vers un autre TPR** (date d'effet, historisé) — le matériel n'est pas déplacé.
+
+## 5. Parc
+
+- **Rechercher** (n°, nom, modèle), **filtrer** par type/statut (pastilles) et par poste, **trier** par colonnes.
+- Pour les ordinateurs : RAM, processeur, disque affichés.
+- **Export Excel** de l'inventaire filtré, **étiquettes** imprimables, **inventaire à une date** passée.
+- La **fiche d'un équipement** montre les caractéristiques, le statut, l'**affectation courante**, l'**historique des propriétaires** et les **relevés**. L'administrateur peut **réaffecter** l'équipement à un autre agent **du même TPR** (date d'effet).
+
+## 6. Workflow d'une mission (de bout en bout)
+
+1. **Créer la mission** (admin/chef) : TPR, objet, période, membres (informaticiens), chef de mission. L'application génère le **N° de mission**.
+2. **Télécharger le canevas pré-rempli** et le distribuer aux agents.
+3. **Saisir hors-ligne** dans Excel (un fichier par agent possible). Respecter les champs obligatoires et le format des **MAC** (`AA:BB:CC:DD:EE:FF`). Laisser le **n° d'inventaire vide** pour un matériel nouveau.
+4. **Recharger** chaque fichier (Importer) : l'application contrôle et affiche un **aperçu** (anomalies bloquantes à corriger, **avertissements** anti-doublon à vérifier).
+5. **Consolidation** : le chef de mission rapproche les fichiers, **arbitre les conflits**, puis **valide l'intégration** (les n° sont attribués aux nouveaux matériels).
+6. **Clôturer** la mission une fois la consolidation terminée.
+
+## 7. Référentiels et comptes (administrateur)
+
+- **Référentiels** : ajouter/renommer/supprimer logiciels et catégories de câble (suppression refusée si l'élément est utilisé).
+- **Comptes** : créer, modifier, activer/désactiver, **réinitialiser** un mot de passe. Un compte de chef de mission ou d'agent est rattaché à un agent informaticien (identifiant = matricule).
+
+## 8. Bonnes pratiques
+
+- **Étiqueter** physiquement les nouveaux matériels avec le n° d'inventaire attribué, pour les missions suivantes.
+- Répartir la saisie d'une mission **par type de matériel ou par zone** pour éviter les doublons.
+- Renseigner le **statut** du matériel (en service / en panne / à changer) pour fiabiliser la disponibilité.
+- Changer le **mot de passe administrateur** par défaut dès la première connexion.
