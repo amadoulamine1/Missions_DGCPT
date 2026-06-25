@@ -1,6 +1,6 @@
 :root{
-  --gold:#B8860B; --gold-dark:#705600; --gold-light:#f1e2ad; --gold-pale:#fbf4e0;
-  --ink:#23262b; --muted:#6b7280; --line:#e2e5ea; --bg:#f4f5f7; --white:#fff;
+  --gold:#B8860B; --gold-dark:#705600; --gold-darker:#5a4600; --gold-light:#f1e2ad; --gold-pale:#fbf4e0;
+  --ink:#23262b; --muted:#5b6470; --line:#e2e5ea; --bg:#f4f5f7; --white:#fff;
   --stripe:#f7f8fa; --hover:#eef1f5;
   --red:#c0392b; --green:#2e7d32;
 }
@@ -9,6 +9,14 @@ body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial
   color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:var(--gold-dark);text-decoration:none}
 a:hover{text-decoration:underline}
+
+/* Accessibilité : focus clavier visible sur les éléments interactifs */
+a:focus-visible,button:focus-visible,.btn:focus-visible,.chip:focus-visible,
+.tile:focus-visible,.kpi:focus-visible,.acard:focus-visible,th a:focus-visible,
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--gold-dark);outline-offset:2px;border-radius:4px}
+.topbar .links a:focus-visible,.topbar .userbox .btn:focus-visible{
+  outline:2px solid #f1d680;outline-offset:-2px}
 
 .topbar{position:fixed;left:0;top:0;bottom:0;width:222px;display:flex;flex-direction:column;
   background:linear-gradient(180deg,#5c4700,#473700);color:#fff;z-index:20;overflow-y:auto;
@@ -41,15 +49,15 @@ h3{color:var(--ink);font-size:1rem;font-weight:600;margin:1rem 0 .4rem}
 
 .table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
   border-radius:8px;overflow:hidden}
-.table th{background:var(--gold);color:#fff;text-align:left;padding:.55rem .85rem;font-weight:600;font-size:.74rem;letter-spacing:.4px;text-transform:uppercase}
+.table th{background:var(--gold-dark);color:#fff;text-align:left;padding:.55rem .85rem;font-weight:600;font-size:.74rem;letter-spacing:.4px;text-transform:uppercase}
 .table td{padding:.55rem .85rem;border-top:1px solid var(--line);font-size:.92rem}
 .table tbody tr:nth-child(even){background:var(--stripe)}
 .table tbody tr:hover{background:var(--hover)}
 .table .empty{color:var(--muted);text-align:center;font-style:italic}
 
-.btn{display:inline-block;background:var(--gold);color:#fff;padding:.48rem 1rem;border:0;border-radius:7px;
+.btn{display:inline-block;background:var(--gold-dark);color:#fff;padding:.48rem 1rem;border:0;border-radius:7px;
   cursor:pointer;font-size:.92rem;font-weight:500;text-decoration:none}
-.btn:hover{background:var(--gold-dark);text-decoration:none;color:#fff}
+.btn:hover{background:var(--gold-darker);text-decoration:none;color:#fff}
 .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.secondary:hover{background:var(--hover);color:var(--ink);border-color:#cfd4db}
 .btn.small{padding:.28rem .65rem;font-size:.82rem}
@@ -139,8 +147,8 @@ th a{color:inherit}
 .chip{display:inline-block;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:20px;
   padding:.32rem .82rem;font-size:.82rem;font-weight:500;cursor:pointer;text-decoration:none;font-family:inherit}
 .chip:hover{background:var(--hover);text-decoration:none;color:var(--ink)}
-.chip.active{background:var(--gold);border-color:var(--gold);color:#fff}
-.chip.active:hover{background:var(--gold-dark);color:#fff}
+.chip.active{background:var(--gold-dark);border-color:var(--gold-dark);color:#fff}
+.chip.active:hover{background:var(--gold-darker);color:#fff}
 .chip.sm{border-radius:7px;padding:.28rem .72rem;font-size:.8rem}
 
 .search{position:relative;display:inline-flex;align-items:center;min-width:240px}

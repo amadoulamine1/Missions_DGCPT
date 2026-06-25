@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <body>
-<nav class="topbar" th:fragment="nav">
+<nav class="topbar" th:fragment="nav" aria-label="Navigation principale">
     <a class="brand" th:href="@{/}">DGCPT<br/><span class="brand-sub">Parc &amp; Missions</span></a>
     <div class="links">
         <a th:href="@{/}" th:classappend="${currentPath == '/'} ? 'active'">
