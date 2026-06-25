@@ -9,6 +9,7 @@ import sn.dgcpt.missionsparc.repository.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /** Lecture seule : restitutions (postes, parc, missions). Mappe vers des DTO de vue. */
@@ -105,13 +106,16 @@ public class ConsultationService {
 
     public List<MaterielVue> listerParc(String q, Integer posteId, String type, String statut) {
         String texte = (q == null) ? "" : q.trim().toLowerCase();
-        return materielRepo.findAll().stream()
+        List<Materiel> filtres = materielRepo.findAll().stream()
                 .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
                 .filter(m -> type == null || type.isBlank() || libelleType(m).equals(type))
                 .filter(m -> statut == null || statut.isBlank() || (m.getStatut() != null && m.getStatut().name().equals(statut)))
                 .filter(m -> texte.isEmpty() || contientTexte(m, texte))
-                .map(this::versMaterielVue)
                 .toList();
+        // Évite le N+1 : les caractéristiques d'ordinateur (RAM/proc/disque) sont chargées en une requête.
+        Map<String, Ordinateur> ords = ordinateurRepo.findAll().stream()
+                .collect(Collectors.toMap(Ordinateur::getNumeroInventaire, o -> o, (a, b) -> a));
+        return filtres.stream().map(m -> versMaterielVue(m, ords.get(m.getNumeroInventaire()))).toList();
     }
 
     private boolean contientTexte(Materiel m, String s) {
@@ -284,14 +288,18 @@ public class ConsultationService {
     }
 
     private MaterielVue versMaterielVue(Materiel m) {
+        Ordinateur o = (m.getType() == TypeMateriel.ORDINATEUR)
+                ? ordinateurRepo.findById(m.getNumeroInventaire()).orElse(null) : null;
+        return versMaterielVue(m, o);
+    }
+
+    /** {@code o} : l'ordinateur déjà résolu (ou null) — permet d'éviter un N+1 sur les listes. */
+    private MaterielVue versMaterielVue(Materiel m, Ordinateur o) {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
         String statut = libelleStatut(m.getStatut());
         String obs = m.getObservation() == null ? "" : m.getObservation();
         String ram = "", proc = "", disque = "";
-        if (m.getType() == TypeMateriel.ORDINATEUR) {
-            var o = ordinateurRepo.findById(m.getNumeroInventaire()).orElse(null);
-            if (o != null) { ram = nz(o.getRam()); proc = nz(o.getProcesseur()); disque = nz(o.getDisqueDur()); }
-        }
+        if (o != null) { ram = nz(o.getRam()); proc = nz(o.getProcesseur()); disque = nz(o.getDisqueDur()); }
         return new MaterielVue(m.getNumeroInventaire(), libelleType(m), familleCode(m), m.getNom(), m.getModele(),
                 poste, statut, obs, ram, proc, disque);
     }

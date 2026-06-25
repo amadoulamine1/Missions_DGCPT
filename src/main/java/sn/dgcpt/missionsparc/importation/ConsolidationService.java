@@ -68,10 +68,23 @@ public class ConsolidationService {
     @Transactional(readOnly = true)
     public List<Conflit> conflits(Integer missionId) {
         List<LotImport> lots = enAttente(missionId);
+        return conflitsDe(lots, parserTolerant(lots));
+    }
+
+    /** Parse chaque lot une seule fois (tolérant : un lot illisible est ignoré). */
+    private Map<Integer, CanevasImporte> parserTolerant(List<LotImport> lots) {
+        Map<Integer, CanevasImporte> parsed = new LinkedHashMap<>();
+        for (LotImport lot : lots) {
+            try { parsed.put(lot.getId(), parse(lot)); } catch (Exception ignored) { }
+        }
+        return parsed;
+    }
+
+    private List<Conflit> conflitsDe(List<LotImport> lots, Map<Integer, CanevasImporte> parsed) {
         Map<String, LinkedHashMap<Integer, Item>> parCle = new LinkedHashMap<>();
         for (LotImport lot : lots) {
-            CanevasImporte cv;
-            try { cv = parse(lot); } catch (Exception e) { continue; }
+            CanevasImporte cv = parsed.get(lot.getId());
+            if (cv == null) continue;
             for (Item it : items(cv)) {
                 if (it.cle == null) continue;
                 parCle.computeIfAbsent(it.cle, k -> new LinkedHashMap<>()).putIfAbsent(lot.getId(), it);
@@ -101,7 +114,13 @@ public class ConsolidationService {
     public int integrer(Integer missionId, Map<String, Integer> arbitrages) {
         List<LotImport> lots = enAttente(missionId);
         if (lots.isEmpty()) throw new IllegalStateException("Aucun fichier en attente pour cette mission.");
-        List<Conflit> conflits = conflits(missionId);
+        // Parse chaque lot UNE seule fois (réutilisé pour la détection des conflits et l'intégration).
+        Map<Integer, CanevasImporte> parsed = new LinkedHashMap<>();
+        for (LotImport lot : lots) {
+            try { parsed.put(lot.getId(), parse(lot)); }
+            catch (IOException e) { throw new IllegalStateException("Lecture du lot #" + lot.getId() + " impossible."); }
+        }
+        List<Conflit> conflits = conflitsDe(lots, parsed);
         Map<String, Integer> gagnants = new HashMap<>(arbitrages == null ? Map.of() : arbitrages);
         Set<String> clesConflit = new HashSet<>();
         for (Conflit c : conflits) {
@@ -110,8 +129,7 @@ public class ConsolidationService {
         }
         int total = 0;
         for (LotImport lot : lots) {
-            CanevasImporte cv;
-            try { cv = parse(lot); } catch (IOException e) { throw new IllegalStateException("Lecture du lot #" + lot.getId() + " impossible."); }
+            CanevasImporte cv = parsed.get(lot.getId());
             filtrer(cv, lot.getId(), clesConflit, gagnants);
             total += integration.integrer(cv);
             lot.setStatut(StatutLot.INTEGRE);
