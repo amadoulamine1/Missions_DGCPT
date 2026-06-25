@@ -78,7 +78,9 @@
         function _show(id, on){ var d=document.getElementById(id); if(d) d.style.display = on ? 'block' : 'none'; }
         function _req(id, on){ var e=document.getElementById(id); if(e) e.required = on; }
         function toggleNouveauTpr(){ var v=document.getElementById('posteId').value; _show('nouveau-tpr', v===''); _req('codePoste', v===''); }
-        function toggleChefPoste(){ var v=document.getElementById('chefPosteSel').value; _show('nouveau-chefposte', v===''); _req('chefPosteMat', v===''); }
+        // Chef de poste facultatif : on propose le bloc de création quand aucun chef existant n'est choisi,
+        // mais le matricule n'est jamais imposé (on peut créer la mission sans chef de poste).
+        function toggleChefPoste(){ var v=document.getElementById('chefPosteSel').value; _show('nouveau-chefposte', v===''); _req('chefPosteMat', false); }
         function majChefPoste(){
             var posteId = document.getElementById('posteId').value;
             var sel = document.getElementById('chefPosteSel');
