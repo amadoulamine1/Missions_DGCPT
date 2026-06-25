@@ -2,12 +2,17 @@ package sn.dgcpt.missionsparc.mission;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.PatternFormatting;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
@@ -219,6 +224,10 @@ public class CanevasWriter {
         listeDeroulante(s, 1, types.toArray(new String[0]));
         listeDeroulante(s, 6, new String[]{"En service", "En panne", "À changer"});
 
+        // Garde-fous (§5.2) : validation du format MAC et mise en forme conditionnelle des champs.
+        validationMac(s, 4); // colonne E (MAC)
+        miseEnFormeAutres(s);
+
         if (m.getPoste() == null) return;
         int r = 1;
         for (Materiel mat : materielRepo.findByPoste_Id(m.getPoste().getId())) {
@@ -248,6 +257,48 @@ public class CanevasWriter {
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);
         s.addValidationData(validation);
+    }
+
+    /** Formule Excel (OOXML, en anglais) vérifiant la structure d'une MAC AA:BB:CC:DD:EE:FF pour la cellule {@code ref}. */
+    private String formuleMac(String ref) {
+        return "AND(LEN(" + ref + ")=17,MID(" + ref + ",3,1)=\":\",MID(" + ref + ",6,1)=\":\","
+                + "MID(" + ref + ",9,1)=\":\",MID(" + ref + ",12,1)=\":\",MID(" + ref + ",15,1)=\":\")";
+    }
+
+    /** Validation de saisie du format MAC (avertissement non bloquant ; cellule vide autorisée). */
+    private void validationMac(Sheet s, int col) {
+        DataValidationHelper helper = s.getDataValidationHelper();
+        DataValidationConstraint c = helper.createCustomConstraint(formuleMac("E2"));
+        CellRangeAddressList zone = new CellRangeAddressList(1, 500, col, col);
+        DataValidation v = helper.createValidation(c, zone);
+        v.setEmptyCellAllowed(true);
+        v.setErrorStyle(DataValidation.ErrorStyle.WARNING);
+        v.setShowErrorBox(true);
+        v.createErrorBox("Adresse MAC", "Format attendu : AA:BB:CC:DD:EE:FF");
+        v.setShowPromptBox(true);
+        v.createPromptBox("Adresse MAC", "Saisir au format AA:BB:CC:DD:EE:FF (facultatif).");
+        s.addValidationData(v);
+    }
+
+    /**
+     * Mise en forme conditionnelle de l'onglet « Autres matériels » : un champ obligatoire vide sur une
+     * ligne saisie apparaît en rouge (Type col. B, Nom col. C) ; une MAC mal formée apparaît en orange (col. E).
+     */
+    private void miseEnFormeAutres(Sheet s) {
+        SheetConditionalFormatting scf = s.getSheetConditionalFormatting();
+        // ligne « saisie » = au moins une valeur entre A et H
+        String ligneSaisie = "COUNTA($A2:$H2)>0";
+        regleFond(scf, "B2:B501", "AND(LEN(TRIM(B2))=0," + ligneSaisie + ")", IndexedColors.ROSE);
+        regleFond(scf, "C2:C501", "AND(LEN(TRIM(C2))=0," + ligneSaisie + ")", IndexedColors.ROSE);
+        regleFond(scf, "E2:E501", "AND(LEN(TRIM(E2))>0,NOT(" + formuleMac("E2") + "))", IndexedColors.LIGHT_ORANGE);
+    }
+
+    private void regleFond(SheetConditionalFormatting scf, String plage, String formule, IndexedColors couleur) {
+        ConditionalFormattingRule regle = scf.createConditionalFormattingRule(formule);
+        PatternFormatting fond = regle.createPatternFormatting();
+        fond.setFillBackgroundColor(couleur.index);
+        fond.setFillPattern(PatternFormatting.SOLID_FOREGROUND);
+        scf.addConditionalFormatting(new CellRangeAddress[]{CellRangeAddress.valueOf(plage)}, regle);
     }
 
     private String attributaire(Materiel mat) {
