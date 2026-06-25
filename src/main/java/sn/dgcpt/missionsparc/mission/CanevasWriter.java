@@ -1,11 +1,14 @@
 package sn.dgcpt.missionsparc.mission;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.PatternFormatting;
 import org.apache.poi.ss.usermodel.Row;
@@ -14,6 +17,10 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -89,6 +96,9 @@ public class CanevasWriter {
             if (saisisseur != null) remplir(s, "agent saisisseur", libelle(saisisseur));
             // État du réseau contraint à : Neuf / Bon / Pas bon
             listeDeroulanteCelluleLabel(s, "état du câblage", new String[]{"Neuf", "Bon", "Pas bon"});
+            // Champs obligatoires de l'en-tête : marqués « * » et surlignés en rouge tant que vides
+            marquerObligatoireEntete(s, "état du câblage");
+            marquerObligatoireEntete(s, "catégorie de câble");
 
             // 2) Membres de la mission
             Sheet mem = wb.getSheet("2-Membres mission");
@@ -133,13 +143,24 @@ public class CanevasWriter {
             // 5) Inventaire déjà enregistré pour le poste (l'agent vérifie / complète)
             fillInventaire(wb, m);
 
+            // Statut obligatoire : surlignage rouge tant que vide sur une ligne saisie (onglets matériel)
+            mefcStatut(wb.getSheet("3-Ordinateurs"), 15, 16);
+            mefcStatut(wb.getSheet("4-Imprimantes"), 6, 7);
+            mefcStatut(wb.getSheet("5-Switchs et AP"), 6, 7);
+            mefcStatut(wb.getSheet("6-Scanners chèque"), 4, 5);
+
             // 6) Onglet générique des types paramétrables (famille AUTRE)
             fillAutres(wb, m);
 
-            // 7) Placer « Agents TPR » juste après « 1-Mission et Réseau »
+            // 7) Ordre des feuilles : « Agents TPR » après « 1-Mission et Réseau »,
+            //    « 7-Autres matériels » juste avant « Referentiels »
             int idxMission = wb.getSheetIndex("1-Mission et Réseau");
             if (idxMission >= 0 && wb.getSheet("Agents TPR") != null) {
                 wb.setSheetOrder("Agents TPR", idxMission + 1);
+            }
+            int idxRef = wb.getSheetIndex("Referentiels");
+            if (idxRef >= 0 && wb.getSheet("7-Autres matériels") != null) {
+                wb.setSheetOrder("7-Autres matériels", idxRef);
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -228,8 +249,16 @@ public class CanevasWriter {
         if (s == null) s = wb.createSheet("7-Autres matériels");
 
         String[] entetes = {"N° inventaire", "Type*", "Nom*", "Modèle", "MAC", "IP", "Statut*", "Observation"};
+        int[] largeurs = {18, 16, 22, 18, 18, 14, 12, 30};
+        XSSFCellStyle styleEntete = styleEntete((XSSFWorkbook) wb);
         Row tete = ligne(s, 0);
-        for (int i = 0; i < entetes.length; i++) set(tete, i, entetes[i]);
+        tete.setHeightInPoints(20);
+        for (int i = 0; i < entetes.length; i++) {
+            set(tete, i, entetes[i]);
+            tete.getCell(i).setCellStyle(styleEntete);
+            s.setColumnWidth(i, largeurs[i] * 256);
+        }
+        s.createFreezePane(0, 1); // fige la ligne d'en-tête
 
         // Listes déroulantes : type (catégories famille AUTRE actives) en col. B, statut en col. G.
         List<String> types = categorieMaterielRepo
@@ -328,6 +357,7 @@ public class CanevasWriter {
         String ligneSaisie = "COUNTA($A2:$H2)>0";
         regleFond(scf, "B2:B501", "AND(LEN(TRIM(B2))=0," + ligneSaisie + ")", IndexedColors.ROSE);
         regleFond(scf, "C2:C501", "AND(LEN(TRIM(C2))=0," + ligneSaisie + ")", IndexedColors.ROSE);
+        regleFond(scf, "G2:G501", "AND(LEN(TRIM(G2))=0," + ligneSaisie + ")", IndexedColors.ROSE); // statut obligatoire
         regleFond(scf, "E2:E501", "AND(LEN(TRIM(E2))>0,NOT(" + formuleMac("E2") + "))", IndexedColors.LIGHT_ORANGE);
     }
 
@@ -337,6 +367,41 @@ public class CanevasWriter {
         fond.setFillBackgroundColor(couleur.index);
         fond.setFillPattern(PatternFormatting.SOLID_FOREGROUND);
         scf.addConditionalFormatting(new CellRangeAddress[]{CellRangeAddress.valueOf(plage)}, regle);
+    }
+
+    /** Style d'en-tête doré (fond or foncé, texte blanc gras) pour l'onglet créé par programme. */
+    private XSSFCellStyle styleEntete(XSSFWorkbook wb) {
+        XSSFCellStyle st = wb.createCellStyle();
+        st.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 0x70, (byte) 0x56, (byte) 0x00}, null));
+        st.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        st.setAlignment(HorizontalAlignment.LEFT);
+        st.setBorderBottom(BorderStyle.THIN);
+        XSSFFont font = wb.createFont();
+        font.setBold(true);
+        font.setColor(IndexedColors.WHITE.getIndex());
+        st.setFont(font);
+        return st;
+    }
+
+    /** Surligne en rouge la colonne « statut » (vide sur une ligne saisie) d'un onglet matériel. */
+    private void mefcStatut(Sheet s, int colStatut, int dernCol) {
+        if (s == null) return;
+        String col = CellReference.convertNumToColString(colStatut);
+        String last = CellReference.convertNumToColString(dernCol);
+        String formule = "AND(LEN(TRIM(" + col + "2))=0,COUNTA($A2:$" + last + "2)>0)";
+        regleFond(s.getSheetConditionalFormatting(), col + "2:" + col + "501", formule, IndexedColors.ROSE);
+    }
+
+    /** Marque un champ d'en-tête obligatoire : « * » sur le libellé (col. A) et fond rouge si la valeur (col. B) est vide. */
+    private void marquerObligatoireEntete(Sheet s, String prefixeLabel) {
+        int r = ligneLabel(s, prefixeLabel);
+        if (r < 0) return;
+        Cell a = s.getRow(r).getCell(0);
+        if (a != null && a.getCellType() == CellType.STRING && !a.getStringCellValue().contains("*")) {
+            a.setCellValue(a.getStringCellValue().trim() + " *");
+        }
+        String cell = "B" + (r + 1);
+        regleFond(s.getSheetConditionalFormatting(), cell + ":" + cell, "LEN(TRIM(" + cell + "))=0", IndexedColors.ROSE);
     }
 
     private String attributaire(Materiel mat) {
