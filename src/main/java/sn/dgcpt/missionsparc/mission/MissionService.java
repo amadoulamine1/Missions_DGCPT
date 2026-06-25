@@ -68,7 +68,8 @@ public class MissionService {
             throw new IllegalArgumentException("Désignez le chef de mission parmi les membres sélectionnés (un seul).");
         }
 
-        verifierChevauchement(membres, debut, fin);
+        // Chevauchement de période entre missions autorisé (souplesse) : un agent peut figurer
+        // sur plusieurs missions à des dates qui se recoupent.
 
         Poste poste = (f.getPosteId() != null)
                 ? posteRepo.findById(f.getPosteId()).orElseThrow()
@@ -93,31 +94,6 @@ public class MissionService {
 
         if (chefPoste != null) historiserChefPoste(poste, chefPoste, debut);
         return saved;
-    }
-
-    private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin) {
-        verifierChevauchement(membres, debut, fin, null);
-    }
-
-    private void verifierChevauchement(List<String> membres, LocalDate debut, LocalDate fin, Integer exclureMissionId) {
-        LocalDate finEff = (fin != null) ? fin : LocalDate.of(9999, 12, 31);
-        List<String> conflits = new ArrayList<>();
-        for (String mat : membres) {
-            for (Mission c : missionRepo.membreEnConflit(mat, debut, finEff)) {
-                if (exclureMissionId != null && c.getId().equals(exclureMissionId)) continue;
-                String nom = agentRepo.findById(mat).map(a -> (a.getNom() + " " + a.getPrenom()).trim()).orElse("");
-                String objet = (c.getObjet() == null || c.getObjet().isBlank()) ? "" : " « " + c.getObjet().trim() + " »";
-                String tpr = (c.getPoste() == null || c.getPoste().getNom() == null) ? "" : " au TPR " + c.getPoste().getNom();
-                conflits.add(mat + (nom.isEmpty() ? "" : " — " + nom) + " (déjà sur " + c.getReference() + objet + tpr + ")");
-                break;
-            }
-        }
-        if (!conflits.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Chevauchement de période — ces agents sont déjà membres d'une mission sur la même période : "
-                    + String.join(" ; ", conflits)
-                    + ". Retirez-les d'abord de leur mission existante avant de les ajouter ici.");
-        }
     }
 
     @Transactional(readOnly = true)
@@ -152,7 +128,7 @@ public class MissionService {
         if (chefMat.isEmpty() || !membres.contains(chefMat)) {
             throw new IllegalArgumentException("Désignez le chef de mission parmi les membres sélectionnés (un seul).");
         }
-        verifierChevauchement(membres, debut, fin, m.getId());
+        // Chevauchement de période autorisé (souplesse) : aucun contrôle bloquant ici.
 
         m.setObjet((f.getObjet() == null || f.getObjet().isBlank()) ? m.getObjet() : f.getObjet().trim());
         m.setDateDebut(debut);

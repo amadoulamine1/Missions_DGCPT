@@ -91,6 +91,11 @@ public class IntegrationService {
         // canevas s'il n'a pas encore été fixé.
         if (mission.getChefPosteFige() == null && !vide(e.getChefPoste()))
             mission.setChefPosteFige(resoudreAgent(e.getChefPoste(), TypeAgent.POSTE, poste));
+        // Dates de mission modifiables depuis le canevas : reportées à la mission si renseignées.
+        LocalDate dDebut = parseDate(e.getDateDebut(), null);
+        if (dDebut != null) mission.setDateDebut(dDebut);
+        LocalDate dFin = parseDate(e.getDateFin(), null);
+        if (dFin != null) mission.setDateFin(dFin);
         Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
         String zone = vide(e.getZone()) ? null : e.getZone();
 

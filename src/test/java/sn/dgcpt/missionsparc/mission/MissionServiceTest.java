@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -133,16 +132,17 @@ class MissionServiceTest {
     }
 
     @Test
-    void creer_refuse_un_membre_deja_sur_une_mission_qui_chevauche() {
-        Mission enConflit = new Mission(); enConflit.setId(99); enConflit.setReference("MIS-2026-099");
-        when(missionRepo.membreEnConflit(eq("AG1"), any(), any())).thenReturn(List.of(enConflit));
+    void creer_autorise_le_chevauchement_de_periode() {
+        when(posteRepo.findById(1)).thenReturn(Optional.of(poste(1)));
+        when(agentRepo.findById("AG1")).thenReturn(Optional.of(agent("AG1")));
+        when(agentRepo.findById("CP1")).thenReturn(Optional.of(agent("CP1")));
+        when(missionRepo.save(any(Mission.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        assertThatThrownBy(() -> service.creer(formCreation(List.of("AG1"), "AG1")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Chevauchement")
-                .hasMessageContaining("MIS-2026-099");
+        // Aucun contrôle de chevauchement : la création réussit même si l'agent est déjà sur une autre mission.
+        Mission m = service.creer(formCreation(List.of("AG1"), "AG1"));
 
-        verify(missionRepo, never()).save(any());
+        assertThat(m.getReference()).isEqualTo("MIS-2026-001");
+        verify(missionRepo).save(any(Mission.class));
     }
 
     // ---------- modification ----------
@@ -168,32 +168,18 @@ class MissionServiceTest {
     }
 
     @Test
-    void modifier_exclut_la_mission_editee_du_controle_de_chevauchement() {
+    void modifier_met_a_jour_la_mission_et_autorise_le_chevauchement() {
         Mission existante = missionExistante(5);
         Agent ag1 = agent("AG1");
         when(missionRepo.findById(5)).thenReturn(Optional.of(existante));
-        when(missionRepo.membreEnConflit(eq("AG1"), any(), any())).thenReturn(List.of(existante)); // elle-même
         when(agentRepo.findById("AG1")).thenReturn(Optional.of(ag1));
         when(missionRepo.save(any(Mission.class))).thenAnswer(inv -> inv.getArgument(0));
 
+        // Aucun contrôle de chevauchement : la modification réussit sans vérifier les périodes des autres missions.
         assertThatCode(() -> service.modifier(formEdition(5, List.of("AG1"), "AG1"))).doesNotThrowAnyException();
 
         verify(missionRepo).save(existante);
         assertThat(existante.getChefMission()).isSameAs(ag1);
-    }
-
-    @Test
-    void modifier_detecte_un_chevauchement_avec_une_autre_mission() {
-        Mission existante = missionExistante(5);
-        Mission autre = new Mission(); autre.setId(99); autre.setReference("MIS-2026-099");
-        when(missionRepo.findById(5)).thenReturn(Optional.of(existante));
-        when(missionRepo.membreEnConflit(eq("AG1"), any(), any())).thenReturn(List.of(autre));
-
-        assertThatThrownBy(() -> service.modifier(formEdition(5, List.of("AG1"), "AG1")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Chevauchement");
-
-        verify(missionRepo, never()).save(any());
     }
 
     // ---------- clôture et retrait ----------
