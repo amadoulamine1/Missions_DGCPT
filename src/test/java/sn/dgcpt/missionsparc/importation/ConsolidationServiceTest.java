@@ -3,7 +3,6 @@ package sn.dgcpt.missionsparc.importation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sn.dgcpt.missionsparc.domain.LotImport;
@@ -14,6 +13,7 @@ import sn.dgcpt.missionsparc.importation.dto.LigneOrdinateur;
 import sn.dgcpt.missionsparc.repository.LotImportRepository;
 import sn.dgcpt.missionsparc.repository.MissionRepository;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -30,19 +30,50 @@ import static org.mockito.Mockito.when;
 /**
  * Logique de consolidation multi-fichiers (§5.1 / §9.9) : détection des conflits par clé
  * (n° d'inventaire, sinon MAC / n° de série), arbitrage du chef de mission et intégration.
- * Le lecteur de canevas est mocké : chaque lot porte un octet « marqueur » qui désigne
- * le {@link CanevasImporte} en mémoire à renvoyer, ce qui évite de fabriquer un vrai .xlsx.
+ *
+ * Les collaborateurs concrets ({@link CanevasReader}, {@link IntegrationService}) sont
+ * remplacés par des doublures manuelles (sous-classes) plutôt que par des mocks Mockito :
+ * sous JDK récent, l'instrumentation « inline » des classes concrètes échoue, alors que
+ * les dépôts (interfaces) restent mockables. Chaque lot porte un octet « marqueur » qui
+ * désigne le {@link CanevasImporte} en mémoire à renvoyer, ce qui évite de fabriquer un
+ * vrai fichier .xlsx.
  */
 @ExtendWith(MockitoExtension.class)
 class ConsolidationServiceTest {
 
     private static final Integer MISSION_ID = 10;
 
-    @Mock IntegrationService integration;
     @Mock MissionRepository missionRepo;
     @Mock LotImportRepository lotRepo;
-    @Mock CanevasReader reader;
-    @InjectMocks ConsolidationService service;
+
+    private FakeIntegration integration;
+    private ConsolidationService service;
+
+    private void init(Map<Integer, CanevasImporte> parMarqueur) {
+        integration = new FakeIntegration();
+        service = new ConsolidationService(integration, missionRepo, lotRepo, new FakeReader(parMarqueur));
+    }
+
+    // ---------- doublures manuelles ----------
+
+    /** Renvoie le canevas associé à l'octet marqueur du flux lu (lot.getFichier()[0]). */
+    private static final class FakeReader extends CanevasReader {
+        private final Map<Integer, CanevasImporte> parMarqueur;
+        FakeReader(Map<Integer, CanevasImporte> parMarqueur) { this.parMarqueur = parMarqueur; }
+        @Override public CanevasImporte lire(InputStream is) throws IOException {
+            int marqueur = is.read();
+            CanevasImporte cv = parMarqueur.get(marqueur);
+            if (cv == null) throw new IOException("marqueur de lot inconnu : " + marqueur);
+            return cv;
+        }
+    }
+
+    /** Compte les intégrations et renvoie 1 (une ligne intégrée) par appel. */
+    private static final class FakeIntegration extends IntegrationService {
+        int appels = 0;
+        FakeIntegration() { super(null, null, null, null, null, null, null, null, null, null, null, null); }
+        @Override public int integrer(CanevasImporte canevas) { appels++; return 1; }
+    }
 
     // ---------- fabriques ----------
 
@@ -68,17 +99,6 @@ class ConsolidationServiceTest {
         return l;
     }
 
-    /** Renvoie le canevas associé à l'octet marqueur du flux lu (lot.getFichier()[0]). */
-    private void brancherLecteur(Map<Integer, CanevasImporte> parMarqueur) {
-        try {
-            when(reader.lire(any())).thenAnswer(inv -> {
-                InputStream in = inv.getArgument(0);
-                int marqueur = in.read();
-                return parMarqueur.get(marqueur);
-            });
-        } catch (Exception e) { throw new RuntimeException(e); }
-    }
-
     private void enAttente(LotImport... lots) {
         when(lotRepo.findByMission_IdAndStatut(MISSION_ID, StatutLot.EN_ATTENTE)).thenReturn(List.of(lots));
     }
@@ -88,7 +108,7 @@ class ConsolidationServiceTest {
     @Test
     void conflits_signale_un_conflit_quand_le_meme_numero_porte_des_valeurs_divergentes() {
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(
+        init(Map.of(
                 1, canevasOrd("ORD-1", null, "PC-A"),
                 2, canevasOrd("ORD-1", null, "PC-B")));
 
@@ -104,7 +124,7 @@ class ConsolidationServiceTest {
     @Test
     void conflits_aucun_conflit_quand_les_valeurs_sont_identiques() {
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(
+        init(Map.of(
                 1, canevasOrd("ORD-1", null, "PC-A"),
                 2, canevasOrd("ORD-1", null, "PC-A")));
 
@@ -114,7 +134,7 @@ class ConsolidationServiceTest {
     @Test
     void conflits_aucun_conflit_quand_la_cle_n_apparait_que_dans_un_seul_lot() {
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(
+        init(Map.of(
                 1, canevasOrd("ORD-1", null, "PC-A"),
                 2, canevasOrd("ORD-2", null, "PC-B")));
 
@@ -124,7 +144,7 @@ class ConsolidationServiceTest {
     @Test
     void conflits_utilise_la_mac_comme_cle_de_repli_quand_le_numero_est_absent() {
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(
+        init(Map.of(
                 1, canevasOrd(null, "AA:BB:CC:DD:EE:FF", "PC-A"),
                 2, canevasOrd("", "AA:BB:CC:DD:EE:FF", "PC-B")));
 
@@ -141,8 +161,7 @@ class ConsolidationServiceTest {
         CanevasImporte cv1 = canevasOrd("ORD-1", null, "PC-A");
         CanevasImporte cv2 = canevasOrd("ORD-1", null, "PC-B");
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(1, cv1, 2, cv2));
-        when(integration.integrer(any())).thenReturn(1);
+        init(Map.of(1, cv1, 2, cv2));
 
         Map<String, Integer> arbitrages = new HashMap<>();
         arbitrages.put("N:ORD-1", 2); // le chef retient la version du lot #2
@@ -159,8 +178,7 @@ class ConsolidationServiceTest {
         CanevasImporte cv1 = canevasOrd("ORD-1", null, "PC-A");
         CanevasImporte cv2 = canevasOrd("ORD-1", null, "PC-B");
         enAttente(lot(1, 1, "AG1"), lot(2, 2, "AG2"));
-        brancherLecteur(Map.of(1, cv1, 2, cv2));
-        when(integration.integrer(any())).thenReturn(1);
+        init(Map.of(1, cv1, 2, cv2));
 
         service.integrer(MISSION_ID, null);
 
@@ -173,32 +191,37 @@ class ConsolidationServiceTest {
         LotImport l1 = lot(1, 1, "AG1");
         LotImport l2 = lot(2, 2, "AG2");
         enAttente(l1, l2);
-        brancherLecteur(Map.of(
+        init(Map.of(
                 1, canevasOrd("ORD-1", null, "PC-A"),
                 2, canevasOrd("ORD-2", null, "PC-B")));
-        when(integration.integrer(any())).thenReturn(1);
 
-        service.integrer(MISSION_ID, null);
+        int total = service.integrer(MISSION_ID, null);
 
+        assertThat(total).isEqualTo(2);
+        assertThat(integration.appels).isEqualTo(2);
         assertThat(l1.getStatut()).isEqualTo(StatutLot.INTEGRE);
         assertThat(l2.getStatut()).isEqualTo(StatutLot.INTEGRE);
+        verify(lotRepo).save(l1);
+        verify(lotRepo).save(l2);
     }
 
     @Test
     void integrer_sans_lot_en_attente_leve_une_exception() {
         when(lotRepo.findByMission_IdAndStatut(MISSION_ID, StatutLot.EN_ATTENTE)).thenReturn(List.of());
+        init(Map.of());
 
         assertThatThrownBy(() -> service.integrer(MISSION_ID, null))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Aucun fichier");
 
-        verify(integration, never()).integrer(any());
+        assertThat(integration.appels).isZero();
     }
 
     // ---------- création / suppression de lot ----------
 
     @Test
     void creerLot_rattache_le_fichier_a_la_mission_par_sa_reference() {
+        init(Map.of());
         CanevasImporte cv = new CanevasImporte();
         cv.getEntete().setReference("MIS-2026-001");
         cv.getEntete().setAgentSaisisseur("AG1");
@@ -219,6 +242,7 @@ class ConsolidationServiceTest {
 
     @Test
     void creerLot_reference_inconnue_leve_une_exception() {
+        init(Map.of());
         CanevasImporte cv = new CanevasImporte();
         cv.getEntete().setReference("MIS-INCONNUE");
         when(missionRepo.findByReference("MIS-INCONNUE")).thenReturn(Optional.empty());
@@ -232,6 +256,7 @@ class ConsolidationServiceTest {
 
     @Test
     void supprimerLot_supprime_le_lot_et_retourne_l_id_de_la_mission() {
+        init(Map.of());
         LotImport l = lot(5, 1, "AG1");
         when(lotRepo.findById(5)).thenReturn(Optional.of(l));
 

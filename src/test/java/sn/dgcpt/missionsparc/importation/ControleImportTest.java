@@ -1,0 +1,160 @@
+package sn.dgcpt.missionsparc.importation;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import sn.dgcpt.missionsparc.domain.Ordinateur;
+import sn.dgcpt.missionsparc.domain.ScannerCheque;
+import sn.dgcpt.missionsparc.importation.dto.CanevasImporte;
+import sn.dgcpt.missionsparc.importation.dto.EnteteMission;
+import sn.dgcpt.missionsparc.importation.dto.LigneOrdinateur;
+import sn.dgcpt.missionsparc.importation.dto.LigneScanner;
+import sn.dgcpt.missionsparc.repository.EquipementReseauRepository;
+import sn.dgcpt.missionsparc.repository.ImprimanteRepository;
+import sn.dgcpt.missionsparc.repository.OrdinateurRepository;
+import sn.dgcpt.missionsparc.repository.ScannerChequeRepository;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+/**
+ * Contrôles à l'import (§5) et filet de sécurité anti-doublon (§4) : une ligne sans
+ * n° d'inventaire dont la MAC / le n° de série est déjà connu en base est signalée
+ * en AVERTISSEMENT (non bloquant), tandis que MAC absente ou mal formée et champs
+ * d'en-tête manquants sont BLOQUANTS.
+ */
+@ExtendWith(MockitoExtension.class)
+class ControleImportTest {
+
+    @Mock OrdinateurRepository ordinateurRepo;
+    @Mock ImprimanteRepository imprimanteRepo;
+    @Mock EquipementReseauRepository reseauRepo;
+    @Mock ScannerChequeRepository scannerRepo;
+    @InjectMocks ControleImport controle;
+
+    private static final String MAC_VALIDE = "AA:BB:CC:DD:EE:FF";
+
+    private void enteteValide(CanevasImporte c) {
+        EnteteMission e = c.getEntete();
+        e.setReference("MIS-2026-001");
+        e.setCodePoste("TPR-01");
+        e.setObjet("Inventaire");
+        e.setAgentSaisisseur("AG1");
+        e.setChefMission("AG1");
+        e.setChefPoste("CP1");
+    }
+
+    private LigneOrdinateur ordinateurValide(String numero, String mac) {
+        LigneOrdinateur o = new LigneOrdinateur();
+        o.setNumLigne(2);
+        o.setNumeroInventaire(numero);
+        o.setNomMachine("PC-A");
+        o.setAgentAttributaire("A1");
+        o.setAgentInstallateur("A2");
+        o.setMacEthernet(mac);
+        return o;
+    }
+
+    private boolean contient(RapportImport r, Severite sev, String fragment) {
+        return r.getAnomalies().stream()
+                .anyMatch(a -> a.getSeverite() == sev && a.getMessage().contains(fragment));
+    }
+
+    // ---------- filet anti-doublon (§4) ----------
+
+    @Test
+    void avertissement_quand_mac_deja_connue_sans_numero_inventaire() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getOrdinateurs().add(ordinateurValide(null, MAC_VALIDE));
+        when(ordinateurRepo.findByMacEthernet(MAC_VALIDE)).thenReturn(Optional.of(new Ordinateur()));
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.nbAvertissements()).isEqualTo(1);
+        assertThat(r.estIntegrable()).isTrue(); // un avertissement ne bloque pas l'intégration
+        assertThat(contient(r, Severite.AVERTISSEMENT, "déjà connu")).isTrue();
+    }
+
+    @Test
+    void pas_d_avertissement_quand_le_numero_d_inventaire_est_present() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getOrdinateurs().add(ordinateurValide("ORD-1", MAC_VALIDE)); // matériel déjà identifié
+        // findByMacEthernet ne doit pas être consulté : la ligne n'est pas « nouvelle »
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.nbAvertissements()).isZero();
+        assertThat(r.estIntegrable()).isTrue();
+    }
+
+    @Test
+    void pas_d_avertissement_quand_la_mac_est_inconnue_en_base() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getOrdinateurs().add(ordinateurValide(null, MAC_VALIDE));
+        when(ordinateurRepo.findByMacEthernet(MAC_VALIDE)).thenReturn(Optional.empty());
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.nbAvertissements()).isZero();
+    }
+
+    @Test
+    void avertissement_doublon_scanner_par_numero_de_serie() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        LigneScanner sc = new LigneScanner();
+        sc.setNumLigne(2);
+        sc.setNumeroInventaire(null);
+        sc.setNumeroSerie("SN-123");
+        c.getScanners().add(sc);
+        when(scannerRepo.findByNumeroSerie("SN-123")).thenReturn(Optional.of(new ScannerCheque()));
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.nbAvertissements()).isEqualTo(1);
+        assertThat(contient(r, Severite.AVERTISSEMENT, "n° de série SN-123")).isTrue();
+    }
+
+    // ---------- contrôles bloquants ----------
+
+    @Test
+    void mac_ethernet_manquante_est_bloquante() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getOrdinateurs().add(ordinateurValide("ORD-1", "")); // MAC absente
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "MAC ethernet")).isTrue();
+    }
+
+    @Test
+    void mac_au_format_invalide_est_bloquante() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getOrdinateurs().add(ordinateurValide("ORD-1", "ZZ:00")); // format invalide
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "Format d'adresse MAC invalide")).isTrue();
+    }
+
+    @Test
+    void entete_incomplete_est_bloquante() {
+        CanevasImporte c = new CanevasImporte(); // en-tête vide, aucun matériel
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(r.nbBloquants()).isEqualTo(6); // référence, code poste, objet, saisisseur, chef mission, chef poste
+    }
+}
