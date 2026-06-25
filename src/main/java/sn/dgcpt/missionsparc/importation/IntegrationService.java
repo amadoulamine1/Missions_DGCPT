@@ -421,6 +421,7 @@ public class IntegrationService {
         ajouterLogiciel(set, o.isSicCDD(), "SicCDD");
         ajouterLogiciel(set, o.isCic(), "CIC");
         ajouterLogiciel(set, o.isSysbudget(), "Sysbudget");
+        ajouterLogiciel(set, o.isAd(), "AD");
         return set;
     }
 

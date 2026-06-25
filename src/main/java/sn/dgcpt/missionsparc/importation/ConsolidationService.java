@@ -193,7 +193,7 @@ public class ConsolidationService {
     private String sigOrd(LigneOrdinateur o) {
         return j(o.getNomMachine(), o.getModele(), o.getMacEthernet(), o.getMacWifi(), o.getAgentAttributaire(),
                 o.getAgentInstallateur(), b(o.isAster()), b(o.isAntivirus()), b(o.isSicCDD()), b(o.isCic()),
-                b(o.isSysbudget()), o.getRam(), o.getProcesseur(), o.getDisqueDur(), o.getStatut(), o.getObservation());
+                b(o.isSysbudget()), b(o.isAd()), o.getRam(), o.getProcesseur(), o.getDisqueDur(), o.getStatut(), o.getObservation());
     }
     private String sigImp(LigneImprimante i) { return j(i.getNom(), i.getModele(), i.getMac(), i.getMacWifi(), i.getIp(), i.getStatut(), i.getObservation()); }
     private String sigReseau(LigneEquipementReseau e) { return j(e.getType(), e.getNom(), e.getModele(), e.getMac(), e.getIp(), e.getStatut(), e.getObservation()); }

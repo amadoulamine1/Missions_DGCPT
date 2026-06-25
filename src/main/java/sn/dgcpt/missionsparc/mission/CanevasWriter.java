@@ -144,7 +144,7 @@ public class CanevasWriter {
             fillInventaire(wb, m);
 
             // Statut obligatoire : surlignage rouge tant que vide sur une ligne saisie (onglets matériel)
-            mefcStatut(wb.getSheet("3-Ordinateurs"), 15, 16);
+            mefcStatut(wb.getSheet("3-Ordinateurs"), 16, 17);
             mefcStatut(wb.getSheet("4-Imprimantes"), 6, 7);
             mefcStatut(wb.getSheet("5-Switchs et AP"), 6, 7);
             mefcStatut(wb.getSheet("6-Scanners chèque"), 4, 5);
@@ -202,13 +202,14 @@ public class CanevasWriter {
                         set(row, 9, logs.contains("SicCDD") ? "Oui" : "Non");
                         set(row, 10, logs.contains("CIC") ? "Oui" : "Non");
                         set(row, 11, logs.contains("Sysbudget") ? "Oui" : "Non");
-                        set(row, 12, o.getRam());
-                        set(row, 13, o.getProcesseur());
-                        set(row, 14, o.getDisqueDur());
+                        set(row, 12, logs.contains("AD") ? "Oui" : "Non");
+                        set(row, 13, o.getRam());
+                        set(row, 14, o.getProcesseur());
+                        set(row, 15, o.getDisqueDur());
                     }
                     set(row, 5, attributaire(mat));
-                    set(row, 15, statut);
-                    set(row, 16, obs);
+                    set(row, 16, statut);
+                    set(row, 17, obs);
                 }
                 case IMPRIMANTE -> {
                     Imprimante i = imprimanteRepo.findById(num).orElse(null);

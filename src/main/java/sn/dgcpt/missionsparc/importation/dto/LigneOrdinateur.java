@@ -15,6 +15,7 @@ public class LigneOrdinateur {
     private boolean sicCDD;
     private boolean cic;
     private boolean sysbudget;
+    private boolean ad;
     private String ram;
     private String processeur;
     private String disqueDur;
@@ -47,6 +48,8 @@ public class LigneOrdinateur {
     public void setCic(boolean cic) { this.cic = cic; }
     public boolean isSysbudget() { return sysbudget; }
     public void setSysbudget(boolean sysbudget) { this.sysbudget = sysbudget; }
+    public boolean isAd() { return ad; }
+    public void setAd(boolean ad) { this.ad = ad; }
     public String getRam() { return ram; }
     public void setRam(String ram) { this.ram = ram; }
     public String getProcesseur() { return processeur; }
