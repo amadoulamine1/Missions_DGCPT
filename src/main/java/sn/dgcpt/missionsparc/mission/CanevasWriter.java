@@ -136,6 +136,12 @@ public class CanevasWriter {
             // 6) Onglet générique des types paramétrables (famille AUTRE)
             fillAutres(wb, m);
 
+            // 7) Placer « Agents TPR » juste après « 1-Mission et Réseau »
+            int idxMission = wb.getSheetIndex("1-Mission et Réseau");
+            if (idxMission >= 0 && wb.getSheet("Agents TPR") != null) {
+                wb.setSheetOrder("Agents TPR", idxMission + 1);
+            }
+
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
             return out.toByteArray();
