@@ -1,44 +1,67 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Parc</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<title>Parc</title><link rel="stylesheet" th:href="@{/css/app.css}"/>
+<style>
+    .parc-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1rem;flex-wrap:wrap}
+    .parc-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    .filterbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;background:#fff;border:1px solid var(--line);
+        border-radius:var(--r);padding:.65rem .85rem;box-shadow:var(--e1);margin:1.1rem 0 .8rem}
+    .filterbar .search{min-width:230px;flex:1}
+    .filterbar select{padding:.46rem .6rem;border:1px solid var(--line);border-radius:var(--r-sm);font-size:.9rem;background:#fff;color:var(--ink)}
+    .filterbar .count{margin-left:auto;font-size:.82rem;color:var(--muted);white-space:nowrap}
+    .filterbar .count b{color:var(--ink);font-weight:700}
+    .chiprow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+    .chiprow .lbl{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:.1rem}
+    .parc thead th{position:sticky;top:0;z-index:2}
+    .parc td.tech{font-family:'Consolas','SFMono-Regular',Menlo,monospace;font-size:.81rem;color:var(--muted);white-space:nowrap}
+    @media print{.no-print{display:none!important}.parc thead th{position:static}}
+</style>
+</head>
 <body>
 <nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
-<main class="container">
-    <h1>Inventaire du parc</h1>
+<main class="container wide parc">
+    <header class="parc-head">
+        <div>
+            <p class="eyebrow">Parc informatique</p>
+            <h1>Inventaire du parc</h1>
+        </div>
+        <div class="parc-actions no-print">
+            <a class="btn secondary small" th:href="@{/inventaire}">📅 Inventaire à une date</a>
+            <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export Excel</a>
+            <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
+        </div>
+    </header>
 
-    <form method="get" th:action="@{/parc}" class="filters">
+    <form method="get" th:action="@{/parc}" class="filterbar no-print">
         <span class="search">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
-            <input type="text" name="q" th:value="${q}" placeholder="N° inv., nom, modèle…"/>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5" stroke="#9aa0a6" stroke-width="1.4"/><path d="M10 10l3.5 3.5" stroke="#9aa0a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input type="text" name="q" th:value="${q}" placeholder="N° inv., nom, modèle…" aria-label="Rechercher dans le parc"/>
         </span>
-        <select name="poste" onchange="this.form.submit()">
+        <select name="poste" onchange="this.form.submit()" aria-label="Filtrer par poste">
             <option value="">Tous les postes</option>
             <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
         </select>
         <input type="hidden" name="type" th:value="${fType}"/>
         <input type="hidden" name="statut" th:value="${fStatut}"/>
-        <button class="btn" type="submit">Rechercher</button>
-        <span class="spacer"></span>
-        <a class="btn secondary small" th:href="@{/inventaire}">Inventaire à une date</a>
-        <a class="btn secondary small" th:href="@{/parc/export(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">⬇ Export</a>
-        <a class="btn secondary small" th:href="@{/parc/etiquettes(q=${q},poste=${fPoste},type=${fType},statut=${fStatut})}">🏷 Étiquettes</a>
+        <button class="btn small" type="submit">Rechercher</button>
+        <span class="count"><b th:text="${page.total}">0</b> matériel(s)</span>
     </form>
 
-    <div class="chips" style="margin-bottom:.5rem">
-        <a class="chip" th:classappend="${fType == null or fType == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},statut=${fStatut})}">Tous types</a>
-        <a class="chip" th:each="t : ${types}" th:classappend="${fType == t} ? 'active'"
-           th:href="@{/parc(q=${q},poste=${fPoste},type=${t},statut=${fStatut})}"
-           th:text="${t}"></a>
+    <div class="chiprow no-print">
+        <span class="lbl">Type</span>
+        <a class="chip sm" th:classappend="${fType == null or fType == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},statut=${fStatut})}">Tous</a>
+        <a class="chip sm" th:each="t : ${types}" th:classappend="${fType == t} ? 'active'"
+           th:href="@{/parc(q=${q},poste=${fPoste},type=${t},statut=${fStatut})}" th:text="${t}"></a>
     </div>
-    <div class="chips" style="margin-bottom:1rem">
-        <a class="chip sm" th:classappend="${fStatut == null or fStatut == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType})}">Tous statuts</a>
+    <div class="chiprow no-print" style="margin-bottom:1rem">
+        <span class="lbl">Statut</span>
+        <a class="chip sm" th:classappend="${fStatut == null or fStatut == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType})}">Tous</a>
         <a class="chip sm" th:classappend="${fStatut == 'EN_SERVICE'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='EN_SERVICE')}">En service</a>
         <a class="chip sm" th:classappend="${fStatut == 'EN_PANNE'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='EN_PANNE')}">En panne</a>
         <a class="chip sm" th:classappend="${fStatut == 'A_CHANGER'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='A_CHANGER')}">À changer</a>
     </div>
 
-    <p class="muted"><span th:text="${page.total}">0</span> matériel(s)</p>
     <table class="table">
         <thead><tr>
             <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
@@ -63,9 +86,9 @@
                 <td th:text="${m.nom}" th:title="${m.observation}"></td>
                 <td th:text="${m.type}"></td>
                 <td th:text="${m.modele}"></td>
-                <td th:text="${m.ram}"></td>
-                <td th:text="${m.processeur}"></td>
-                <td th:text="${m.disqueDur}"></td>
+                <td class="tech" th:text="${m.ram}"></td>
+                <td class="tech" th:text="${m.processeur}"></td>
+                <td class="tech" th:text="${m.disqueDur}"></td>
                 <td th:text="${m.posteNom}"></td>
                 <td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
             </tr>
@@ -73,7 +96,7 @@
         </tbody>
     </table>
 
-    <div class="toolbar" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
+    <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
         <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"
            th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
         <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>

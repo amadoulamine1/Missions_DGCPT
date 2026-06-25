@@ -41,6 +41,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
 .topbar .userbox .btn{width:100%;text-align:center}
 
 .container{max-width:1080px;margin:1.6rem auto;padding:0 1.2rem}
+.container.wide{max-width:1320px}            /* pages à tableaux denses (parc…) */
 .topbar ~ .container{margin-left:222px;margin-right:auto}
 h1{font-family:var(--serif);color:var(--ink);font-size:1.6rem;font-weight:700;margin:.2rem 0 1rem;letter-spacing:-.01em}
 /* filet doré sous le titre de page (identité éditoriale ; le dashboard a son propre filet) */
