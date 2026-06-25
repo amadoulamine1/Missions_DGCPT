@@ -91,7 +91,7 @@ public class MissionService {
         }
         Mission saved = missionRepo.save(m);
 
-        historiserChefPoste(poste, chefPoste, debut);
+        if (chefPoste != null) historiserChefPoste(poste, chefPoste, debut);
         return saved;
     }
 
@@ -250,7 +250,9 @@ public class MissionService {
         }
         final String fm = (f.getChefPosteMat() == null) ? "" : f.getChefPosteMat().trim();
         if (fm.isEmpty()) {
-            throw new IllegalArgumentException("Choisissez un chef de poste existant ou renseignez le matricule du nouvel agent.");
+            // Chef de poste inconnu à la création : autorisé. Il pourra être renseigné plus tard
+            // via le fichier canevas (à l'import).
+            return null;
         }
         final String fnom = f.getChefPosteNom(), fprenom = f.getChefPostePrenom();
         return agentRepo.findById(fm).orElseGet(() -> {

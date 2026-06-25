@@ -87,6 +87,10 @@ public class IntegrationService {
         // canevas par l'agent. On les reporte donc à l'intégration, même si la mission existe déjà.
         if (!vide(e.getEtatCablage())) mission.setEtatCablage(e.getEtatCablage().trim());
         if (!vide(e.getCategorieCable())) mission.setCategorieCable(resoudreCategorie(e.getCategorieCable()));
+        // Chef de poste éventuellement inconnu à la création de la mission : renseigné ici depuis le
+        // canevas s'il n'a pas encore été fixé.
+        if (mission.getChefPosteFige() == null && !vide(e.getChefPoste()))
+            mission.setChefPosteFige(resoudreAgent(e.getChefPoste(), TypeAgent.POSTE, poste));
         Agent saisisseur = resoudreAgent(e.getAgentSaisisseur(), TypeAgent.INFORMATICIEN, null);
         String zone = vide(e.getZone()) ? null : e.getZone();
 

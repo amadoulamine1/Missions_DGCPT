@@ -165,8 +165,9 @@ class ControleImportTest {
         RapportImport r = controle.controler(c);
 
         assertThat(r.estIntegrable()).isFalse();
-        // référence, code poste, objet, saisisseur, chef mission, chef poste, état du câblage, catégorie de câble
-        assertThat(r.nbBloquants()).isEqualTo(8);
+        // référence, code poste, objet, saisisseur, chef mission, état du câblage, catégorie de câble
+        // (le chef de poste est facultatif : renseignable via le canevas)
+        assertThat(r.nbBloquants()).isEqualTo(7);
     }
 
     @Test

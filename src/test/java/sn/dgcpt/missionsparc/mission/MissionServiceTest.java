@@ -91,6 +91,21 @@ class MissionServiceTest {
     }
 
     @Test
+    void creer_mission_sans_chef_de_poste_est_autorise() {
+        when(posteRepo.findById(1)).thenReturn(Optional.of(poste(1)));
+        when(agentRepo.findById("AG1")).thenReturn(Optional.of(agent("AG1")));
+        when(missionRepo.save(any(Mission.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        CreationMissionForm f = formCreation(List.of("AG1"), "AG1");
+        f.setChefPosteSel("");   // chef de poste inconnu à la création (renseignable via le canevas)
+
+        Mission m = service.creer(f);
+
+        assertThat(m.getChefPosteFige()).isNull();
+        verify(chefPosteRepo, never()).save(any(ChefPoste.class)); // pas d'historisation sans chef
+    }
+
+    @Test
     void creer_refuse_une_date_de_fin_anterieure_au_debut() {
         CreationMissionForm f = formCreation(List.of("AG1"), "AG1");
         f.setDateDebut("2026-02-10");

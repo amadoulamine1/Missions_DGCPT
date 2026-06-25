@@ -30,11 +30,12 @@
             </div>
 
             <div class="form-row">
-                <label>Chef de poste (du TPR) <span class="req">*</span></label>
+                <label>Chef de poste (du TPR)</label>
                 <select th:field="*{chefPosteSel}">
                     <option value="">➕ Ajouter un agent…</option>
                 </select>
             </div>
+            <p class="hint">Facultatif : si le chef de poste n'est pas connu, laissez vide — il pourra être renseigné via le fichier Excel (canevas) lors de l'import.</p>
             <div id="nouveau-chefposte" class="subform">
                 <p class="legend">Nouvel agent du TPR (chef de poste)</p>
                 <p class="hint">À remplir uniquement si l'agent n'est pas dans la liste.</p>
