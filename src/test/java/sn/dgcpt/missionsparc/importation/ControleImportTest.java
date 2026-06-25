@@ -53,6 +53,8 @@ class ControleImportTest {
         e.setAgentSaisisseur("AG1");
         e.setChefMission("AG1");
         e.setChefPoste("CP1");
+        e.setEtatCablage("Bon");
+        e.setCategorieCable("Cat6");
     }
 
     private LigneOrdinateur ordinateurValide(String numero, String mac) {
@@ -163,7 +165,23 @@ class ControleImportTest {
         RapportImport r = controle.controler(c);
 
         assertThat(r.estIntegrable()).isFalse();
-        assertThat(r.nbBloquants()).isEqualTo(6); // référence, code poste, objet, saisisseur, chef mission, chef poste
+        // référence, code poste, objet, saisisseur, chef mission, chef poste, état du câblage, catégorie de câble
+        assertThat(r.nbBloquants()).isEqualTo(8);
+    }
+
+    @Test
+    void etat_du_cablage_et_categorie_de_cable_obligatoires() {
+        CanevasImporte c = new CanevasImporte();
+        EnteteMission e = c.getEntete();
+        e.setReference("MIS-2026-001"); e.setCodePoste("TPR-01"); e.setObjet("Inventaire");
+        e.setAgentSaisisseur("AG1"); e.setChefMission("AG1"); e.setChefPoste("CP1");
+        // état du câblage et catégorie de câble laissés vides
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "État du câblage réseau")).isTrue();
+        assertThat(contient(r, Severite.BLOQUANT, "Catégorie de câble")).isTrue();
     }
 
     // ---------- statut obligatoire & état du réseau ----------

@@ -114,6 +114,8 @@ public class ControleImport {
         obligatoireEntete(e.getAgentSaisisseur(), "Agent saisisseur", r);
         obligatoireEntete(e.getChefMission(), "Chef de mission", r);
         obligatoireEntete(e.getChefPoste(), "Chef de poste", r);
+        obligatoireEntete(e.getEtatCablage(), "État du câblage réseau", r);
+        obligatoireEntete(e.getCategorieCable(), "Catégorie de câble", r);
         if (!estVide(e.getEtatCablage()) && !etatReseauConforme(e.getEtatCablage())) {
             r.ajouter(new AnomalieImport(Severite.BLOQUANT, CanevasReader.SHEET_MISSION, null,
                     "État du réseau invalide : « " + e.getEtatCablage() + " ». Valeurs attendues : Neuf, Bon, Pas bon."));
