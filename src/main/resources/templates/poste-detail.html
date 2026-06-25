@@ -18,6 +18,9 @@
             <a class="btn secondary" th:href="@{/postes/{id}/modifier(id=${d.poste.id})}" th:if="${currentRole == 'ADMIN'}">Modifier</a>
         </div>
     </header>
+    <nav class="muted no-print" style="margin:.5rem 0 .2rem;font-size:.9rem" aria-label="Historiques du poste">
+        Aller à : <a href="#hist-missions">Missions</a> · <a href="#hist-fichiers">Fichiers chargés</a> · <a href="#hist-affectations">Affectations matériel</a> · <a href="#hist-chefs">Chefs de poste</a>
+    </nav>
     <div class="card">
         <table class="kv">
             <tr><td class="k">Code</td><td th:text="${d.poste.code}"></td></tr>
@@ -72,7 +75,7 @@
         </tbody>
     </table>
 
-    <h2>Missions du poste</h2>
+    <h2 id="hist-missions">Missions du poste</h2>
     <table class="table">
         <thead><tr><th scope="col">N° mission</th><th scope="col">Objet</th><th scope="col">Période</th><th scope="col">État</th></tr></thead>
         <tbody>
@@ -84,7 +87,7 @@
         </tbody>
     </table>
 
-    <h2>Fichiers chargés (canevas)</h2>
+    <h2 id="hist-fichiers">Fichiers chargés (canevas)</h2>
     <table class="table">
         <thead><tr><th scope="col">Mission</th><th scope="col">Fichier</th><th scope="col">Saisi par</th><th scope="col">Date</th><th scope="col">Statut</th></tr></thead>
         <tbody>
@@ -96,7 +99,7 @@
         </tbody>
     </table>
 
-    <h2>Historique des affectations de matériel</h2>
+    <h2 id="hist-affectations">Historique des affectations de matériel</h2>
     <table class="table">
         <thead><tr><th scope="col">N° inventaire</th><th scope="col">Matériel</th><th scope="col">Agent</th><th scope="col">Depuis</th><th scope="col">Jusqu'à</th></tr></thead>
         <tbody>
@@ -107,7 +110,7 @@
         </tbody>
     </table>
 
-    <h2>Historique des chefs de poste</h2>
+    <h2 id="hist-chefs">Historique des chefs de poste</h2>
     <table class="table">
         <thead><tr><th scope="col">Agent</th><th scope="col">Depuis</th><th scope="col">Jusqu'à</th></tr></thead>
         <tbody>

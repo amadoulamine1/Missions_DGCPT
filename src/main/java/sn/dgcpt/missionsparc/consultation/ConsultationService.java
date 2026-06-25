@@ -181,6 +181,7 @@ public class ConsultationService {
                         r.getAgentSaisisseur() == null ? "" : r.getAgentSaisisseur().getMatricule(),
                         r.getAgentTraitant() == null ? "" :
                                 r.getAgentTraitant().getMatricule() + " — " + r.getAgentTraitant().getPrenom() + " " + r.getAgentTraitant().getNom(),
+                        libelleStatut(r.getStatutObserve()),
                         nz(r.getZone())
                 }).toList();
         List<String[]> histo = affectationRepo.findByMaterielOrderByDateDebutDesc(m).stream()

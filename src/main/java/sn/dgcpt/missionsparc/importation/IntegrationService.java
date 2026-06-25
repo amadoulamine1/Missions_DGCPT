@@ -363,6 +363,7 @@ public class IntegrationService {
         r.setAgentTraitant(traitant);
         r.setZone(zone);
         r.setDateReleve(jour);
+        r.setStatutObserve(mat.getStatut()); // statut observé à cette mission (historique)
         r.setEtatObserve(construireEtatObserve(mat));
         releveRepo.save(r);
     }

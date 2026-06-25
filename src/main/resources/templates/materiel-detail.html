@@ -82,12 +82,14 @@
 
     <h2>Relevés (missions)</h2>
     <table class="table">
-        <thead><tr><th scope="col">Mission</th><th scope="col">Date</th><th scope="col">Saisi par</th><th scope="col">Agent traitant</th><th scope="col">Zone</th></tr></thead>
+        <thead><tr><th scope="col">Mission</th><th scope="col">Date</th><th scope="col">Saisi par</th><th scope="col">Agent traitant</th><th scope="col">Statut</th><th scope="col">Zone</th></tr></thead>
         <tbody>
             <tr th:each="r : ${d.releves}">
-                <td th:text="${r[0]}"></td><td th:text="${r[1]}"></td><td th:text="${r[2]}"></td><td th:text="${r[3]}"></td><td th:text="${r[4]}"></td>
+                <td th:text="${r[0]}"></td><td th:text="${r[1]}"></td><td th:text="${r[2]}"></td><td th:text="${r[3]}"></td>
+                <td><span th:if="${r[4] != ''}" class="badge" th:classappend="${r[4] == 'En service' ? 'green' : (r[4] == 'En panne' ? 'red' : 'orange')}" th:text="${r[4]}"></span></td>
+                <td th:text="${r[5]}"></td>
             </tr>
-            <tr th:if="${d.releves.isEmpty()}"><td colspan="5" class="empty">Aucun relevé.</td></tr>
+            <tr th:if="${d.releves.isEmpty()}"><td colspan="6" class="empty">Aucun relevé.</td></tr>
         </tbody>
     </table>
     <p style="margin-top:1rem"><a th:href="@{/parc}">← Parc</a></p>

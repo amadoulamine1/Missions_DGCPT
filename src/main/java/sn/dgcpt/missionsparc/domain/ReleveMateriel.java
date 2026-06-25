@@ -40,6 +40,11 @@ public class ReleveMateriel {
     @Column(name = "etat_observe", columnDefinition = "text")
     private String etatObserve;
 
+    /** Statut du matériel observé lors de ce relevé (historique des statuts par mission). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "statut_observe")
+    private StatutMateriel statutObserve;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public Mission getMission() { return mission; }
@@ -58,4 +63,6 @@ public class ReleveMateriel {
     public void setDateReleve(LocalDate dateReleve) { this.dateReleve = dateReleve; }
     public String getEtatObserve() { return etatObserve; }
     public void setEtatObserve(String etatObserve) { this.etatObserve = etatObserve; }
+    public StatutMateriel getStatutObserve() { return statutObserve; }
+    public void setStatutObserve(StatutMateriel statutObserve) { this.statutObserve = statutObserve; }
 }
