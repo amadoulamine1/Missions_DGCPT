@@ -34,6 +34,7 @@
     </div>
     <div class="userbox" th:if="${currentUser != null}">
         <span th:text="${currentUser}">user</span>
+        <a class="btn small secondary" th:href="@{/mon-mot-de-passe}" style="text-align:center">Mot de passe</a>
         <form method="post" th:action="@{/logout}" style="margin:0">
             <button class="btn small secondary" type="submit">Déconnexion</button>
         </form>

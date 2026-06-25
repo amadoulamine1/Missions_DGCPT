@@ -32,6 +32,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setRole(RoleUtilisateur.ADMIN);
             admin.setActif(true);
             admin.setNomComplet("Administrateur");
+            admin.setMotDePasseAChanger(true); // changement imposé à la première connexion
             repo.save(admin);
             log.warn("Compte administrateur initial créé : admin / admin — À CHANGER après la première connexion.");
         }

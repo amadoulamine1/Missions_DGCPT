@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Mot de passe</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Sécurité du compte</p>
+            <h1>Changer mon mot de passe</h1>
+        </div>
+    </header>
+
+    <p th:if="${message}" class="alert ok" th:text="${message}"></p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}"></p>
+    <p th:if="${force}" class="alert warn">Pour des raisons de sécurité, vous devez changer votre mot de passe avant de continuer.</p>
+
+    <div class="card" style="max-width:480px">
+        <form method="post" th:action="@{/mon-mot-de-passe}">
+            <div class="form-row">
+                <label>Mot de passe actuel</label>
+                <input type="password" name="actuel" required autofocus/>
+            </div>
+            <div class="form-row">
+                <label>Nouveau mot de passe</label>
+                <input type="password" name="nouveau" required minlength="6"/>
+            </div>
+            <div class="form-row">
+                <label>Confirmer le nouveau</label>
+                <input type="password" name="confirmation" required minlength="6"/>
+            </div>
+            <p class="muted" style="font-size:.84rem">Au moins 6 caractères, différent de l'actuel.</p>
+            <button class="btn" type="submit">Enregistrer</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

@@ -91,8 +91,31 @@ public class CompteService implements UserDetailsService {
         Utilisateur u = repo.findById(id).orElseThrow();
         String temp = "Tmp" + (int) (Math.random() * 9000 + 1000);
         u.setMotDePasse(encoder.encode(temp));
+        u.setMotDePasseAChanger(true); // l'utilisateur devra changer ce mot de passe temporaire
         repo.save(u);
         return temp;
+    }
+
+    /** Vrai si l'utilisateur doit (encore) changer son mot de passe. */
+    @Transactional(readOnly = true)
+    public boolean doitChangerMotDePasse(String username) {
+        return repo.findByUsername(username).map(Utilisateur::isMotDePasseAChanger).orElse(false);
+    }
+
+    /** Changement de mot de passe en self-service ; lève l'obligation de changement. */
+    @Transactional
+    public void changerMonMotDePasse(String username, String actuel, String nouveau) {
+        Utilisateur u = repo.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Compte introuvable."));
+        if (actuel == null || !encoder.matches(actuel, u.getMotDePasse()))
+            throw new IllegalArgumentException("Mot de passe actuel incorrect.");
+        if (nouveau == null || nouveau.length() < 6)
+            throw new IllegalArgumentException("Le nouveau mot de passe doit comporter au moins 6 caractères.");
+        if (encoder.matches(nouveau, u.getMotDePasse()))
+            throw new IllegalArgumentException("Le nouveau mot de passe doit être différent de l'ancien.");
+        u.setMotDePasse(encoder.encode(nouveau));
+        u.setMotDePasseAChanger(false);
+        repo.save(u);
     }
 
     /** Associe (ou détache) un agent informaticien au compte ; le nom est alors dérivé de l'agent. */

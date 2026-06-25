@@ -23,6 +23,10 @@ public class Utilisateur {
     @Column(nullable = false)
     private boolean actif = true;
 
+    /** Force la redirection vers la page de changement tant que le mot de passe par défaut/temporaire n'est pas modifié. */
+    @Column(name = "mot_de_passe_a_changer", nullable = false)
+    private boolean motDePasseAChanger = false;
+
     @Column(name = "nom_complet")
     private String nomComplet;
 
@@ -40,6 +44,8 @@ public class Utilisateur {
     public void setRole(RoleUtilisateur role) { this.role = role; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
+    public boolean isMotDePasseAChanger() { return motDePasseAChanger; }
+    public void setMotDePasseAChanger(boolean motDePasseAChanger) { this.motDePasseAChanger = motDePasseAChanger; }
     public String getNomComplet() { return nomComplet; }
     public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
     public Agent getAgent() { return agent; }

@@ -3,6 +3,8 @@ package sn.dgcpt.missionsparc.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -22,7 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <b>404</b> = accès autorisé (la requête a franchi la sécurité sans trouver de handler).
  * CSRF étant actif, les POST autorisés portent le jeton ({@code with(csrf())}).
  */
-@WebMvcTest(controllers = SecuriteAccesParRoleTest.NoopController.class)
+@WebMvcTest(controllers = SecuriteAccesParRoleTest.NoopController.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class))
 @Import(SecurityConfig.class)
 class SecuriteAccesParRoleTest {
 
