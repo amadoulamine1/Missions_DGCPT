@@ -10,27 +10,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.CategorieCable;
+import sn.dgcpt.missionsparc.domain.CategorieMateriel;
 import sn.dgcpt.missionsparc.domain.Logiciel;
+import sn.dgcpt.missionsparc.domain.TypeMateriel;
 import sn.dgcpt.missionsparc.repository.CategorieCableRepository;
+import sn.dgcpt.missionsparc.repository.CategorieMaterielRepository;
 import sn.dgcpt.missionsparc.repository.LogicielRepository;
 
-/** Administration des référentiels paramétrables : logiciels et catégories de câble (cahier §3.8). */
+/** Administration des référentiels paramétrables : logiciels, catégories de câble, types de matériel (cahier §3.8). */
 @Controller
 @RequestMapping("/referentiels")
 public class ReferentielController {
 
     private final LogicielRepository logicielRepo;
     private final CategorieCableRepository cableRepo;
+    private final CategorieMaterielRepository typeRepo;
 
-    public ReferentielController(LogicielRepository logicielRepo, CategorieCableRepository cableRepo) {
+    public ReferentielController(LogicielRepository logicielRepo, CategorieCableRepository cableRepo,
+                                 CategorieMaterielRepository typeRepo) {
         this.logicielRepo = logicielRepo;
         this.cableRepo = cableRepo;
+        this.typeRepo = typeRepo;
     }
 
     @GetMapping
     public String index(Model model) {
         model.addAttribute("logiciels", logicielRepo.findAll());
         model.addAttribute("cables", cableRepo.findAll());
+        model.addAttribute("types", typeRepo.findByActifTrueOrderByLibelle());
         return "referentiels";
     }
 
@@ -103,6 +110,62 @@ public class ReferentielController {
             ra.addFlashAttribute("message", "Catégorie supprimée.");
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("erreur", "Suppression impossible : cette catégorie est utilisée par une mission.");
+        }
+        return "redirect:/referentiels";
+    }
+
+    // ---------- Types de matériel (paramétrables) ----------
+
+    @PostMapping("/types")
+    public String ajouterType(@RequestParam String libelle, @RequestParam String prefixe, RedirectAttributes ra) {
+        String lib = libelle == null ? "" : libelle.trim();
+        String pre = prefixe == null ? "" : prefixe.trim().toUpperCase();
+        if (lib.isEmpty() || pre.isEmpty()) ra.addFlashAttribute("erreur", "Le libellé et le préfixe sont obligatoires.");
+        else if (!pre.matches("[A-Z]{2,4}")) ra.addFlashAttribute("erreur", "Le préfixe doit comporter 2 à 4 lettres.");
+        else if (typeRepo.findByLibelle(lib).isPresent()) ra.addFlashAttribute("erreur", "Le type « " + lib + " » existe déjà.");
+        else if (typeRepo.findByPrefixe(pre).isPresent()) ra.addFlashAttribute("erreur", "Le préfixe « " + pre + " » est déjà utilisé.");
+        else {
+            CategorieMateriel t = new CategorieMateriel();
+            t.setLibelle(lib);
+            t.setPrefixe(pre);
+            t.setFamille(TypeMateriel.AUTRE);
+            t.setActif(true);
+            t.setSysteme(false);
+            typeRepo.save(t);
+            ra.addFlashAttribute("message", "Type « " + lib + " » ajouté.");
+        }
+        return "redirect:/referentiels";
+    }
+
+    @PostMapping("/types/{id}")
+    public String modifierType(@PathVariable Integer id, @RequestParam String libelle, @RequestParam String prefixe,
+                               RedirectAttributes ra) {
+        String lib = libelle == null ? "" : libelle.trim();
+        String pre = prefixe == null ? "" : prefixe.trim().toUpperCase();
+        CategorieMateriel t = typeRepo.findById(id).orElse(null);
+        if (t == null) ra.addFlashAttribute("erreur", "Type introuvable.");
+        else if (t.isSysteme()) ra.addFlashAttribute("erreur", "Les types système ne sont pas modifiables.");
+        else if (lib.isEmpty() || pre.isEmpty()) ra.addFlashAttribute("erreur", "Le libellé et le préfixe sont obligatoires.");
+        else if (!pre.matches("[A-Z]{2,4}")) ra.addFlashAttribute("erreur", "Le préfixe doit comporter 2 à 4 lettres.");
+        else if (typeRepo.findByLibelle(lib).filter(a -> !a.getId().equals(id)).isPresent())
+            ra.addFlashAttribute("erreur", "Le type « " + lib + " » existe déjà.");
+        else if (typeRepo.findByPrefixe(pre).filter(a -> !a.getId().equals(id)).isPresent())
+            ra.addFlashAttribute("erreur", "Le préfixe « " + pre + " » est déjà utilisé.");
+        else { t.setLibelle(lib); t.setPrefixe(pre); typeRepo.save(t); ra.addFlashAttribute("message", "Type modifié."); }
+        return "redirect:/referentiels";
+    }
+
+    @PostMapping("/types/{id}/supprimer")
+    public String supprimerType(@PathVariable Integer id, RedirectAttributes ra) {
+        CategorieMateriel t = typeRepo.findById(id).orElse(null);
+        if (t == null) { ra.addFlashAttribute("erreur", "Type introuvable."); return "redirect:/referentiels"; }
+        if (t.isSysteme()) { ra.addFlashAttribute("erreur", "Les types système ne sont pas supprimables."); return "redirect:/referentiels"; }
+        try {
+            typeRepo.deleteById(id);
+            typeRepo.flush();
+            ra.addFlashAttribute("message", "Type supprimé.");
+        } catch (DataIntegrityViolationException e) {
+            ra.addFlashAttribute("erreur", "Suppression impossible : ce type est utilisé par du matériel.");
         }
         return "redirect:/referentiels";
     }

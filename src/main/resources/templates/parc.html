@@ -27,9 +27,9 @@
 
     <div class="chips" style="margin-bottom:.5rem">
         <a class="chip" th:classappend="${fType == null or fType == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},statut=${fStatut})}">Tous types</a>
-        <a class="chip" th:each="t : ${types}" th:classappend="${fType == t.name()} ? 'active'"
+        <a class="chip" th:each="t : ${types}" th:classappend="${fType == t} ? 'active'"
            th:href="@{/parc(q=${q},poste=${fPoste},type=${t},statut=${fStatut})}"
-           th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(t),'_',' '))}"></a>
+           th:text="${t}"></a>
     </div>
     <div class="chips" style="margin-bottom:1rem">
         <a class="chip sm" th:classappend="${fStatut == null or fStatut == ''} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType})}">Tous statuts</a>
@@ -55,13 +55,13 @@
             <tr th:each="m : ${materiels}">
                 <td>
                     <span class="cell-mat">
-                        <span class="glyph" th:classappend="${m.type == 'ORDINATEUR' ? 't-ord' : (m.type == 'IMPRIMANTE' ? 't-imp' : ((m.type == 'SWITCH' or m.type == 'ACCESS_POINT') ? 't-net' : (m.type == 'SCANNER_CHEQUE' ? 't-scn' : 't-aut')))}"
-                              th:text="${m.type == 'ORDINATEUR' ? 'O' : (m.type == 'IMPRIMANTE' ? 'I' : (m.type == 'SWITCH' ? 'S' : (m.type == 'ACCESS_POINT' ? 'A' : (m.type == 'SCANNER_CHEQUE' ? 'C' : '•'))))}">O</span>
+                        <span class="glyph" th:classappend="${m.famille == 'ORDINATEUR' ? 't-ord' : (m.famille == 'IMPRIMANTE' ? 't-imp' : ((m.famille == 'SWITCH' or m.famille == 'ACCESS_POINT') ? 't-net' : (m.famille == 'SCANNER_CHEQUE' ? 't-scn' : 't-aut')))}"
+                              th:text="${m.famille == 'ORDINATEUR' ? 'O' : (m.famille == 'IMPRIMANTE' ? 'I' : (m.famille == 'SWITCH' ? 'S' : (m.famille == 'ACCESS_POINT' ? 'A' : (m.famille == 'SCANNER_CHEQUE' ? 'C' : '•'))))}">O</span>
                         <a class="mono" th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a>
                     </span>
                 </td>
-                <td th:text="${m.nom}"></td>
-                <td th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(m.type),'_',' '))}"></td>
+                <td th:text="${m.nom}" th:title="${m.observation}"></td>
+                <td th:text="${m.type}"></td>
                 <td th:text="${m.modele}"></td>
                 <td th:text="${m.ram}"></td>
                 <td th:text="${m.processeur}"></td>

@@ -18,7 +18,6 @@ import sn.dgcpt.missionsparc.consultation.dto.PageVue;
 import sn.dgcpt.missionsparc.consultation.dto.PosteVue;
 import sn.dgcpt.missionsparc.consultation.ParcExporter;
 import sn.dgcpt.missionsparc.affectation.AffectationService;
-import sn.dgcpt.missionsparc.domain.TypeMateriel;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -80,7 +79,7 @@ public class ConsultationController {
         model.addAttribute("page", p);
         model.addAttribute("materiels", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
-        model.addAttribute("types", TypeMateriel.values());
+        model.addAttribute("types", consultation.typesMateriel());
         model.addAttribute("q", q);
         model.addAttribute("fPoste", poste);
         model.addAttribute("fType", type);

@@ -58,13 +58,13 @@
 
     <h2>Matériel du poste</h2>
     <table class="table">
-        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Affecté à</th><th>Caractéristiques</th><th>Statut</th></tr></thead>
+        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Modèle</th><th>Affecté à</th><th>Caractéristiques</th><th>Statut</th><th>Observation</th></tr></thead>
         <tbody>
             <tr th:each="m : ${d.materiels}">
                 <td><a th:href="@{/parc/{n}(n=${m.numeroInventaire})}" th:text="${m.numeroInventaire}"></a></td><td th:text="${m.type}"></td>
-                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.affecteA}"></td><td class="muted" th:text="${m.caracteristiques}"></td><td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td>
+                <td th:text="${m.nom}"></td><td th:text="${m.modele}"></td><td th:text="${m.affecteA}"></td><td class="muted" th:text="${m.caracteristiques}"></td><td><span th:if="${m.statut != ''}" class="badge" th:classappend="${m.statut == 'En service' ? 'green' : (m.statut == 'En panne' ? 'red' : 'orange')}" th:text="${m.statut}"></span></td><td class="muted" th:text="${m.observation}"></td>
             </tr>
-            <tr th:if="${d.materiels.isEmpty()}"><td colspan="7" class="empty">Aucun matériel.</td></tr>
+            <tr th:if="${d.materiels.isEmpty()}"><td colspan="8" class="empty">Aucun matériel.</td></tr>
         </tbody>
     </table>
     <p style="margin-top:1rem"><a th:href="@{/postes}">← Liste des postes</a></p>

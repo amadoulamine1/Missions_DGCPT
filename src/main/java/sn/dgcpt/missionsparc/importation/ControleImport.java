@@ -2,8 +2,10 @@ package sn.dgcpt.missionsparc.importation;
 
 import org.springframework.stereotype.Component;
 import sn.dgcpt.missionsparc.importation.dto.*;
+import sn.dgcpt.missionsparc.repository.CategorieMaterielRepository;
 import sn.dgcpt.missionsparc.repository.EquipementReseauRepository;
 import sn.dgcpt.missionsparc.repository.ImprimanteRepository;
+import sn.dgcpt.missionsparc.repository.MaterielRepository;
 import sn.dgcpt.missionsparc.repository.OrdinateurRepository;
 import sn.dgcpt.missionsparc.repository.ScannerChequeRepository;
 
@@ -24,13 +26,18 @@ public class ControleImport {
     private final ImprimanteRepository imprimanteRepo;
     private final EquipementReseauRepository reseauRepo;
     private final ScannerChequeRepository scannerRepo;
+    private final MaterielRepository materielRepo;
+    private final CategorieMaterielRepository categorieMaterielRepo;
 
     public ControleImport(OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
-                          EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo) {
+                          EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
+                          MaterielRepository materielRepo, CategorieMaterielRepository categorieMaterielRepo) {
         this.ordinateurRepo = ordinateurRepo;
         this.imprimanteRepo = imprimanteRepo;
         this.reseauRepo = reseauRepo;
         this.scannerRepo = scannerRepo;
+        this.materielRepo = materielRepo;
+        this.categorieMaterielRepo = categorieMaterielRepo;
     }
 
     public RapportImport controler(CanevasImporte c) {
@@ -75,6 +82,21 @@ public class ControleImport {
             if (estNouveau(sc.getNumeroInventaire()) && !estVide(sc.getNumeroSerie())
                     && scannerRepo.findByNumeroSerie(sc.getNumeroSerie()).isPresent()) {
                 alerteDoublon("n° de série " + sc.getNumeroSerie(), CanevasReader.SHEET_SCANNERS, sc.getNumLigne(), r);
+            }
+        }
+        for (LigneAutreMateriel a : c.getAutres()) {
+            r.incrementerLignesLues();
+            obligatoire(a.getTypeLibelle(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), "Type", r);
+            obligatoire(a.getNom(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), "Nom", r);
+            if (!estVide(a.getTypeLibelle())
+                    && categorieMaterielRepo.findByLibelleIgnoreCase(a.getTypeLibelle().trim()).isEmpty()) {
+                r.ajouter(new AnomalieImport(Severite.BLOQUANT, CanevasReader.SHEET_AUTRES, a.getNumLigne(),
+                        "Type de matériel inconnu : « " + a.getTypeLibelle() + " ». Créez-le dans les référentiels avant l'import."));
+            }
+            macSiPresent(a.getMac(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), "MAC", r);
+            if (estNouveau(a.getNumeroInventaire()) && macValide(a.getMac())
+                    && materielRepo.findByMac(a.getMac()).isPresent()) {
+                alerteDoublon("MAC " + a.getMac(), CanevasReader.SHEET_AUTRES, a.getNumLigne(), r);
             }
         }
         return r;

@@ -26,9 +26,22 @@ public class Materiel {
     @Column(name = "observation", length = 2000)
     private String observation;
 
+    /** MAC/IP portées directement par le matériel pour les types génériques (famille AUTRE) ;
+     *  les types câblés stockent ces informations dans leur sous-entité dédiée. */
+    @Column(name = "mac")
+    private String mac;
+
+    @Column(name = "ip")
+    private String ip;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "poste_id")
     private Poste poste;
+
+    /** Type paramétrable affiché (libellé + préfixe). La famille technique reste {@link #type}. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "categorie_id")
+    private CategorieMateriel categorie;
 
     @Column(name = "date_creation")
     private Instant dateCreation;
@@ -49,4 +62,10 @@ public class Materiel {
     public void setStatut(StatutMateriel statut) { this.statut = statut; }
     public String getObservation() { return observation; }
     public void setObservation(String observation) { this.observation = observation; }
+    public CategorieMateriel getCategorie() { return categorie; }
+    public void setCategorie(CategorieMateriel categorie) { this.categorie = categorie; }
+    public String getMac() { return mac; }
+    public void setMac(String mac) { this.mac = mac; }
+    public String getIp() { return ip; }
+    public void setIp(String ip) { this.ip = ip; }
 }

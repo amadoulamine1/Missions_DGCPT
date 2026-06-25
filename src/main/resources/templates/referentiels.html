@@ -68,6 +68,41 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="card">
+            <h2 style="margin-top:0;border:none">Types de matériel</h2>
+            <p class="muted" style="margin-top:-.2rem">Types affichés dans le parc et le canevas. Le préfixe alimente le n° d'inventaire. Les types système ne sont pas modifiables.</p>
+            <form method="post" th:action="@{/referentiels/types}" class="toolbar" style="margin-bottom:.8rem">
+                <input type="text" name="libelle" placeholder="Nouveau type…" required
+                       style="flex:1;min-width:120px;padding:.4rem .6rem;border:1px solid var(--line);border-radius:7px;font-size:.92rem"/>
+                <input type="text" name="prefixe" placeholder="Préfixe" required maxlength="4" pattern="[A-Za-z]{2,4}" title="2 à 4 lettres"
+                       style="width:80px;padding:.4rem .6rem;border:1px solid var(--line);border-radius:7px;font-size:.92rem;text-transform:uppercase"/>
+                <button class="btn" type="submit">+ Ajouter</button>
+            </form>
+            <table class="table">
+                <thead><tr><th>Libellé</th><th style="width:1%">Préfixe</th><th style="width:1%">Actions</th></tr></thead>
+                <tbody>
+                    <tr th:each="t : ${types}">
+                        <td>
+                            <form th:if="${!t.systeme}" method="post" th:action="@{/referentiels/types/{id}(id=${t.id})}" style="display:flex;gap:.4rem;align-items:center;margin:0">
+                                <input type="text" name="libelle" th:value="${t.libelle}" style="flex:1;padding:.32rem .5rem;border:1px solid var(--line);border-radius:6px;font-size:.9rem"/>
+                                <input type="text" name="prefixe" th:value="${t.prefixe}" maxlength="4" pattern="[A-Za-z]{2,4}" style="width:70px;padding:.32rem .5rem;border:1px solid var(--line);border-radius:6px;font-size:.9rem;text-transform:uppercase"/>
+                                <button class="btn small secondary" type="submit">Enregistrer</button>
+                            </form>
+                            <span th:if="${t.systeme}" th:text="${t.libelle}"></span>
+                        </td>
+                        <td><span class="mono" th:if="${t.systeme}" th:text="${t.prefixe}"></span></td>
+                        <td style="text-align:right;white-space:nowrap">
+                            <form th:if="${!t.systeme}" method="post" th:action="@{/referentiels/types/{id}/supprimer(id=${t.id})}" style="display:inline;margin:0" onsubmit="return confirm('Supprimer ce type ?');">
+                                <button class="btn small secondary" type="submit">Supprimer</button>
+                            </form>
+                            <span th:if="${t.systeme}" class="muted" style="font-size:.8rem">système</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${types.isEmpty()}"><td colspan="3" class="empty">Aucun type.</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </main>
 </body>

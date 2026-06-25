@@ -22,6 +22,7 @@ public class CanevasReader {
     public static final String SHEET_IMPRIMANTES = "4-Imprimantes";
     public static final String SHEET_RESEAU = "5-Switchs et AP";
     public static final String SHEET_SCANNERS = "6-Scanners chèque";
+    public static final String SHEET_AUTRES = "7-Autres matériels";
     public static final String SHEET_AGENTS = "Agents TPR";
 
     private final DataFormatter fmt = new DataFormatter();
@@ -35,6 +36,7 @@ public class CanevasReader {
             lireImprimantes(wb.getSheet(SHEET_IMPRIMANTES), c);
             lireReseau(wb.getSheet(SHEET_RESEAU), c);
             lireScanners(wb.getSheet(SHEET_SCANNERS), c);
+            lireAutres(wb.getSheet(SHEET_AUTRES), c);
             lireAgentsTpr(wb.getSheet(SHEET_AGENTS), c);
             return c;
         }
@@ -183,6 +185,25 @@ public class CanevasReader {
             sc.setStatut(cell(row, 4));
             sc.setObservation(cell(row, 5));
             c.getScanners().add(sc);
+        }
+    }
+
+    private void lireAutres(Sheet s, CanevasImporte c) {
+        if (s == null) return;
+        for (int r = 1; r <= s.getLastRowNum(); r++) {
+            Row row = s.getRow(r);
+            if (ligneVide(row, 8)) continue;
+            LigneAutreMateriel a = new LigneAutreMateriel();
+            a.setNumLigne(r + 1);
+            a.setNumeroInventaire(cell(row, 0));
+            a.setTypeLibelle(cell(row, 1));
+            a.setNom(cell(row, 2));
+            a.setModele(cell(row, 3));
+            a.setMac(cell(row, 4));
+            a.setIp(cell(row, 5));
+            a.setStatut(cell(row, 6));
+            a.setObservation(cell(row, 7));
+            c.getAutres().add(a);
         }
     }
 

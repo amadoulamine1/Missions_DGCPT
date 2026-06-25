@@ -5,14 +5,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sn.dgcpt.missionsparc.domain.CategorieMateriel;
+import sn.dgcpt.missionsparc.domain.Materiel;
 import sn.dgcpt.missionsparc.domain.Ordinateur;
 import sn.dgcpt.missionsparc.domain.ScannerCheque;
 import sn.dgcpt.missionsparc.importation.dto.CanevasImporte;
 import sn.dgcpt.missionsparc.importation.dto.EnteteMission;
+import sn.dgcpt.missionsparc.importation.dto.LigneAutreMateriel;
 import sn.dgcpt.missionsparc.importation.dto.LigneOrdinateur;
 import sn.dgcpt.missionsparc.importation.dto.LigneScanner;
+import sn.dgcpt.missionsparc.repository.CategorieMaterielRepository;
 import sn.dgcpt.missionsparc.repository.EquipementReseauRepository;
 import sn.dgcpt.missionsparc.repository.ImprimanteRepository;
+import sn.dgcpt.missionsparc.repository.MaterielRepository;
 import sn.dgcpt.missionsparc.repository.OrdinateurRepository;
 import sn.dgcpt.missionsparc.repository.ScannerChequeRepository;
 
@@ -34,6 +39,8 @@ class ControleImportTest {
     @Mock ImprimanteRepository imprimanteRepo;
     @Mock EquipementReseauRepository reseauRepo;
     @Mock ScannerChequeRepository scannerRepo;
+    @Mock MaterielRepository materielRepo;
+    @Mock CategorieMaterielRepository categorieMaterielRepo;
     @InjectMocks ControleImport controle;
 
     private static final String MAC_VALIDE = "AA:BB:CC:DD:EE:FF";
@@ -156,5 +163,55 @@ class ControleImportTest {
 
         assertThat(r.estIntegrable()).isFalse();
         assertThat(r.nbBloquants()).isEqualTo(6); // référence, code poste, objet, saisisseur, chef mission, chef poste
+    }
+
+    // ---------- onglet « Autres matériels » (types paramétrables) ----------
+
+    private LigneAutreMateriel autre(String type, String nom, String mac) {
+        LigneAutreMateriel a = new LigneAutreMateriel();
+        a.setNumLigne(2);
+        a.setTypeLibelle(type);
+        a.setNom(nom);
+        a.setMac(mac);
+        return a;
+    }
+
+    @Test
+    void autre_type_et_nom_sont_obligatoires() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getAutres().add(autre("", "", null));
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(contient(r, Severite.BLOQUANT, "Type")).isTrue();
+        assertThat(contient(r, Severite.BLOQUANT, "Nom")).isTrue();
+    }
+
+    @Test
+    void autre_type_inconnu_est_bloquant() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getAutres().add(autre("Onduleur", "Onduleur salle serveur", null));
+        when(categorieMaterielRepo.findByLibelleIgnoreCase("Onduleur")).thenReturn(Optional.empty());
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "Type de matériel inconnu")).isTrue();
+    }
+
+    @Test
+    void autre_doublon_mac_sans_numero_est_un_avertissement() {
+        CanevasImporte c = new CanevasImporte();
+        enteteValide(c);
+        c.getAutres().add(autre("Onduleur", "Onduleur 1", MAC_VALIDE));
+        when(categorieMaterielRepo.findByLibelleIgnoreCase("Onduleur")).thenReturn(Optional.of(new CategorieMateriel()));
+        when(materielRepo.findByMac(MAC_VALIDE)).thenReturn(Optional.of(new Materiel()));
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.nbAvertissements()).isEqualTo(1);
+        assertThat(contient(r, Severite.AVERTISSEMENT, "déjà connu")).isTrue();
     }
 }

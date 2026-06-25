@@ -27,13 +27,14 @@ public class ConsultationService {
     private final EquipementReseauRepository reseauRepo;
     private final ScannerChequeRepository scannerRepo;
     private final AffectationMaterielRepository affectationRepo;
+    private final CategorieMaterielRepository categorieMaterielRepo;
 
     public ConsultationService(PosteRepository posteRepo, MaterielRepository materielRepo,
                                ChefPosteRepository chefPosteRepo, AgentRepository agentRepo,
                                MissionRepository missionRepo, ReleveMaterielRepository releveRepo,
                                OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
                                EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
-                               AffectationMaterielRepository affectationRepo) {
+                               AffectationMaterielRepository affectationRepo, CategorieMaterielRepository categorieMaterielRepo) {
         this.posteRepo = posteRepo;
         this.materielRepo = materielRepo;
         this.chefPosteRepo = chefPosteRepo;
@@ -45,6 +46,13 @@ public class ConsultationService {
         this.reseauRepo = reseauRepo;
         this.scannerRepo = scannerRepo;
         this.affectationRepo = affectationRepo;
+        this.categorieMaterielRepo = categorieMaterielRepo;
+    }
+
+    /** Libellés des types paramétrables actifs (chips de filtre du parc). */
+    public List<String> typesMateriel() {
+        return categorieMaterielRepo.findByActifTrueOrderByLibelle().stream()
+                .map(CategorieMateriel::getLibelle).toList();
     }
 
     // ---- Postes ----
@@ -73,7 +81,7 @@ public class ConsultationService {
         String texte = (q == null) ? "" : q.trim().toLowerCase();
         return materielRepo.findAll().stream()
                 .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
-                .filter(m -> type == null || type.isBlank() || m.getType().name().equals(type))
+                .filter(m -> type == null || type.isBlank() || libelleType(m).equals(type))
                 .filter(m -> statut == null || statut.isBlank() || (m.getStatut() != null && m.getStatut().name().equals(statut)))
                 .filter(m -> texte.isEmpty() || contientTexte(m, texte))
                 .map(this::versMaterielVue)
@@ -130,7 +138,10 @@ public class ConsultationService {
                 attrs.add(new String[]{"Numéro de série", nz(sc.getNumeroSerie())});
                 attrs.add(new String[]{"Marque", nz(sc.getMarque())});
             });
-            default -> { }
+            default -> {
+                attrs.add(new String[]{"MAC", nz(m.getMac())});
+                attrs.add(new String[]{"IP", nz(m.getIp())});
+            }
         }
         var aff = affectationRepo.findByMaterielAndDateFinIsNull(m);
         String affA = aff.map(a -> a.getAgent() == null ? "" :
@@ -202,8 +213,8 @@ public class ConsultationService {
         String affecteA = affectationRepo.findByMaterielAndDateFinIsNull(m)
                 .map(AffectationMateriel::getAgent)
                 .map(a -> a.getMatricule() + " — " + a.getNom() + " " + a.getPrenom()).orElse("");
-        return new MaterielLignePoste(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(),
-                statut, affecteA, caracteristiques(m));
+        return new MaterielLignePoste(m.getNumeroInventaire(), libelleType(m), familleCode(m), m.getNom(), m.getModele(),
+                statut, affecteA, caracteristiques(m), nz(m.getObservation()));
     }
 
     private String caracteristiques(Materiel m) {
@@ -217,7 +228,7 @@ public class ConsultationService {
                     join(" · ", pre("MAC ", e.getMac()), pre("IP ", e.getIp()))).orElse("");
             case SCANNER_CHEQUE -> scannerRepo.findById(num).map(sc ->
                     join(" · ", pre("Série ", sc.getNumeroSerie()), nz(sc.getMarque()))).orElse("");
-            default -> "";
+            default -> join(" · ", pre("MAC ", m.getMac()), pre("IP ", m.getIp()));
         };
     }
 
@@ -252,7 +263,18 @@ public class ConsultationService {
             var o = ordinateurRepo.findById(m.getNumeroInventaire()).orElse(null);
             if (o != null) { ram = nz(o.getRam()); proc = nz(o.getProcesseur()); disque = nz(o.getDisqueDur()); }
         }
-        return new MaterielVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), m.getModele(), poste, statut, obs, ram, proc, disque);
+        return new MaterielVue(m.getNumeroInventaire(), libelleType(m), familleCode(m), m.getNom(), m.getModele(),
+                poste, statut, obs, ram, proc, disque);
+    }
+
+    /** Libellé du type paramétrable (catégorie), avec repli sur la famille technique. */
+    private String libelleType(Materiel m) {
+        if (m.getCategorie() != null) return m.getCategorie().getLibelle();
+        return m.getType() == null ? "" : m.getType().name();
+    }
+
+    private String familleCode(Materiel m) {
+        return m.getType() == null ? "" : m.getType().name();
     }
 
     private String libelleStatut(StatutMateriel s) {

@@ -2,15 +2,20 @@ package sn.dgcpt.missionsparc.mission;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import sn.dgcpt.missionsparc.domain.*;
 import sn.dgcpt.missionsparc.repository.AffectationMaterielRepository;
 import sn.dgcpt.missionsparc.repository.AgentRepository;
+import sn.dgcpt.missionsparc.repository.CategorieMaterielRepository;
 import sn.dgcpt.missionsparc.repository.EquipementReseauRepository;
 import sn.dgcpt.missionsparc.repository.ImprimanteRepository;
 import sn.dgcpt.missionsparc.repository.MaterielRepository;
@@ -21,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,11 +43,12 @@ public class CanevasWriter {
     private final EquipementReseauRepository reseauRepo;
     private final ScannerChequeRepository scannerRepo;
     private final AffectationMaterielRepository affectationRepo;
+    private final CategorieMaterielRepository categorieMaterielRepo;
 
     public CanevasWriter(AgentRepository agentRepo, MaterielRepository materielRepo,
                          OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
                          EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
-                         AffectationMaterielRepository affectationRepo) {
+                         AffectationMaterielRepository affectationRepo, CategorieMaterielRepository categorieMaterielRepo) {
         this.agentRepo = agentRepo;
         this.materielRepo = materielRepo;
         this.ordinateurRepo = ordinateurRepo;
@@ -49,6 +56,7 @@ public class CanevasWriter {
         this.reseauRepo = reseauRepo;
         this.scannerRepo = scannerRepo;
         this.affectationRepo = affectationRepo;
+        this.categorieMaterielRepo = categorieMaterielRepo;
     }
 
     public byte[] prestamper(Mission m) throws IOException {
@@ -111,6 +119,9 @@ public class CanevasWriter {
 
             // 5) Inventaire déjà enregistré pour le poste (l'agent vérifie / complète)
             fillInventaire(wb, m);
+
+            // 6) Onglet générique des types paramétrables (famille AUTRE)
+            fillAutres(wb, m);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
@@ -186,6 +197,57 @@ public class CanevasWriter {
                 default -> { }
             }
         }
+    }
+
+    /**
+     * Onglet « 7-Autres matériels » créé par programme (le canevas vierge ne le contient pas) :
+     * en-têtes, listes déroulantes (type paramétrable famille AUTRE actif, statut) et pré-remplissage
+     * des matériels génériques déjà connus du poste.
+     */
+    private void fillAutres(Workbook wb, Mission m) {
+        Sheet s = wb.getSheet("7-Autres matériels");
+        if (s == null) s = wb.createSheet("7-Autres matériels");
+
+        String[] entetes = {"N° inventaire", "Type*", "Nom*", "Modèle", "MAC", "IP", "Statut", "Observation"};
+        Row tete = ligne(s, 0);
+        for (int i = 0; i < entetes.length; i++) set(tete, i, entetes[i]);
+
+        // Listes déroulantes : type (catégories famille AUTRE actives) en col. B, statut en col. G.
+        List<String> types = categorieMaterielRepo
+                .findByFamilleAndActifTrueOrderByLibelle(TypeMateriel.AUTRE).stream()
+                .map(CategorieMateriel::getLibelle).collect(Collectors.toList());
+        listeDeroulante(s, 1, types.toArray(new String[0]));
+        listeDeroulante(s, 6, new String[]{"En service", "En panne", "À changer"});
+
+        if (m.getPoste() == null) return;
+        int r = 1;
+        for (Materiel mat : materielRepo.findByPoste_Id(m.getPoste().getId())) {
+            if (mat.getType() != TypeMateriel.AUTRE) continue;
+            Row row = ligne(s, r++);
+            set(row, 0, mat.getNumeroInventaire());
+            set(row, 1, mat.getCategorie() == null ? "" : mat.getCategorie().getLibelle());
+            set(row, 2, mat.getNom());
+            set(row, 3, mat.getModele());
+            set(row, 4, mat.getMac());
+            set(row, 5, mat.getIp());
+            set(row, 6, statutLabel(mat.getStatut()));
+            set(row, 7, mat.getObservation());
+        }
+    }
+
+    /** Pose une validation « liste » sur une colonne (lignes 2 à 500). Excel limite la liste à 255 caractères. */
+    private void listeDeroulante(Sheet s, int col, String[] valeurs) {
+        if (valeurs.length == 0) return;
+        int total = 0;
+        for (String v : valeurs) total += v.length() + 1;
+        if (total > 255) return; // trop de valeurs pour une liste explicite : saisie libre
+        DataValidationHelper helper = s.getDataValidationHelper();
+        DataValidationConstraint contrainte = helper.createExplicitListConstraint(valeurs);
+        CellRangeAddressList zone = new CellRangeAddressList(1, 500, col, col);
+        DataValidation validation = helper.createValidation(contrainte, zone);
+        validation.setSuppressDropDownArrow(true);
+        validation.setShowErrorBox(true);
+        s.addValidationData(validation);
     }
 
     private String attributaire(Materiel mat) {

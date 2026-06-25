@@ -50,13 +50,14 @@ public class IntegrationService {
     private final ReleveMaterielRepository releveRepo;
     private final LogicielRepository logicielRepo;
     private final CategorieCableRepository categorieRepo;
+    private final CategorieMaterielRepository categorieMaterielRepo;
 
     public IntegrationService(PosteRepository posteRepo, AgentRepository agentRepo, MissionRepository missionRepo,
                               MaterielRepository materielRepo, OrdinateurRepository ordinateurRepo,
                               ImprimanteRepository imprimanteRepo, EquipementReseauRepository reseauRepo,
                               ScannerChequeRepository scannerRepo, AffectationMaterielRepository affectationRepo,
                               ReleveMaterielRepository releveRepo, LogicielRepository logicielRepo,
-                              CategorieCableRepository categorieRepo) {
+                              CategorieCableRepository categorieRepo, CategorieMaterielRepository categorieMaterielRepo) {
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
         this.missionRepo = missionRepo;
@@ -69,6 +70,7 @@ public class IntegrationService {
         this.releveRepo = releveRepo;
         this.logicielRepo = logicielRepo;
         this.categorieRepo = categorieRepo;
+        this.categorieMaterielRepo = categorieMaterielRepo;
     }
 
     @Transactional
@@ -108,6 +110,7 @@ public class IntegrationService {
         for (LigneImprimante i : canevas.getImprimantes()) { integrerImprimante(i, poste, mission, saisisseur, zone, jour); nb++; }
         for (LigneEquipementReseau eq : canevas.getEquipementsReseau()) { integrerReseau(eq, poste, mission, saisisseur, zone, jour); nb++; }
         for (LigneScanner s : canevas.getScanners()) { integrerScanner(s, poste, mission, saisisseur, zone, jour); nb++; }
+        for (LigneAutreMateriel a : canevas.getAutres()) { integrerAutre(a, poste, mission, saisisseur, zone, jour); nb++; }
 
         missionRepo.save(mission);
 
@@ -202,10 +205,16 @@ public class IntegrationService {
         });
     }
 
+    /** Catégorie système (seedée) d'une famille technique : sert de type affiché aux onglets câblés. */
+    private CategorieMateriel categorieSysteme(TypeMateriel famille) {
+        return categorieMaterielRepo.findFirstByFamilleAndSystemeTrue(famille)
+                .orElseThrow(() -> new IllegalStateException("Catégorie système manquante pour la famille " + famille + "."));
+    }
+
     // ---------- intégration par type ----------
 
     private void integrerOrdinateur(LigneOrdinateur o, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(o.getNumeroInventaire(), TypeMateriel.ORDINATEUR, o.getNomMachine(), o.getModele(), poste, o.getStatut(), o.getObservation(),
+        Materiel mat = rapprocher(o.getNumeroInventaire(), categorieSysteme(TypeMateriel.ORDINATEUR), o.getNomMachine(), o.getModele(), poste, o.getStatut(), o.getObservation(),
                 () -> vide(o.getMacEthernet()) ? Optional.empty()
                         : ordinateurRepo.findByMacEthernet(o.getMacEthernet()).map(Ordinateur::getMateriel));
         Ordinateur ord = ordinateurRepo.findById(mat.getNumeroInventaire()).orElseGet(Ordinateur::new);
@@ -226,7 +235,7 @@ public class IntegrationService {
     }
 
     private void integrerImprimante(LigneImprimante i, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(i.getNumeroInventaire(), TypeMateriel.IMPRIMANTE, i.getNom(), i.getModele(), poste, i.getStatut(), i.getObservation(),
+        Materiel mat = rapprocher(i.getNumeroInventaire(), categorieSysteme(TypeMateriel.IMPRIMANTE), i.getNom(), i.getModele(), poste, i.getStatut(), i.getObservation(),
                 () -> vide(i.getMac()) ? Optional.empty()
                         : imprimanteRepo.findByMac(i.getMac()).map(Imprimante::getMateriel));
         Imprimante imp = imprimanteRepo.findById(mat.getNumeroInventaire()).orElseGet(Imprimante::new);
@@ -241,7 +250,7 @@ public class IntegrationService {
 
     private void integrerReseau(LigneEquipementReseau eq, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
         TypeMateriel type = "Access point".equalsIgnoreCase(trim(eq.getType())) ? TypeMateriel.ACCESS_POINT : TypeMateriel.SWITCH;
-        Materiel mat = rapprocher(eq.getNumeroInventaire(), type, eq.getNom(), eq.getModele(), poste, eq.getStatut(), eq.getObservation(),
+        Materiel mat = rapprocher(eq.getNumeroInventaire(), categorieSysteme(type), eq.getNom(), eq.getModele(), poste, eq.getStatut(), eq.getObservation(),
                 () -> vide(eq.getMac()) ? Optional.empty()
                         : reseauRepo.findByMac(eq.getMac()).map(EquipementReseau::getMateriel));
         EquipementReseau er = reseauRepo.findById(mat.getNumeroInventaire()).orElseGet(EquipementReseau::new);
@@ -254,7 +263,7 @@ public class IntegrationService {
     }
 
     private void integrerScanner(LigneScanner s, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
-        Materiel mat = rapprocher(s.getNumeroInventaire(), TypeMateriel.SCANNER_CHEQUE, null, s.getModele(), poste, s.getStatut(), s.getObservation(),
+        Materiel mat = rapprocher(s.getNumeroInventaire(), categorieSysteme(TypeMateriel.SCANNER_CHEQUE), null, s.getModele(), poste, s.getStatut(), s.getObservation(),
                 () -> vide(s.getNumeroSerie()) ? Optional.empty()
                         : scannerRepo.findByNumeroSerie(s.getNumeroSerie()).map(ScannerCheque::getMateriel));
         ScannerCheque sc = scannerRepo.findById(mat.getNumeroInventaire()).orElseGet(ScannerCheque::new);
@@ -266,9 +275,24 @@ public class IntegrationService {
         majReleve(mission, mat, saisisseur, zone, jour);
     }
 
+    /** Matériel d'un type paramétrable (famille AUTRE) : attributs communs uniquement. */
+    private void integrerAutre(LigneAutreMateriel a, Poste poste, Mission mission, Agent saisisseur, String zone, LocalDate jour) {
+        CategorieMateriel categorie = vide(a.getTypeLibelle())
+                ? categorieSysteme(TypeMateriel.AUTRE)
+                : categorieMaterielRepo.findByLibelleIgnoreCase(a.getTypeLibelle().trim())
+                        .orElseGet(() -> categorieSysteme(TypeMateriel.AUTRE));
+        Materiel mat = rapprocher(a.getNumeroInventaire(), categorie, a.getNom(), a.getModele(), poste, a.getStatut(), a.getObservation(),
+                () -> vide(a.getMac()) ? Optional.empty() : materielRepo.findByMac(a.getMac().trim()));
+        if (!vide(a.getMac())) mat.setMac(a.getMac().trim());
+        if (!vide(a.getIp())) mat.setIp(a.getIp().trim());
+        materielRepo.save(mat);
+        majAffectation(mat, null, poste, jour);
+        majReleve(mission, mat, saisisseur, zone, jour);
+    }
+
     // ---------- noyau ----------
 
-    private Materiel rapprocher(String numero, TypeMateriel type, String nom, String modele, Poste poste,
+    private Materiel rapprocher(String numero, CategorieMateriel categorie, String nom, String modele, Poste poste,
                                 String statut, String observation,
                                 Supplier<Optional<Materiel>> parCleNaturelle) {
         Materiel mat;
@@ -283,11 +307,12 @@ public class IntegrationService {
             mat = parCleNaturelle.get().orElse(null);
             if (mat == null) {
                 mat = new Materiel();
-                mat.setNumeroInventaire(genererNumero(poste, type));
+                mat.setNumeroInventaire(genererNumero(poste, categorie));
                 mat.setDateCreation(Instant.now());
             }
         }
-        mat.setType(type);
+        mat.setCategorie(categorie);
+        mat.setType(categorie.getFamille());
         if (!vide(nom)) mat.setNom(nom);
         if (!vide(modele)) mat.setModele(modele);
         mat.setPoste(poste);
@@ -298,21 +323,10 @@ public class IntegrationService {
         return materielRepo.save(mat);
     }
 
-    private String genererNumero(Poste poste, TypeMateriel type) {
-        String prefixe = poste.getCode() + "-" + codeType(type) + "-";
+    private String genererNumero(Poste poste, CategorieMateriel categorie) {
+        String prefixe = poste.getCode() + "-" + categorie.getPrefixe() + "-";
         long n = materielRepo.countByNumeroInventaireStartingWith(prefixe) + 1;
         return prefixe + String.format("%04d", n);
-    }
-
-    private String codeType(TypeMateriel type) {
-        return switch (type) {
-            case ORDINATEUR -> "PC";
-            case IMPRIMANTE -> "IMP";
-            case SWITCH -> "SW";
-            case ACCESS_POINT -> "AP";
-            case SCANNER_CHEQUE -> "SCN";
-            case AUTRE -> "AUT";
-        };
     }
 
     private void majAffectation(Materiel mat, Agent agent, Poste poste, LocalDate jour) {
