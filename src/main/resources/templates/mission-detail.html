@@ -63,11 +63,13 @@
     <div class="toolbar"><h2 style="margin:0">Inventaire relevé</h2><span class="spacer"></span>
         <a class="btn small secondary" th:href="@{/missions/{id}/releves/export(id=${d.mission.id})}">⬇ Export Excel</a></div>
     <table class="table">
-        <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Saisi par</th><th>Zone</th><th>Date</th></tr></thead>
+        <thead><tr><th scope="col">N° inventaire</th><th scope="col">Type</th><th scope="col">Nom</th><th scope="col">Saisi par</th><th scope="col">Statut</th><th scope="col">Date</th></tr></thead>
         <tbody>
             <tr th:each="r : ${d.releves}">
                 <td th:text="${r.numeroInventaire}"></td><td th:text="${r.typeMateriel}"></td><td th:text="${r.nomMateriel}"></td>
-                <td th:text="${r.agentSaisisseur}"></td><td th:text="${r.zone}"></td><td th:text="${r.dateReleve}"></td>
+                <td th:text="${r.agentSaisisseur}"></td>
+                <td><span th:if="${r.statut != ''}" class="badge" th:classappend="${r.statut == 'En service' ? 'green' : (r.statut == 'En panne' ? 'red' : 'orange')}" th:text="${r.statut}"></span></td>
+                <td th:text="${r.dateReleve}"></td>
             </tr>
             <tr th:if="${d.releves.isEmpty()}"><td colspan="6" class="empty">Aucun relevé.</td></tr>
         </tbody>

@@ -304,8 +304,10 @@ public class ConsultationService {
 
     private ReleveVue versReleveVue(ReleveMateriel r) {
         Materiel m = r.getMateriel();
-        String saisisseur = r.getAgentSaisisseur() == null ? "" : r.getAgentSaisisseur().getMatricule();
-        return new ReleveVue(m.getNumeroInventaire(), m.getType().name(), m.getNom(), saisisseur, r.getZone(), r.getDateReleve());
+        Agent a = r.getAgentSaisisseur();
+        String saisisseur = a == null ? "" : a.getMatricule() + " — " + a.getPrenom() + " " + a.getNom();
+        return new ReleveVue(m.getNumeroInventaire(), libelleType(m), m.getNom(), saisisseur,
+                libelleStatut(m.getStatut()), r.getZone(), r.getDateReleve());
     }
 
     private String periode(LocalDate d1, LocalDate d2) {

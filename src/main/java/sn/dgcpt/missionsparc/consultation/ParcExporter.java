@@ -51,7 +51,7 @@ public class ParcExporter {
             Sheet s = wb.createSheet("Relevés");
             CellStyle entete = wb.createCellStyle();
             Font gras = wb.createFont(); gras.setBold(true); entete.setFont(gras);
-            String[] cols = {"N° inventaire", "Type", "Nom", "Saisi par", "Zone", "Date"};
+            String[] cols = {"N° inventaire", "Type", "Nom", "Saisi par", "Statut", "Zone", "Date"};
             Row h = s.createRow(0);
             for (int i = 0; i < cols.length; i++) {
                 Cell c = h.createCell(i); c.setCellValue(cols[i]); c.setCellStyle(entete);
@@ -63,8 +63,9 @@ public class ParcExporter {
                 row.createCell(1).setCellValue(nz(v.getTypeMateriel()));
                 row.createCell(2).setCellValue(nz(v.getNomMateriel()));
                 row.createCell(3).setCellValue(nz(v.getAgentSaisisseur()));
-                row.createCell(4).setCellValue(nz(v.getZone()));
-                row.createCell(5).setCellValue(v.getDateReleve() == null ? "" : v.getDateReleve().toString());
+                row.createCell(4).setCellValue(nz(v.getStatut()));
+                row.createCell(5).setCellValue(nz(v.getZone()));
+                row.createCell(6).setCellValue(v.getDateReleve() == null ? "" : v.getDateReleve().toString());
             }
             for (int i = 0; i < cols.length; i++) s.autoSizeColumn(i);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
