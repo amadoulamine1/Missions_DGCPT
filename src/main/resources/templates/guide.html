@@ -38,7 +38,7 @@
         <h2 style="margin-top:0;border:none">Agents et postes</h2>
         <ul>
             <li><strong>Agents</strong> : fiches séparées entre <strong>informaticiens</strong> (qui effectuent les missions) et <strong>agents de poste</strong> (qui utilisent le matériel). Utilisez la <strong>recherche</strong> et, pour les agents de poste, le <strong>filtre par TPR</strong>.</li>
-            <li><strong>Postes (TPR)</strong> : liste triable et paginée ; la fiche d'un poste montre le chef de poste, les agents et le matériel rattaché.</li>
+            <li><strong>Postes (TPR)</strong> : liste triable et paginée ; la fiche d'un poste montre le chef de poste, les agents et le matériel rattaché, ainsi que les <strong>historiques</strong> du poste : missions, fichiers (canevas) chargés, affectations de matériel et chefs de poste successifs.</li>
         </ul>
     </div>
 
@@ -46,24 +46,27 @@
         <h2 style="margin-top:0;border:none">Saisie hors-ligne — canevas et import</h2>
         <p><a class="btn" th:href="@{/import/canevas}">⬇ Télécharger un canevas vierge</a></p>
         <ol>
-            <li><strong>Télécharger</strong> le canevas (idéalement le canevas pré-rempli d'une mission créée en ligne).</li>
-            <li><strong>Remplir</strong> le canevas hors-ligne.</li>
+            <li><strong>Télécharger</strong> le canevas depuis la mission : l'application produit <strong>un canevas par agent membre</strong> (regroupés dans un fichier ZIP), chacun avec son nom et son matricule pré-renseigné comme agent saisisseur.</li>
+            <li><strong>Remplir</strong> le canevas hors-ligne. Les machines déjà connues du poste sont pré-chargées (à vérifier et compléter).</li>
             <li><strong>Recharger</strong> le fichier : l'application le contrôle et affiche un aperçu.</li>
             <li><strong>Corriger</strong> les anomalies bloquantes, puis recharger.</li>
             <li>Le <strong>chef de mission</strong> vérifie et valide la consolidation.</li>
         </ol>
+        <p class="muted">Onglets du canevas : <strong>1-Mission et Réseau</strong>, <strong>Agents TPR</strong>, puis un onglet par type câblé (Ordinateurs, Imprimantes, Switchs/AP, Scanners) et <strong>7-Autres matériels</strong> pour les types paramétrables, avant la feuille de référentiels.</p>
     </div>
 
     <div class="card">
         <h2 style="margin-top:0;border:none">Règles de saisie</h2>
         <ul>
-            <li>Les champs suivis d'un <strong>astérisque (*)</strong> sont obligatoires.</li>
+            <li>Les champs suivis d'un <strong>astérisque (*)</strong> sont obligatoires ; laissés vides sur une ligne saisie, ils apparaissent en <strong>rouge</strong>.</li>
             <li><strong>N° d'inventaire</strong> : laissez-le vide pour un matériel nouveau (l'app attribue un numéro) ; sinon reportez l'étiquette.</li>
-            <li>Utilisez les <strong>menus déroulants</strong> (agents, catégorie, type, Oui/Non).</li>
+            <li><strong>Statut</strong> du matériel <strong>obligatoire</strong> : En service, En panne ou À changer.</li>
+            <li><strong>Relevé réseau</strong> (une seule fois) : <strong>état du câblage</strong> obligatoire (Neuf, Bon ou Pas bon) et <strong>catégorie de câble</strong> obligatoire.</li>
+            <li><strong>Agent traitant</strong> (ordinateurs) : à <strong>ressaisir à chaque mission</strong> — il n'est pas reporté de la mission précédente, car il est historisé par mission.</li>
+            <li><strong>Types paramétrables</strong> : les types de matériel ajoutés dans les référentiels se saisissent dans l'onglet <strong>7-Autres matériels</strong> (type choisi dans la liste déroulante).</li>
+            <li>Utilisez les <strong>menus déroulants</strong> (agents, catégorie, type, statut, Oui/Non).</li>
             <li>Adresses <strong>MAC</strong> au format <code>AA:BB:CC:DD:EE:FF</code>.</li>
             <li><strong>Scanners de chèque</strong> : numéro de série (pas de MAC).</li>
-            <li>L'indicateur en tête de « 1-Mission et Réseau » signale si le canevas est <strong>conforme</strong>, <strong>incomplet</strong> ou <strong>non conforme</strong>.</li>
-            <li>Le <strong>relevé réseau</strong> se renseigne une seule fois.</li>
         </ul>
     </div>
 

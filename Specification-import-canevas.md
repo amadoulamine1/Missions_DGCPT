@@ -24,13 +24,15 @@ Transformer un canevas rempli hors-ligne en données fiables dans la base, en :
 
 ## 3. Pré-requis : le canevas pré-estampillé
 
-Parce que le chef crée la mission en ligne d'abord, chaque canevas est distribué avec :
+Parce que le chef crée la mission en ligne d'abord, le téléchargement produit **un canevas par agent membre** (regroupés en ZIP). Chaque canevas est distribué avec :
 
 - le **N° de mission** et le **code poste** déjà renseignés (en-tête) ;
 - l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste) ;
-- les **listes déroulantes** alimentées avec les référentiels du poste (agents, catégories de câble, logiciels).
+- l'**agent saisisseur pré-renseigné** avec le matricule de l'agent destinataire ;
+- les machines déjà connues du poste **pré-chargées** — sauf l'**agent traitant**, laissé vide (historisé par mission, à ressaisir) ;
+- les **listes déroulantes** alimentées avec les référentiels du poste (agents, catégories de câble, logiciels, types de matériel paramétrables).
 
-L'agent complète son **matricule de saisisseur**, éventuellement sa **zone**, le **relevé réseau** (une fois) et l'**inventaire**.
+L'agent vérifie/complète l'**inventaire**, renseigne l'**agent traitant** des ordinateurs, éventuellement sa **zone**, et le **relevé réseau** (une fois : état du câblage + catégorie de câble, obligatoires).
 
 ## 4. Lecture du fichier (correspondance onglets → tables)
 
@@ -55,6 +57,8 @@ Deux niveaux de sévérité : **Bloquant** (la ligne ou le fichier est rejeté t
 | Code poste du fichier cohérent avec celui de la mission | Bloquant |
 | Agent saisisseur renseigné, connu, et de type `INFORMATICIEN` | Bloquant |
 | Champs obligatoires (marqués `*`) renseignés sur chaque ligne | Bloquant |
+| **Statut** du matériel renseigné et conforme (En service / En panne / À changer) | Bloquant |
+| En-tête : **état du câblage** (Neuf / Bon / Pas bon) et **catégorie de câble** renseignés | Bloquant |
 | Format des adresses MAC `AA:BB:CC:DD:EE:FF` | Bloquant |
 | Format IP, e-mail, dates | Bloquant |
 | Valeurs des listes conformes (catégorie de câble, type, Oui/Non) | Bloquant |
@@ -105,10 +109,11 @@ Ses actions : corriger ou exclure une ligne, **arbitrer un conflit** (choisir la
 L'intégration s'effectue en **transaction** (tout ou rien sur le lot validé) :
 
 - création ou mise à jour de `materiel` et de la table de sous-type correspondante ;
-- attribution du **numéro d'inventaire** aux nouveaux matériels ;
+- **report du relevé réseau sur la mission** (état du câblage, catégorie de câble) — même si la mission, créée en ligne, existait déjà sans ces champs ;
+- attribution du **numéro d'inventaire** aux nouveaux matériels (préfixe issu du **type**) ;
 - mise à jour des **affectations** : si l'attributaire ou le poste change, l'affectation en cours est **clôturée** (`date_fin`) et une **nouvelle** est ouverte (`affectation_materiel`) ;
 - mise à jour des **logiciels installés** (`ordinateur_logiciel`) ;
-- écriture des lignes `releve_materiel`, avec le **snapshot `etat_observe`** (photo des attributs observés) et la `date_releve` ;
+- écriture des lignes `releve_materiel`, avec l'**agent saisisseur**, l'**agent traitant** (historisé par mission pour les ordinateurs), le **snapshot `etat_observe`** (résumé textuel des attributs observés) et la `date_releve` ;
 - la photo datée est ainsi **figée** : elle ne change plus, même si la fiche matériel évolue ensuite.
 
 **Idempotence** — recharger un fichier corrigé ne crée pas de doublon : le rapprochement par clé met à jour la même entrée.

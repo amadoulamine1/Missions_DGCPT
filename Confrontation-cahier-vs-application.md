@@ -1,10 +1,10 @@
 # Confrontation cahier des charges ⇄ application réalisée
 
-*État au 25/06/2026 — cahier de référence : **v10**. Écarts entre le cahier des charges et l'application livrée, vérifiés dans le code.*
+*État au 25/06/2026 — cahier de référence : **v11**. Écarts entre le cahier des charges et l'application livrée, vérifiés dans le code.*
 
 ## 1. Globalement conforme
 
-Le cœur métier est couvert : postes (TPR) et **chefs de poste historisés** ; agents (informaticiens / agents de poste) ; missions (création, membres, chef de mission **parmi les membres**, contrôle de chevauchement, édition, statut temporel, **clôture**) ; matériel et ses types avec caractéristiques ; **mode hors-ligne** (canevas Excel pré-rempli, contrôles, aperçu, **validation**, intégration) ; **consolidation multi-fichiers et arbitrage des conflits** ; **historisations** (chef de poste ; affectation matériel **avec réaffectation et historique des propriétaires** ; **rattachement agent↔TPR avec mutation**) ; restitutions (résultats de mission, inventaire d'un poste, **inventaire à une date avec état observé figé**) ; recherche / filtres / tri / pagination ; **tableau de bord filtrable par poste** ; **exports** (parc, relevés, statistiques Excel + PDF) ; **administration des référentiels** (logiciels, catégories de câble, **types de matériel paramétrables**) ; authentification et **3 rôles**.
+Le cœur métier est couvert : postes (TPR) et **chefs de poste historisés** ; agents (informaticiens / agents de poste) ; missions (création, membres, chef de mission **parmi les membres**, contrôle de chevauchement, édition, statut temporel, **clôture**) ; matériel et ses types avec caractéristiques ; **mode hors-ligne** (canevas Excel pré-rempli, contrôles, aperçu, **validation**, intégration) ; **consolidation multi-fichiers et arbitrage des conflits** ; **historisations** (chef de poste ; affectation matériel **avec réaffectation et historique des propriétaires** ; **rattachement agent↔TPR avec mutation** ; **agent traitant par mission**) ; restitutions (résultats de mission, inventaire d'un poste, **inventaire à une date avec état observé figé**, **fiche poste avec historiques** missions/fichiers/affectations/chefs) ; recherche / filtres / tri / pagination ; **tableau de bord filtrable par poste** ; **exports** (parc, relevés, statistiques Excel + PDF) ; **administration des référentiels** (logiciels, catégories de câble, **types de matériel paramétrables**) ; authentification et **3 rôles**.
 
 ## 2. Écarts fonctionnels restants (vs cahier)
 
@@ -14,7 +14,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 - **Sécurité durcie** : protection **CSRF réactivée** (formulaires Thymeleaf porteurs du jeton) ; profil `application-prod` (HTTPS, cookies sécurisés). Reste à faire côté exploitation : **déploiement HTTPS** effectif et **changement du compte initial `admin / admin`** (idéalement forcé au premier login).
 - **Sauvegarde** : scripts `pg_dump` + rotation et procédure de restauration présents ; reste leur **planification opérationnelle** (tâche planifiée / cron) et un **test de restauration**.
-- **Tests automatisés** — ~53 tests : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — chevauchement, désignation du chef, clôture (`MissionServiceTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`). *Restent peu couverts* : exports PDF, génération du canevas (Apache POI).
+- **Tests automatisés** — ~58 tests : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — chevauchement, désignation du chef, clôture (`MissionServiceTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`). *Restent peu couverts* : exports PDF, génération du canevas (Apache POI).
   - *Note JDK 25* : Mockito ne peut pas instrumenter les **classes concrètes** (inline mock) ; mocker uniquement des **interfaces** (dépôts) ou recourir à des **doublures manuelles** (sous-classes) pour les services concrets.
 
 ## 4. Incohérences mineures / cosmétique
@@ -24,6 +24,14 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ## 5. Résolus
 
+- **Agent traitant historisé par mission** (§3.5/§3.6) — l'agent traitant est porté par le **relevé** (migration **V11**) ; le canevas ne le pré-remplit plus (ressaisie à chaque mission) ; l'ordinateur conserve le « dernier traitant » pour l'affichage ; historique visible sur la fiche équipement.
+- **Historiques sur la fiche poste** — missions, fichiers (canevas) chargés, affectations de matériel et chefs de poste successifs.
+- **Statut du matériel obligatoire** — contrôle bloquant à l'import (tous onglets) **et** surlignage rouge sur le canevas si vide.
+- **Relevé réseau obligatoire** — état du câblage (Neuf / Bon / Pas bon) et catégorie de câble obligatoires ; valeurs **reportées sur la mission à l'import** (la mission est créée en ligne sans ces champs, l'agent les saisit dans le canevas).
+- **Canevas par agent** — le téléchargement produit **un canevas par agent membre** (ZIP), pré-renseigné (agent saisisseur en B11) ; onglets réordonnés (Agents TPR après l'en-tête, « 7-Autres matériels » avant les référentiels) ; onglet générique stylé (en-têtes dorés, volet figé) et garde-fous (validation MAC, mises en forme conditionnelles).
+- **Affichage des relevés** (fiche mission) — saisisseur en « matricule — prénom nom », **statut** affiché, **zone masquée** ; liste des missions **triée du plus récent**.
+- **Refonte du design** — tableau de bord (anneau de disponibilité, KPI), identité éditoriale globale (titres serif, filet doré), Parc en mode large, listes et fiches alignées ; **accessibilité** (contrastes AA, focus, `aria-current`, `scope`).
+- **Correctif** `etat_observe` — colonne ramenée de `jsonb` (héritée de V1) à `TEXT` (migration **V10**) ; débloque l'intégration/arbitrage.
 - **Types de matériel paramétrables** (§3.8 / §9.12) — référentiel `categorie_materiel` (migration **V9**) : l'admin ajoute un type (libellé + préfixe) ; les types système restent câblés et protégés ; onglet canevas **« 7-Autres matériels »** (liste déroulante, intégration en famille *Autre*, contrôles + anti-doublon). **Observation** du matériel désormais affichée (fiche poste + infobulle parc).
 - **Snapshot exact à une date** (§9.5) — la photo `etat_observe` est figée à chaque intégration (migration **V8**, rendue idempotente : `ADD COLUMN IF NOT EXISTS`) ; l'inventaire à une date affiche l'état observé au relevé le plus proche ≤ date.
 - **Clôture de mission** — bouton dédié « Clôturer » (ADMIN / CHEF_MISSION, masqué si déjà clôturée).

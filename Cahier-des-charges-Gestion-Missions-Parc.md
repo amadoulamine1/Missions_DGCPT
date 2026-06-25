@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 10 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 11 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -72,7 +72,7 @@ Produit pendant la mission, rattaché au poste et à la mission, daté :
 - **catégorie de câble** utilisée (référentiel) ;
 - l'**inventaire du matériel** constaté.
 
-Chaque ligne d'inventaire conserve l'**agent saisisseur** (qui l'a relevée) et, le cas échéant, la **zone/périmètre** couverte — utile quand plusieurs agents se partagent la mission.
+Chaque ligne d'inventaire conserve l'**agent saisisseur** (qui l'a relevée), l'**agent traitant** (pour les ordinateurs) et, le cas échéant, la **zone/périmètre** couverte — utile quand plusieurs agents se partagent la mission. L'**agent traitant est historisé par mission** : ce n'est pas forcément le même informaticien qui traite une machine d'une mission à l'autre (voir §9.13).
 
 ### 3.6 Matériel
 Identité commune à tous les types :
@@ -252,6 +252,14 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - Conception : l'application conserve une **famille technique** (le comportement câblé des types riches — sous-type, feuille de caractéristiques, regroupement réseau — reste inchangé) ; les types ajoutés sont des matériels **génériques** de famille « Autre », limités aux **attributs communs** (nom, modèle, MAC, IP, statut, observation).
 - **Canevas** : un onglet **« 7-Autres matériels »** accueille ces types via une **liste déroulante** alimentée par le référentiel. À l'import, le **préfixe** du type alimente le numéro d'inventaire (`CODEPOSTE-PRÉFIXE-SÉQUENCE`) ; un type inconnu est signalé comme anomalie bloquante.
 - **Observation** : le champ d'observation du matériel, déjà saisi dans le canevas, est désormais **affiché** sur la fiche du poste (colonne) et en infobulle dans le parc.
+
+### 9.13 Historisations, obligations de saisie et canevas par agent
+- **Agent traitant historisé par mission** : l'agent traitant est porté par le **relevé** (et non plus seulement par la machine). Le canevas d'une nouvelle mission charge les machines du poste **sans reporter l'agent traitant** (champ vide, à ressaisir) ; l'ordinateur conserve le « dernier agent traitant » pour l'affichage, et la fiche équipement montre l'historique par mission.
+- **Fiche poste enrichie** : en plus du chef, des agents et du matériel, elle présente les **historiques** du poste — missions menées, fichiers (canevas) chargés, affectations de matériel et chefs de poste successifs.
+- **Obligations de saisie renforcées** : le **statut** du matériel devient obligatoire (à l'import et signalé en rouge dans le canevas) ; l'**état du câblage** (Neuf / Bon / Pas bon) et la **catégorie de câble** sont obligatoires ; le relevé réseau saisi dans le canevas est **reporté sur la mission** à l'import.
+- **Canevas par agent** : le téléchargement produit **un canevas par agent membre** (regroupés en ZIP), chacun nommé d'après l'agent et avec son matricule pré-renseigné comme agent saisisseur. Onglets réordonnés (Agents TPR juste après l'en-tête, « 7-Autres matériels » avant les référentiels) ; l'onglet générique est mis en forme (en-têtes, listes, surlignage des champs manquants).
+- **Restitutions** : les relevés d'une mission affichent l'agent saisisseur en « matricule — prénom nom » et le statut ; la liste des missions est triée du plus récent par défaut.
+- **Refonte de l'interface** : tableau de bord repensé (anneau de disponibilité, KPI), **identité éditoriale** (titres serif, filet doré) déployée sur toutes les pages, parc en mode large, et améliorations d'**accessibilité** (contrastes, focus clavier, repères ARIA).
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :
