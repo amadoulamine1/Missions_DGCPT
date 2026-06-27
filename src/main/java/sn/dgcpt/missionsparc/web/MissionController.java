@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Mission;
 import sn.dgcpt.missionsparc.mission.CreationMissionForm;
@@ -17,6 +18,8 @@ import sn.dgcpt.missionsparc.mission.MissionService;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 public class MissionController {
@@ -98,9 +101,20 @@ public class MissionController {
     @GetMapping("/missions/{id}/canevas")
     public ResponseEntity<byte[]> canevas(@PathVariable Integer id) throws IOException {
         byte[] data = missionService.genererCanevasZip(id);
-        String ref = missionService.reference(id);
+        String nom = missionService.nomZipMission(id);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Canevas-" + ref + ".zip\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nom + ".zip\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .body(data);
+    }
+
+    /** Téléchargement en lot : les canevas de plusieurs missions dans un seul ZIP. */
+    @GetMapping("/missions/canevas")
+    public ResponseEntity<byte[]> canevasLot(@RequestParam("id") List<Integer> ids) throws IOException {
+        byte[] data = missionService.genererCanevasZipLot(ids);
+        String nom = "Canevas-missions-" + LocalDate.now();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nom + ".zip\"")
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(data);
     }

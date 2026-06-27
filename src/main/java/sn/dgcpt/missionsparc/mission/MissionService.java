@@ -188,24 +188,58 @@ public class MissionService {
     @Transactional(readOnly = true)
     public byte[] genererCanevasZip(Integer missionId) throws IOException {
         Mission m = missionRepo.findById(missionId).orElseThrow();
-        List<Agent> membres = new ArrayList<>(m.getMembres());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(bos)) {
-            if (membres.isEmpty()) {
-                zip.putNextEntry(new ZipEntry("Canevas-" + m.getReference() + ".xlsx"));
-                zip.write(canevasWriter.prestamper(m));
-                zip.closeEntry();
-            } else {
-                for (Agent a : membres) {
-                    String nom = (nz(a.getNom()) + " " + nz(a.getPrenom())).trim();
-                    String fichier = nettoyer("Canevas-" + m.getReference() + "-" + a.getMatricule() + "-" + nom) + ".xlsx";
-                    zip.putNextEntry(new ZipEntry(fichier));
-                    zip.write(canevasWriter.prestamper(m, a));
-                    zip.closeEntry();
+            ecrireCanevasMission(zip, m);
+        }
+        return bos.toByteArray();
+    }
+
+    /** Canevas de plusieurs missions réunis dans un seul ZIP « à plat » : chaque fichier est déjà
+     *  auto-identifié (code poste + période + agent), donc pas de sous-dossiers. */
+    @Transactional(readOnly = true)
+    public byte[] genererCanevasZipLot(List<Integer> missionIds) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(bos)) {
+            if (missionIds != null) {
+                for (Integer id : missionIds) {
+                    Mission m = missionRepo.findById(id).orElse(null);
+                    if (m != null) ecrireCanevasMission(zip, m);
                 }
             }
         }
         return bos.toByteArray();
+    }
+
+    /** Écrit les fichiers d'une mission dans le ZIP : un .xlsx par agent membre (générique si aucun membre). */
+    private void ecrireCanevasMission(ZipOutputStream zip, Mission m) throws IOException {
+        String base = baseNomMission(m);
+        List<Agent> membres = new ArrayList<>(m.getMembres());
+        if (membres.isEmpty()) {
+            zip.putNextEntry(new ZipEntry(base + ".xlsx"));
+            zip.write(canevasWriter.prestamper(m));
+            zip.closeEntry();
+        } else {
+            for (Agent a : membres) {
+                String nom = (nz(a.getNom()) + " " + nz(a.getPrenom())).trim();
+                String fichier = nettoyer(base + "-" + a.getMatricule() + "-" + nom) + ".xlsx";
+                zip.putNextEntry(new ZipEntry(fichier));
+                zip.write(canevasWriter.prestamper(m, a));
+                zip.closeEntry();
+            }
+        }
+    }
+
+    /** Nom de base d'un canevas (sans extension) : « Canevas-{codePoste}-{début}_{fin} ». */
+    public String baseNomMission(Mission m) {
+        String code = (m.getPoste() != null && m.getPoste().getCode() != null && !m.getPoste().getCode().isBlank())
+                ? m.getPoste().getCode() : "sans-poste";
+        StringBuilder sb = new StringBuilder("Canevas-").append(code);
+        if (m.getDateDebut() != null || m.getDateFin() != null) {
+            sb.append("-").append(m.getDateDebut() == null ? "" : m.getDateDebut())
+              .append("_").append(m.getDateFin() == null ? "" : m.getDateFin());
+        }
+        return nettoyer(sb.toString());
     }
 
     private String nz(String s) { return s == null ? "" : s; }
@@ -214,6 +248,12 @@ public class MissionService {
     @Transactional(readOnly = true)
     public String reference(Integer missionId) {
         return missionRepo.findById(missionId).map(Mission::getReference).orElse("mission");
+    }
+
+    /** Nom du ZIP d'une mission (sans extension) : code poste + période. */
+    @Transactional(readOnly = true)
+    public String nomZipMission(Integer missionId) {
+        return missionRepo.findById(missionId).map(this::baseNomMission).orElse("Canevas-mission");
     }
 
     private AgentOption option(Agent a) {

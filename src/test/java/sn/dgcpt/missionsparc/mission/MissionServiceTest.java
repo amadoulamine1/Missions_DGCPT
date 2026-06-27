@@ -216,4 +216,21 @@ class MissionServiceTest {
         assertThat(m.getMembres()).extracting(Agent::getMatricule).containsExactly("AG2");
         verify(missionRepo).save(m);
     }
+
+    // ---------- nom de ZIP du canevas ----------
+
+    @Test
+    void base_nom_canevas_porte_code_poste_et_periode() {
+        Poste p = new Poste(); p.setCode("DKR");
+        Mission m = new Mission(); m.setPoste(p);
+        m.setDateDebut(java.time.LocalDate.of(2026, 6, 1));
+        m.setDateFin(java.time.LocalDate.of(2026, 6, 5));
+
+        assertThat(service.baseNomMission(m)).isEqualTo("Canevas-DKR-2026-06-01_2026-06-05");
+    }
+
+    @Test
+    void base_nom_canevas_repli_sans_poste_ni_date() {
+        assertThat(service.baseNomMission(new Mission())).isEqualTo("Canevas-sans-poste");
+    }
 }

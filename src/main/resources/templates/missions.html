@@ -10,8 +10,10 @@
             <p class="eyebrow">Missions d'inventaire</p>
             <h1>Missions</h1>
         </div>
-        <div class="actions no-print">
-            <a class="btn" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">+ Nouvelle mission</a>
+        <div class="actions no-print" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">
+            <button class="btn secondary" type="button" onclick="telechargerLot()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Télécharger la sélection</button>
+            <a class="btn" th:href="@{/missions/nouvelle}">+ Nouvelle mission</a>
         </div>
     </header>
 
@@ -34,6 +36,8 @@
 
     <table class="table sticky">
         <thead><tr>
+            <th scope="col" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" style="width:1%">
+                <input type="checkbox" id="selAll" onclick="toggleAll(this)" aria-label="Tout sélectionner"/></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
@@ -43,12 +47,14 @@
         </tr></thead>
         <tbody>
             <tr th:each="m : ${missions}">
+                <td th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">
+                    <input type="checkbox" class="sel-mission" th:value="${m.id}" th:attr="aria-label=|Sélectionner ${m.reference}|"/></td>
                 <td><a class="mono" th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
                 <td th:text="${m.objet}"></td><td th:text="${m.posteNom}"></td><td th:text="${m.periode}"></td>
                 <td><span class="badge" th:classappend="${m.etat == 'En cours' ? 'orange' : (m.etat == 'Terminée' ? 'green' : 'blue')}" th:text="${m.etat}"></span></td>
                 <td><span class="badge" th:classappend="${m.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${m.statut}"></span></td>
             </tr>
-            <tr th:if="${page.vide}"><td colspan="6" class="empty">Aucune mission.</td></tr>
+            <tr th:if="${page.vide}"><td th:colspan="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') ? 7 : 6}" class="empty">Aucune mission.</td></tr>
         </tbody>
     </table>
 
@@ -59,6 +65,16 @@
         <a class="btn small secondary" th:classappend="${page.dernier} ? 'disabled' : ''"
            th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri=${tri},sens=${sens},page=${page.suivant})}">Suivant →</a>
     </div>
+
+    <script th:inline="javascript" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">
+        var URL_LOT = /*[[@{/missions/canevas}]]*/ '/missions/canevas';
+        function toggleAll(cb){ document.querySelectorAll('.sel-mission').forEach(function(x){ x.checked = cb.checked; }); }
+        function telechargerLot(){
+            var ids = Array.from(document.querySelectorAll('.sel-mission:checked')).map(function(x){ return x.value; });
+            if (ids.length === 0) { alert('Sélectionnez au moins une mission à télécharger.'); return; }
+            window.location = URL_LOT + '?id=' + ids.join('&id=');
+        }
+    </script>
 </main>
 </body>
 </html>
