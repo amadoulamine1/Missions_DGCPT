@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +24,9 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/favicon.ico").permitAll()
+                // Supervision : sonde de santé ouverte (réseau/sonde externe), le reste réservé à l'ADMIN
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/**").hasRole("ADMIN")
                 // Rapport annuel : document de pilotage (lecture) — ADMIN + MANAGER
                 .requestMatchers("/rapport-annuel/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
@@ -50,6 +54,16 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutSuccessUrl("/login?logout")
                 .permitAll())
+            // En-têtes de sécurité HTTP. CSP adaptée au rendu serveur (Thymeleaf) avec scripts/styles
+            // inline de première main ('unsafe-inline') ; aucune origine externe autorisée. HSTS actif
+            // sur les réponses HTTPS (profil prod). Referrer limité à la même origine.
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
+                        + "script-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; "
+                        + "base-uri 'self'; form-action 'self'; frame-ancestors 'self'"))
+                .referrerPolicy(ref -> ref.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
+                .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000)))
             // CSRF actif : protection des formulaires POST. Les formulaires Thymeleaf (th:action)
             // injectent automatiquement le jeton _csrf (login, logout et tous les formulaires inclus).
             .csrf(org.springframework.security.config.Customizer.withDefaults());

@@ -46,6 +46,7 @@
         <a class="chip sm" th:classappend="${fStatut == 'A_CHANGER'} ? 'active'" th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut='A_CHANGER')}">À changer</a>
     </div>
 
+    <div class="table-scroll">
     <table class="table sticky">
         <thead><tr>
             <th scope="col"><a th:href="@{/parc(q=${q},poste=${fPoste},type=${fType},statut=${fStatut},tri='numero',sens=${(tri == 'numero' and sens != 'desc') ? 'desc' : 'asc'})}">N° inventaire</a><span th:if="${tri == 'numero'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
@@ -79,6 +80,7 @@
             <tr th:if="${page.vide}"><td colspan="9" class="empty">Aucun matériel ne correspond à ces filtres.</td></tr>
         </tbody>
     </table>
+    </div>
 
     <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
         <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"

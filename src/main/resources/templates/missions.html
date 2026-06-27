@@ -45,6 +45,7 @@
         <span class="count"><b th:text="${page.total}">0</b> mission(s)</span>
     </form>
 
+    <div class="table-scroll">
     <table class="table sticky">
         <thead><tr>
             <th scope="col" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" style="width:1%">
@@ -90,6 +91,7 @@
             <tr th:if="${page.vide}"><td th:colspan="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') ? 9 : 8}" class="empty">Aucune mission.</td></tr>
         </tbody>
     </table>
+    </div>
 
     <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
         <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"

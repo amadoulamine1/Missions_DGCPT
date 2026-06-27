@@ -21,11 +21,14 @@ public class CompteService implements UserDetailsService {
     private final UtilisateurRepository repo;
     private final PasswordEncoder encoder;
     private final AgentRepository agentRepo;
+    private final LoginAttemptService tentatives;
 
-    public CompteService(UtilisateurRepository repo, PasswordEncoder encoder, AgentRepository agentRepo) {
+    public CompteService(UtilisateurRepository repo, PasswordEncoder encoder, AgentRepository agentRepo,
+                         LoginAttemptService tentatives) {
         this.repo = repo;
         this.encoder = encoder;
         this.agentRepo = agentRepo;
+        this.tentatives = tentatives;
     }
 
     @Transactional(readOnly = true)
@@ -144,6 +147,7 @@ public class CompteService implements UserDetailsService {
                 .password(u.getMotDePasse())
                 .roles(u.getRole().name())
                 .disabled(!u.isActif())
+                .accountLocked(tentatives.estVerrouille(u.getUsername())) // verrou anti-force-brute (temporaire)
                 .build();
     }
 }

@@ -318,6 +318,12 @@ td.ordre{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
 .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:.2rem .5rem;line-height:1}
 .btn.ghost:hover{background:#fceae8;color:var(--red);border-color:#f3c7c1}
 
+/* Tableaux denses : défilement horizontal sur petit écran (sans casser l'en-tête figé en grand écran) */
+@media (max-width:860px){
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .table-scroll > .table{min-width:760px}
+}
+
 /* ===== Rapport annuel : écarts N‑1 & prévision N+1 ===== */
 .kpi-foot{display:flex;flex-direction:column;gap:.3rem;margin-top:.55rem}
 .delta{display:inline-flex;align-items:center;gap:.25rem;font-size:.73rem;font-weight:700;
