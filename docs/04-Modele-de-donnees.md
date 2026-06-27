@@ -66,6 +66,7 @@ erDiagram
 | **V13** | Utilisateur : `mot_de_passe_a_changer` (changement de mot de passe forcé) |
 | **V14** | Référentiel logiciels : semis du logiciel **« AD »** (idempotent) |
 | **V15** | Mission : `chef_poste_fige_matricule` rendu **nullable** (chef de poste facultatif) |
+| **V16** | Utilisateur : contrainte `CHECK` du rôle étendue pour le **rôle MANAGER** (pilotage) |
 
 Le schéma est **géré exclusivement par Flyway** (`ddl-auto=none`).
 

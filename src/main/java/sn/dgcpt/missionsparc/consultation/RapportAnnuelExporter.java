@@ -72,7 +72,7 @@ public class RapportAnnuelExporter {
             rp = kv(pc, rp, "En panne", r.getParcPan());
             rp = kv(pc, rp, "À changer", r.getParcChg());
             rp = kv(pc, rp, "Disponibilité (%)", r.getParcDispo());
-            rp = kv(pc, rp, "Nouveau matériel dans l'année", r.getNouveauTotal());
+            rp = kv(pc, rp, "Matériel nouvellement inventorié", r.getNouveauTotal());
             rp++;
             ligne(pc, rp++, entete, "Par type", "Total", "En service", "En panne", "À changer");
             for (TypeStat t : r.getParcParType()) {

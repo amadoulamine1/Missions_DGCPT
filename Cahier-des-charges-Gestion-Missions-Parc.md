@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 12 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 13 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -108,6 +108,9 @@ Lien matériel ↔ agent (et/ou poste) avec période. Permet de savoir à qui/o�
 - **Administrateur** : référentiels, postes, agents, comptes utilisateurs.
 - **Chef de mission** : crée et gère ses missions, **valide les imports**.
 - **Agent** : saisit les relevés (en ligne ou via canevas Excel).
+- **Manager** : profil de **pilotage en lecture seule** — consulte toutes les restitutions (tableau de
+  bord, postes, parc, missions, agents, **rapport annuel**) pour décider, sans rien pouvoir modifier
+  ni importer (voir §9.15).
 - Les comptes des **chefs de mission** et des **agents** sont **rattachés à un agent informaticien** (un agent = un compte).
 
 ## 4. Règle d'identité du matériel et anti-doublon
@@ -211,7 +214,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 
 ### 9.7 Authentification, rôles et comptes
 - **Connexion par formulaire** (Spring Security) ; mots de passe **chiffrés en BCrypt** ; déconnexion.
-- **Trois rôles** : **Administrateur** (gestion des postes, agents, comptes, référentiels), **Chef de mission** (création et **édition** de mission, validation des imports), **Agent** (consultation, téléchargement des canevas, téléversement des fichiers).
+- **Quatre rôles** : **Administrateur** (gestion des postes, agents, comptes, référentiels), **Chef de mission** (création et **édition** de mission, validation des imports), **Agent** (consultation, téléchargement des canevas, téléversement des fichiers), **Manager** (pilotage en **lecture seule** : toutes les restitutions et le **rapport annuel**, sans aucune modification ni import — voir §9.15).
 - **Règles d'accès** appliquées par rôle et **navigation adaptée** (liens et actions réservés masqués).
 - **Consultation des postes et de leur inventaire** ouverte à tous les rôles ; la **création/modification** des postes et des agents reste réservée à l'administrateur.
 - **Gestion des comptes** par l'administrateur : créer, modifier, désactiver, **réinitialiser** le mot de passe (valeur temporaire) ; le mot de passe est **affichable** à la saisie.
@@ -270,6 +273,25 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 - **Chevauchement autorisé** : le contrôle bloquant de chevauchement de périodes est **supprimé** — un agent peut figurer sur plusieurs missions simultanées (à la création comme à la modification).
 - **Sécurité — changement de mot de passe forcé** : à la première connexion (compte initial) et après chaque **réinitialisation** par un administrateur, l'utilisateur **doit changer son mot de passe** avant toute navigation.
 - **Qualité** : validation déclarative (Bean Validation) des formulaires agent et poste ; **journalisation** des créations « à la volée » à l'import (audit administrateur) ; **intégration continue** (build et tests à chaque évolution).
+
+### 9.15 Rapport annuel (pilotage) et rôle Manager
+- **Rôle Manager** : profil de **décision en lecture seule**. Il accède à l'ensemble des restitutions
+  (tableau de bord, postes, parc, missions, **agents** en lecture) et au **rapport annuel**, mais **ne peut
+  rien modifier ni importer** (création/édition/clôture, affectation, référentiels, comptes lui sont
+  refusés). Navigation adaptée (actions et écrans de modification masqués).
+- **Rubrique « Rapport annuel »** (réservée **Administrateur + Manager**) : revue annuelle des missions et
+  du parc pour le pilotage, avec **sélecteur d'année** et **export Excel / PDF**.
+  - **Synthèse** : missions menées, relevés effectués, incidents (pannes / à changer), **matériel
+    nouvellement inventorié** (équipements enregistrés pour la première fois dans l'année), taille du parc
+    et **disponibilité au 31/12**, chacun avec son **écart par rapport à l'année précédente** et une
+    **prévision de l'année suivante**.
+  - **Tendance pluriannuelle** : comparaison sur **jusqu'à 5 ans** (fenêtre réglable), avec une **prévision
+    N+1** par tendance linéaire — présentée comme **indicative** (extrapolation).
+  - **Détails** : missions de l'année (par mois, par poste, liste) ; parc au 31/12 (disponibilité, par
+    statut / type / poste, matériel ajouté dans l'année) ; **incidents & maintenance** (par type / poste,
+    équipements concernés) ; **activité des agents** (missions par informaticien).
+  - L'**état du parc au 31 décembre** d'une année est reconstitué à partir du **dernier relevé daté** de
+    chaque équipement (statut observé), réutilisant la mécanique de l'inventaire à une date.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

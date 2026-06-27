@@ -2,7 +2,7 @@
 
 ## 1. Connexion et navigation
 
-Se connecter avec son **identifiant** (matricule pour les comptes liés à un agent) et son mot de passe. Le **menu de gauche** donne accès aux écrans selon le rôle : Accueil, Postes, Agents, Parc, Missions, Importer, Guide, Référentiels, Comptes. La page courante est mise en évidence ; les actions réservées sont masquées.
+Se connecter avec son **identifiant** (matricule pour les comptes liés à un agent) et son mot de passe. Le **menu de gauche** donne accès aux écrans selon le rôle : Accueil, Postes, Agents, Parc, Missions, **Rapport annuel**, Importer, Guide, Référentiels, Comptes. La page courante est mise en évidence ; les actions réservées sont masquées. Quatre rôles : **Administrateur**, **Chef de mission**, **Agent**, et **Manager** (pilotage en **lecture seule** — voir §9).
 
 ## 2. Tableau de bord (Accueil)
 
@@ -43,3 +43,18 @@ Fiches séparées : **informaticiens** (effectuent les missions) et **agents de 
 - Répartir la saisie d'une mission **par type de matériel ou par zone** pour éviter les doublons.
 - Renseigner le **statut** du matériel (en service / en panne / à changer) pour fiabiliser la disponibilité.
 - Changer le **mot de passe administrateur** par défaut dès la première connexion.
+
+## 9. Rapport annuel et profil Manager (pilotage)
+
+- **Profil Manager** : compte de **décision en lecture seule**. Il voit le tableau de bord, les postes,
+  le parc, les missions, les agents et le **rapport annuel**, mais ne peut **rien modifier ni importer**.
+  Création d'un compte Manager : *Comptes → Nouveau compte → rôle « Manager (pilotage) »* (administrateur).
+- **Rapport annuel** (menu *Rapport annuel*, réservé Administrateur / Manager) : revue de l'année pour le
+  pilotage.
+  - Choisir l'**année** et la **fenêtre de comparaison** (2 à 5 ans) en haut de page.
+  - **Synthèse** : missions, relevés, incidents, nouveau matériel, taille du parc et **disponibilité au
+    31/12**, avec l'**écart par rapport à l'année précédente** et une **prévision** de l'année suivante.
+  - **Tendance** : évolution sur jusqu'à 5 ans, avec une barre de **prévision** (extrapolation, indicative).
+  - **Détails** : missions de l'année (par mois, par poste), parc au 31/12 (par statut / type / poste),
+    incidents (équipements concernés), activité des agents.
+  - **Exporter** : bouton **Excel** (classeur détaillé) ou **PDF** (impression).

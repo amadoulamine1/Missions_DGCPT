@@ -77,7 +77,7 @@ public class RapportAnnuelService {
         series.add(serie("Missions menées", "", 0, annee, fenetre, nbMissions, null));
         series.add(serie("Relevés effectués", "", 0, annee, fenetre, nbReleves, null));
         series.add(serie("Incidents (pannes / à changer)", "", -1, annee, fenetre, nbIncidents, null));
-        series.add(serie("Nouveau matériel", "", 0, annee, fenetre, nbNouveau, null));
+        series.add(serie("Matériel nouvellement inventorié", "", 0, annee, fenetre, nbNouveau, null));
         series.add(serie("Taille du parc (31/12)", "", 0, annee, fenetre, taille, null));
         series.add(serie("Disponibilité (31/12)", "%", 1, annee, fenetre, dispo, 100L));
         v.setSeries(series);

@@ -50,6 +50,8 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R24 | Référentiels | Ajout/suppression | Référentiels → ajouter un logiciel, supprimer | Ajout OK ; suppression refusée si utilisé |
 | R25 | Comptes | Réinitialiser MdP | Comptes → réinitialiser un mot de passe | Mot de passe temporaire fixé |
 | R26 | Robustesse | Page 404 | Ouvrir une URL inexistante | Page **404** habillée + lien retour |
+| R27 | Rapport annuel | Synthèse + tendance | Rapport annuel → choisir année + fenêtre (2–5 ans) | Indicateurs avec écart N‑1 et **prévision N+1** ; tendance affichée ; exports Excel/PDF |
+| R28 | Rôle Manager | Lecture seule | Se connecter en **Manager** | Voit tableau de bord, parc, missions, agents, **rapport annuel** ; import/comptes/édition **refusés** |
 
 ## 4. Critères d'acceptation
 

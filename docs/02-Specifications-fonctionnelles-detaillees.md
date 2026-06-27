@@ -4,20 +4,24 @@ Réf. métier : *Cahier des charges v9*. Ce document décrit les fonctions telle
 
 ## 1. Acteurs et matrice des droits
 
-| Fonction | Admin | Chef de mission | Agent |
-|---|:--:|:--:|:--:|
-| Tableau de bord, consultation (postes, parc, missions, inventaire à une date) | ✓ | ✓ | ✓ |
-| Créer / modifier un poste (TPR) | ✓ | | |
-| Désigner le chef d'un poste | ✓ | | |
-| Créer / modifier un agent ; muter un agent | ✓ | | |
-| Créer / éditer / clôturer une mission ; membres | ✓ | ✓ | |
-| Télécharger un canevas, téléverser un fichier rempli | ✓ | ✓ | ✓ |
-| Valider / arbitrer la consolidation d'import | ✓ | ✓ | |
-| Réaffecter un matériel à un agent | ✓ | | |
-| Gérer les référentiels (logiciels, catégories de câble) | ✓ | | |
-| Gérer les comptes utilisateurs | ✓ | | |
+| Fonction | Admin | Manager | Chef de mission | Agent |
+|---|:--:|:--:|:--:|:--:|
+| Tableau de bord, consultation (postes, parc, missions, inventaire à une date) | ✓ | ✓ | ✓ | ✓ |
+| Consulter la liste des agents | ✓ | ✓ | | |
+| **Rapport annuel** (tendance, prévisions, exports) | ✓ | ✓ | | |
+| Créer / modifier un poste (TPR) | ✓ | | | |
+| Désigner le chef d'un poste | ✓ | | | |
+| Créer / modifier un agent ; muter un agent | ✓ | | | |
+| Créer / éditer / clôturer une mission ; membres | ✓ | | ✓ | |
+| Télécharger un canevas, téléverser un fichier rempli | ✓ | | ✓ | ✓ |
+| Valider / arbitrer la consolidation d'import | ✓ | | ✓ | |
+| Réaffecter un matériel à un agent | ✓ | | | |
+| Gérer les référentiels (logiciels, catégories de câble) | ✓ | | | |
+| Gérer les comptes utilisateurs | ✓ | | | |
 
-L'accès est filtré par rôle (Spring Security) et la **navigation s'adapte** (les liens et actions réservés sont masqués).
+Le **Manager** est un profil de **pilotage en lecture seule** : toutes les restitutions et le rapport
+annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spring Security) et la
+**navigation s'adapte** (les liens et actions réservés sont masqués).
 
 ## 2. Domaine « Postes (TPR) »
 
@@ -65,6 +69,7 @@ L'accès est filtré par rôle (Spring Security) et la **navigation s'adapte** (
 
 - **Inventaire à une date** : composition et localisation du parc à une date donnée (à partir de l'historique des affectations) + **état observé** (photo datée du relevé au plus proche ≤ date).
 - **Tableau de bord** (accueil), **filtrable par poste** : indicateurs (postes, matériel, **disponibilité** = en service / matériel statué, postes en alerte, missions) et graphiques (matériel par statut, par type, par poste, missions par état). **Exports** des statistiques en **Excel** (synthèse / par type / par poste) et **PDF** (impression).
+- **Rapport annuel** (Admin / Manager) : revue annuelle des missions et du parc — synthèse avec **écart N‑1** et **prévision N+1**, **tendance sur ≤ 5 ans**, parc au 31/12 (statut reconstitué via le dernier relevé daté), incidents par type/poste, activité des agents ; **exports Excel / PDF**.
 
 ## 8. Référentiels et comptes
 

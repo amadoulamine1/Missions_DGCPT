@@ -42,6 +42,8 @@
     <!-- ===== Synthèse : KPI + écart N‑1 + prévision N+1 ===== -->
     <section class="reveal" style="animation-delay:.05s">
         <h2 class="flush" style="font-family:var(--serif)">Synthèse de l'année</h2>
+        <p class="cap">« Matériel nouvellement inventorié » = équipements <b>enregistrés pour la première fois</b>
+            dans le parc cette année‑là (1ʳᵉ apparition à l'import, sans n° d'inventaire existant).</p>
         <div class="ov-kpis" style="margin-top:.6rem">
             <div class="mkpi" th:each="s : ${r.series}">
                 <span class="m-n" th:text="${s.valeurN} + ${s.unite}">0</span>
@@ -135,7 +137,7 @@
                 <div class="gauge" th:style="'--p:' + ${r.parcDispo}" role="img" th:aria-label="|Disponibilité ${r.parcDispo} pour cent|">
                     <div class="g-in"><div class="g-pct" th:text="${r.parcDispo} + '%'">0%</div><div class="g-lab">Dispo. 31/12</div></div>
                 </div>
-                <p class="g-detail" th:text="|${r.parcSvc} en service sur ${r.parcTaille} équipements ; ${r.nouveauTotal} ajouté(s) dans l'année|">—</p>
+                <p class="g-detail" th:text="|${r.parcSvc} en service sur ${r.parcTaille} équipements ; ${r.nouveauTotal} nouvellement inventorié(s) dans l'année|">—</p>
             </article>
             <div class="card">
                 <h3 class="ch-title">Par statut</h3>
