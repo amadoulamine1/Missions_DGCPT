@@ -3,6 +3,8 @@ package sn.dgcpt.missionsparc.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import sn.dgcpt.missionsparc.repository.MissionRepository;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
@@ -34,6 +36,8 @@ class SecuriteAccesParRoleTest {
     static class NoopController { }
 
     @Autowired MockMvc mvc;
+    /** Requise par GlobalModelAdvice (@ControllerAdvice chargé dans la tranche web) pour les notifications. */
+    @MockBean MissionRepository missionRepo;
 
     private static RequestPostProcessor admin()   { return user("admin").roles("ADMIN"); }
     private static RequestPostProcessor chef()    { return user("chef").roles("CHEF_MISSION"); }

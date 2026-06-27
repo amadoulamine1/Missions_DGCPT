@@ -37,6 +37,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{
 .topbar .links a:hover{opacity:1;text-decoration:none;background:rgba(255,255,255,.09)}
 .topbar .links a.active{background:rgba(255,255,255,.14);color:#fff;border-left-color:#f1d680;font-weight:600}
 .topbar .links a svg{width:18px;height:18px;flex:0 0 18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.topbar .links a.nav-alert{color:#fff;background:rgba(192,57,43,.22);border-left-color:#e8b0a6}
+.topbar .links a.nav-alert:hover{background:rgba(192,57,43,.34)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.72rem;font-weight:700;
+  border-radius:999px;padding:.05rem .45rem;min-width:1.1rem;text-align:center;line-height:1.35}
 .topbar .userbox{margin-top:auto;display:flex;flex-direction:column;align-items:stretch;gap:.5rem;
   color:#efe7d2;font-size:.85rem;padding:.85rem 1.15rem;border-top:1px solid rgba(255,255,255,.14)}
 .topbar .userbox > span{font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis}
