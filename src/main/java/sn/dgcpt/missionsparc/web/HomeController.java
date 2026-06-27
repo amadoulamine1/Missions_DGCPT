@@ -106,6 +106,16 @@ public class HomeController {
         model.addAttribute("misPlan", plan);
         model.addAttribute("misEnCours", enCours);
         model.addAttribute("misTerm", missions.size() - plan - enCours);
+
+        // Alertes proactives : missions dont la date de fin est dépassée mais non clôturées (en retard),
+        // et missions en cours dont la date de fin approche (échéance ≤ 7 jours).
+        LocalDate dans7 = today.plusDays(7);
+        long misEnRetard = missions.stream().filter(m -> m.getStatut() != StatutMission.CLOTUREE
+                && m.getDateFin() != null && m.getDateFin().isBefore(today)).count();
+        long misEcheance = missions.stream().filter(m -> m.getStatut() != StatutMission.CLOTUREE
+                && m.getDateFin() != null && !m.getDateFin().isBefore(today) && !m.getDateFin().isAfter(dans7)).count();
+        model.addAttribute("misEnRetard", misEnRetard);
+        model.addAttribute("misEcheance", misEcheance);
         return "index";
     }
 

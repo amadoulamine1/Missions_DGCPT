@@ -35,6 +35,23 @@
         <div class="hero-rule"></div>
     </header>
 
+    <section class="reveal" style="animation-delay:.04s" th:with="nbAlertes=${misEnRetard + misEcheance + matEnPanne + matAChanger}">
+        <div class="card alerts-card">
+            <h3 class="ch-title">Alertes</h3>
+            <div class="alert-chips" th:if="${nbAlertes > 0}">
+                <a th:if="${misEnRetard > 0}" class="alert-chip danger" th:href="@{/missions(poste=${fPoste},etat='Terminée')}">
+                    <span class="ac-n" th:text="${misEnRetard}">0</span><span>mission(s) en retard<small>fin dépassée, non clôturée</small></span></a>
+                <a th:if="${misEcheance > 0}" class="alert-chip warn" th:href="@{/missions(poste=${fPoste},etat='En cours')}">
+                    <span class="ac-n" th:text="${misEcheance}">0</span><span>échéance(s) proche(s)<small>fin sous 7 jours</small></span></a>
+                <a th:if="${matEnPanne > 0}" class="alert-chip danger" th:href="@{/parc(poste=${fPoste},statut='EN_PANNE')}">
+                    <span class="ac-n" th:text="${matEnPanne}">0</span><span>matériel(s) en panne</span></a>
+                <a th:if="${matAChanger > 0}" class="alert-chip warn" th:href="@{/parc(poste=${fPoste},statut='A_CHANGER')}">
+                    <span class="ac-n" th:text="${matAChanger}">0</span><span>matériel(s) à changer</span></a>
+            </div>
+            <p class="muted m-0" th:if="${nbAlertes == 0}">Aucune alerte — tout est au vert.</p>
+        </div>
+    </section>
+
     <section class="overview reveal" style="animation-delay:.05s">
         <article class="card ov-gauge">
             <div class="gauge" th:style="'--p:' + ${tauxDispo}" role="img" th:aria-label="|Disponibilité ${tauxDispo} pour cent|">

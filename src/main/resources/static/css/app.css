@@ -303,6 +303,18 @@ a.mkpi:hover{box-shadow:0 7px 20px rgba(20,24,31,.10);transform:translateY(-2px)
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .reveal{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
 
+/* Tableau de bord — panneau d'alertes actionnables */
+.alert-chips{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:.55rem}
+.alert-chip{display:inline-flex;align-items:center;gap:.6rem;text-decoration:none;border:1px solid var(--line);
+  border-radius:10px;padding:.5rem .9rem;background:#fff;color:var(--ink);transition:transform .15s,box-shadow .15s}
+.alert-chip:hover{box-shadow:0 5px 16px rgba(20,24,31,.09);transform:translateY(-1px);text-decoration:none;color:var(--ink)}
+.alert-chip .ac-n{font-family:var(--serif);font-size:1.55rem;font-weight:700;line-height:1}
+.alert-chip span small{display:block;color:var(--muted);font-size:.73rem;font-weight:400;margin-top:1px}
+.alert-chip.danger{border-left:4px solid var(--red)}
+.alert-chip.danger .ac-n{color:var(--red)}
+.alert-chip.warn{border-left:4px solid var(--gold-dark)}
+.alert-chip.warn .ac-n{color:var(--gold-dark)}
+
 /* ===== Missions : agents en charge + ordres de mission (PDF) ===== */
 td.agents{font-size:.85rem;color:#4b5563;max-width:230px;line-height:1.35}
 td.ordre{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
