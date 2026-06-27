@@ -32,7 +32,7 @@ missions**, on peut aussi **sélectionner plusieurs missions** (cases à cocher)
 **seul ZIP** (les fichiers, déjà auto-identifiés, sont regroupés à plat). Chaque canevas est distribué avec :
 
 - le **N° de mission** et le **code poste** déjà renseignés (en-tête) ;
-- l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste — ce dernier **facultatif** : s'il était inconnu à la création, l'agent le renseigne ici) ;
+- l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste — ce dernier **obligatoire dans le canevas** : s'il était inconnu à la création, l'agent **doit** le renseigner ici) ;
 - l'**agent saisisseur pré-renseigné** avec le matricule de l'agent destinataire ;
 - les machines déjà connues du poste **pré-chargées** — sauf l'**agent traitant**, laissé vide (historisé par mission, à ressaisir) ;
 - les **listes déroulantes** alimentées avec les référentiels du poste (agents, catégories de câble, logiciels, types de matériel paramétrables).
@@ -64,7 +64,7 @@ Deux niveaux de sévérité : **Bloquant** (la ligne ou le fichier est rejeté t
 | Champs obligatoires (marqués `*`) renseignés sur chaque ligne | Bloquant |
 | **Statut** du matériel renseigné et conforme (En service / En panne / À changer) | Bloquant |
 | En-tête : **état du câblage** (Neuf / Bon / Pas bon) et **catégorie de câble** renseignés | Bloquant |
-| En-tête : **chef de poste** (facultatif — renseigné s'il était inconnu à la création) | *Non bloquant* |
+| En-tête : **chef de poste** (obligatoire dans le canevas — à renseigner s'il était inconnu à la création) | Bloquant |
 | Format des adresses MAC `AA:BB:CC:DD:EE:FF` | Bloquant |
 | Format IP, e-mail, dates | Bloquant |
 | Valeurs des listes conformes (catégorie de câble, type, Oui/Non) | Bloquant |

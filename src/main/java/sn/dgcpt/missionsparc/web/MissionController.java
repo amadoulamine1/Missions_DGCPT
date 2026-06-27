@@ -111,7 +111,7 @@ public class MissionController {
                 .body(data);
     }
 
-    /** Joindre (ou remplacer) l'ordre de mission au format PDF. */
+    /** Joindre un ordre de mission au format PDF (plusieurs possibles par mission). */
     @PostMapping("/missions/{id}/ordre")
     public String joindreOrdre(@PathVariable Integer id, @RequestParam("fichier") MultipartFile fichier, RedirectAttributes ra) {
         try {
@@ -125,11 +125,11 @@ public class MissionController {
         return "redirect:/missions";
     }
 
-    /** Télécharger l'ordre de mission (PDF) : ouverture dans le navigateur. */
-    @GetMapping("/missions/{id}/ordre")
-    public ResponseEntity<byte[]> telechargerOrdre(@PathVariable Integer id) {
-        OrdreMission o = missionService.ordreMission(id).orElse(null);
-        if (o == null) return ResponseEntity.notFound().build();
+    /** Télécharger un ordre de mission (PDF) par son identifiant : ouverture dans le navigateur. */
+    @GetMapping("/missions/{id}/ordre/{ordreId}")
+    public ResponseEntity<byte[]> telechargerOrdre(@PathVariable Integer id, @PathVariable Integer ordreId) {
+        OrdreMission o = missionService.ordreMission(ordreId).orElse(null);
+        if (o == null || !id.equals(o.getMissionId())) return ResponseEntity.notFound().build();
         String nom = o.getNomFichier() == null ? "ordre-mission.pdf" : o.getNomFichier();
         String ascii = nom.replaceAll("[^\\x20-\\x7E]", "_").replace("\"", "");
         String dispo = "inline; filename=\"" + ascii + "\"; filename*=UTF-8''"
@@ -140,10 +140,10 @@ public class MissionController {
                 .body(o.getContenu());
     }
 
-    /** Supprimer l'ordre de mission attaché. */
-    @PostMapping("/missions/{id}/ordre/supprimer")
-    public String supprimerOrdre(@PathVariable Integer id, RedirectAttributes ra) {
-        missionService.supprimerOrdre(id);
+    /** Supprimer un ordre de mission par son identifiant. */
+    @PostMapping("/missions/{id}/ordre/{ordreId}/supprimer")
+    public String supprimerOrdre(@PathVariable Integer id, @PathVariable Integer ordreId, RedirectAttributes ra) {
+        missionService.supprimerOrdre(ordreId);
         ra.addFlashAttribute("message", "Ordre de mission supprimé.");
         return "redirect:/missions";
     }

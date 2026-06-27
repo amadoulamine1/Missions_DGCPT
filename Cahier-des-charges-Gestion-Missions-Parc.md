@@ -61,7 +61,7 @@ Contient :
 - le **poste** où elle se déroule ;
 - le **chef de poste en fonction au moment de la mission**, figé dans la mission (même si le chef change plus tard, la mission garde le bon nom). Ce chef de poste peut être **inconnu à la création** de la mission : il est alors **renseigné plus tard via le fichier canevas** (à l'import).
 
-La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission. Un **ordre de mission** (document **PDF** facultatif, un par mission) peut y être **joint** puis téléchargé.
+La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission. Un ou **plusieurs ordres de mission** (documents **PDF** facultatifs) peuvent y être **joints** puis téléchargés.
 
 Les **membres** sont choisis parmi les informaticiens (sélection multiple). Pour la **souplesse opérationnelle**, un même agent **peut** figurer sur plusieurs missions dont les **périodes se chevauchent** : aucun blocage n'est appliqué.
 
@@ -269,7 +269,7 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
 
 ### 9.14 Logiciel « AD », souplesse des missions et sécurité
 - **Logiciel « AD »** : ajout d'« AD » (Active Directory) aux logiciels relevés sur les ordinateurs — colonne **Oui/Non** du canevas, juste après *Sysbudget*. Les colonnes logiciels du canevas sont désormais : Aster, Antivirus, SicCDD, CIC, Sysbudget, **AD**.
-- **Chef de poste facultatif** : il peut être **laissé vide à la création** de la mission et **renseigné via le fichier canevas** à l'import ; il n'est donc plus bloquant, ni au formulaire ni au contrôle d'import.
+- **Chef de poste** : **facultatif à la création** de la mission (peut être laissé vide), mais **obligatoire dans le fichier canevas** : s'il était inconnu, l'agent doit le renseigner dans l'en-tête — **sans lui, le chargement est bloqué** à l'import. La valeur saisie est reportée à la mission.
 - **Dates de mission via le canevas** : les dates (début / fin) saisies dans le canevas sont **reportées à la mission** à l'import (elles peuvent y être ajustées).
 - **Chevauchement autorisé** : le contrôle bloquant de chevauchement de périodes est **supprimé** — un agent peut figurer sur plusieurs missions simultanées (à la création comme à la modification).
 - **Sécurité — changement de mot de passe forcé** : à la première connexion (compte initial) et après chaque **réinitialisation** par un administrateur, l'utilisateur **doit changer son mot de passe** avant toute navigation.
@@ -294,13 +294,15 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
   - L'**état du parc au 31 décembre** d'une année est reconstitué à partir du **dernier relevé daté** de
     chaque équipement (statut observé), réutilisant la mécanique de l'inventaire à une date.
 
-### 9.16 Liste des missions : agents en charge et ordre de mission
-- **Agents en charge** : la **liste des missions** affiche, pour chaque mission, les **informaticiens en
-  charge** — le **chef de mission** en tête (mention « chef ») suivi des autres **membres**.
-- **Ordre de mission (PDF)** : un **document PDF facultatif**, à raison d'**un par mission**, peut être
-  **joint** depuis la liste (**Administrateur / Chef de mission**) ; il est ensuite **téléchargeable** par
-  tout utilisateur connecté (Manager compris). Il peut être **remplacé** ou **supprimé**. Seul le format
-  **PDF** est accepté ; le document est conservé en base (sauvegardé avec elle).
+### 9.16 Liste des missions : filtres, agents en charge et ordres de mission
+- **Filtres** : la **liste des missions** se filtre par **poste**, **région**, **agent de mission**
+  (informaticien membre) et **état** (Planifiée / En cours / Terminée), en plus de la recherche texte.
+- **Agents en charge** : la liste affiche, pour chaque mission, les **informaticiens en charge** — le
+  **chef de mission** en tête (mention « chef ») suivi des autres **membres**.
+- **Ordres de mission (PDF)** : une mission peut porter **plusieurs documents PDF** facultatifs, **joints**
+  depuis la liste (**Administrateur / Chef de mission**) ; chacun est **téléchargeable** par tout
+  utilisateur connecté (Manager compris) et **supprimable** individuellement. Seul le format **PDF** est
+  accepté ; les documents sont conservés en base (sauvegardés avec elle).
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

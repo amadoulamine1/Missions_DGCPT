@@ -98,6 +98,7 @@ public class CanevasWriter {
             // État du réseau contraint à : Neuf / Bon / Pas bon
             listeDeroulanteCelluleLabel(s, "état du câblage", new String[]{"Neuf", "Bon", "Pas bon"});
             // Champs obligatoires de l'en-tête : marqués « * » et surlignés en rouge tant que vides
+            marquerObligatoireEntete(s, "chef de poste");
             marquerObligatoireEntete(s, "état du câblage");
             marquerObligatoireEntete(s, "catégorie de câble");
 

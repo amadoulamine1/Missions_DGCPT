@@ -113,8 +113,9 @@ public class ControleImport {
         obligatoireEntete(e.getObjet(), "Objet de la mission", r);
         obligatoireEntete(e.getAgentSaisisseur(), "Agent saisisseur", r);
         obligatoireEntete(e.getChefMission(), "Chef de mission", r);
-        // Chef de poste : facultatif. Il peut être inconnu à la création de la mission et n'être
-        // renseigné qu'ici, via le canevas ; son absence n'est donc pas bloquante.
+        // Chef de poste : obligatoire dans le canevas. S'il était inconnu à la création de la mission,
+        // il doit être renseigné ici ; sans lui, le chargement est bloqué.
+        obligatoireEntete(e.getChefPoste(), "Chef de poste", r);
         obligatoireEntete(e.getEtatCablage(), "État du câblage réseau", r);
         obligatoireEntete(e.getCategorieCable(), "Catégorie de câble", r);
         if (!estVide(e.getEtatCablage()) && !etatReseauConforme(e.getEtatCablage())) {

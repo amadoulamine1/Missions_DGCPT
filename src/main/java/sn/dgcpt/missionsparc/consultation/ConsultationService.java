@@ -140,8 +140,9 @@ public class ConsultationService {
         String cable = m.getCategorieCable() == null ? "" : m.getCategorieCable().getLibelle();
         List<ReleveVue> releves = releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
         List<AgentVue> membres = m.getMembres().stream().map(this::versAgentVue).toList();
-        String ordreNom = ordreRepo.findById(id).map(OrdreMission::getNomFichier).orElse(null);
-        return new MissionDetailVue(versMissionVue(m, ordreNom), chefMission, chefPoste, m.getEtatCablage(), cable, m.getObservations(), releves, membres);
+        List<OrdreLien> ordres = ordreRepo.findMetaByMission(id).stream()
+                .map(o -> new OrdreLien(o.getId(), o.getNomFichier())).toList();
+        return new MissionDetailVue(versMissionVue(m, ordres), chefMission, chefPoste, m.getEtatCablage(), cable, m.getObservations(), releves, membres);
     }
 
     public MaterielDetailVue detailMateriel(String numero) {
@@ -219,18 +220,41 @@ public class ConsultationService {
         }).toList();
     }
 
-    public List<MissionVue> listerMissions(String q, Integer posteId, String etat) {
+    public List<MissionVue> listerMissions(String q, Integer posteId, String region, String agentMat, String etat) {
         String texte = (q == null) ? "" : q.trim().toLowerCase();
-        Map<Integer, String> ordres = ordreRepo.findAllMeta().stream()
-                .collect(Collectors.toMap(OrdreMissionRepository.OrdreMeta::getMissionId,
-                        OrdreMissionRepository.OrdreMeta::getNomFichier));
+        String reg = (region == null) ? "" : region.trim();
+        String ag = (agentMat == null) ? "" : agentMat.trim();
+        Map<Integer, List<OrdreLien>> ordres = ordreRepo.findAllMeta().stream()
+                .collect(Collectors.groupingBy(OrdreMissionRepository.OrdreMeta::getMissionId,
+                        Collectors.mapping(o -> new OrdreLien(o.getId(), o.getNomFichier()), Collectors.toList())));
         return missionRepo.findAll().stream()
                 .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
+                .filter(m -> reg.isEmpty() || (m.getPoste() != null && reg.equalsIgnoreCase(m.getPoste().getRegion())))
+                .filter(m -> ag.isEmpty() || m.getMembres().stream().anyMatch(a -> ag.equalsIgnoreCase(a.getMatricule())))
                 .filter(m -> etat == null || etat.isBlank() || etatTemporel(m).equals(etat))
                 .filter(m -> texte.isEmpty()
                         || (m.getReference() != null && m.getReference().toLowerCase().contains(texte))
                         || (m.getObjet() != null && m.getObjet().toLowerCase().contains(texte)))
-                .map(m -> versMissionVue(m, ordres.get(m.getId())))
+                .map(m -> versMissionVue(m, ordres.getOrDefault(m.getId(), List.of())))
+                .toList();
+    }
+
+    /** Régions distinctes des postes (pour le filtre des missions). */
+    public List<String> listerRegions() {
+        return posteRepo.findAll().stream()
+                .map(Poste::getRegion)
+                .filter(s -> s != null && !s.isBlank())
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+    }
+
+    /** Informaticiens (membres potentiels d'une mission) — pour le filtre « agent de mission ». */
+    public List<AgentVue> listerInformaticiens() {
+        return agentRepo.findByTypeAgent(TypeAgent.INFORMATICIEN).stream()
+                .sorted(Comparator.comparing(Agent::getNom, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Agent::getPrenom, String.CASE_INSENSITIVE_ORDER))
+                .map(this::versAgentVue)
                 .toList();
     }
 
@@ -331,14 +355,14 @@ public class ConsultationService {
     }
 
     private MissionVue versMissionVue(Mission m) {
-        return versMissionVue(m, null);
+        return versMissionVue(m, List.of());
     }
 
-    private MissionVue versMissionVue(Mission m, String ordreNom) {
+    private MissionVue versMissionVue(Mission m, List<OrdreLien> ordres) {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
         return new MissionVue(m.getId(), m.getReference(), m.getObjet(), poste,
                 periode(m.getDateDebut(), m.getDateFin()), m.getStatut().name(), etatTemporel(m),
-                agentsLib(m), ordreNom);
+                agentsLib(m), ordres);
     }
 
     /** Agents informaticiens en charge : chef de mission en tête (suffixé « chef »), puis les autres membres. */

@@ -165,9 +165,8 @@ class ControleImportTest {
         RapportImport r = controle.controler(c);
 
         assertThat(r.estIntegrable()).isFalse();
-        // référence, code poste, objet, saisisseur, chef mission, état du câblage, catégorie de câble
-        // (le chef de poste est facultatif : renseignable via le canevas)
-        assertThat(r.nbBloquants()).isEqualTo(7);
+        // référence, code poste, objet, saisisseur, chef mission, chef de poste, état du câblage, catégorie de câble
+        assertThat(r.nbBloquants()).isEqualTo(8);
     }
 
     @Test
@@ -183,6 +182,21 @@ class ControleImportTest {
         assertThat(r.estIntegrable()).isFalse();
         assertThat(contient(r, Severite.BLOQUANT, "État du câblage réseau")).isTrue();
         assertThat(contient(r, Severite.BLOQUANT, "Catégorie de câble")).isTrue();
+    }
+
+    @Test
+    void chef_de_poste_obligatoire() {
+        CanevasImporte c = new CanevasImporte();
+        EnteteMission e = c.getEntete();
+        e.setReference("MIS-2026-001"); e.setCodePoste("TPR-01"); e.setObjet("Inventaire");
+        e.setAgentSaisisseur("AG1"); e.setChefMission("AG1");
+        e.setEtatCablage("Bon"); e.setCategorieCable("Cat6");
+        // chef de poste laissé vide : le chargement doit être bloqué
+
+        RapportImport r = controle.controler(c);
+
+        assertThat(r.estIntegrable()).isFalse();
+        assertThat(contient(r, Severite.BLOQUANT, "Chef de poste")).isTrue();
     }
 
     // ---------- statut obligatoire & état du réseau ----------

@@ -168,6 +168,8 @@ public class ConsultationController {
     @GetMapping("/missions")
     public String missions(@RequestParam(required = false) String q,
                            @RequestParam(required = false) Integer poste,
+                           @RequestParam(required = false) String region,
+                           @RequestParam(required = false) String agent,
                            @RequestParam(required = false) String etat,
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(required = false) String tri,
@@ -175,15 +177,19 @@ public class ConsultationController {
                            Model model) {
         // Tri par défaut : N° de mission décroissant (missions les plus récentes en premier)
         if (tri == null && sens == null) { tri = "ref"; sens = "desc"; }
-        List<MissionVue> tout = consultation.listerMissions(q, poste, etat);
+        List<MissionVue> tout = consultation.listerMissions(q, poste, region, agent, etat);
         Comparator<MissionVue> cmp = comparateurMissions(tri);
         if ("desc".equals(sens)) cmp = cmp.reversed();
         PageVue<MissionVue> p = Pagination.page(tout, page, 25, cmp);
         model.addAttribute("page", p);
         model.addAttribute("missions", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
+        model.addAttribute("regions", consultation.listerRegions());
+        model.addAttribute("agents", consultation.listerInformaticiens());
         model.addAttribute("q", q);
         model.addAttribute("fPoste", poste);
+        model.addAttribute("fRegion", region);
+        model.addAttribute("fAgent", agent);
         model.addAttribute("fEtat", etat);
         model.addAttribute("tri", tri);
         model.addAttribute("sens", sens);

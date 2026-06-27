@@ -264,7 +264,7 @@ public class MissionService {
 
     // ---- Ordre de mission (PDF facultatif, un par mission) ----
 
-    /** Attache (ou remplace) l'ordre de mission au format PDF d'une mission. */
+    /** Attache un ordre de mission au format PDF à une mission (plusieurs ordres possibles par mission). */
     @Transactional
     public void attacherOrdre(Integer missionId, MultipartFile fichier) throws IOException {
         Mission m = missionRepo.findById(missionId).orElseThrow();
@@ -278,7 +278,7 @@ public class MissionService {
         if (!estPdf) {
             throw new IllegalArgumentException("L'ordre de mission doit être un fichier PDF.");
         }
-        OrdreMission o = ordreRepo.findById(missionId).orElseGet(OrdreMission::new);
+        OrdreMission o = new OrdreMission();
         o.setMissionId(m.getId());
         o.setNomFichier((nom == null || nom.isBlank()) ? "ordre-mission.pdf" : nom);
         o.setTypeMime("application/pdf");
@@ -288,16 +288,16 @@ public class MissionService {
         ordreRepo.save(o);
     }
 
-    /** Ordre de mission complet (contenu compris) pour le téléchargement ; vide si absent. */
+    /** Ordre de mission complet (contenu compris) pour le téléchargement, par identifiant d'ordre ; vide si absent. */
     @Transactional(readOnly = true)
-    public Optional<OrdreMission> ordreMission(Integer missionId) {
-        return ordreRepo.findById(missionId);
+    public Optional<OrdreMission> ordreMission(Integer ordreId) {
+        return ordreRepo.findById(ordreId);
     }
 
-    /** Supprime l'ordre de mission attaché (sans effet s'il n'existe pas). */
+    /** Supprime un ordre de mission par son identifiant (sans effet s'il n'existe pas). */
     @Transactional
-    public void supprimerOrdre(Integer missionId) {
-        ordreRepo.deleteById(missionId);
+    public void supprimerOrdre(Integer ordreId) {
+        ordreRepo.deleteById(ordreId);
     }
 
     private AgentOption option(Agent a) {

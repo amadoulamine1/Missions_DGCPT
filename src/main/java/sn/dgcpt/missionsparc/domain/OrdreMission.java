@@ -4,13 +4,16 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-/** Ordre de mission au format PDF, facultatif, à raison d'un par mission (clé = id de la mission). */
+/** Ordre de mission au format PDF, facultatif ; une mission peut en porter plusieurs. */
 @Entity
 @Table(name = "ordre_mission")
 public class OrdreMission {
 
     @Id
-    @Column(name = "mission_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "mission_id", nullable = false)
     private Integer missionId;
 
     @Column(name = "nom_fichier", nullable = false)
@@ -28,6 +31,8 @@ public class OrdreMission {
     @Column(name = "date_ajout", nullable = false)
     private Instant dateAjout;
 
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     public Integer getMissionId() { return missionId; }
     public void setMissionId(Integer missionId) { this.missionId = missionId; }
     public String getNomFichier() { return nomFichier; }

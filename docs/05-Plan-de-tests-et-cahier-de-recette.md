@@ -55,7 +55,9 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R29 | Canevas | Téléchargement | Fiche mission → Télécharger les canevas | ZIP `Canevas-{codePoste}-{début}_{fin}.zip` ; fichiers `…-{matricule}-{nom}.xlsx` |
 | R30 | Canevas | Téléchargement en lot | Liste missions → cocher 2–3 missions → « Télécharger la sélection » | **Un seul ZIP** réunissant tous les canevas, fichiers auto-identifiés (code poste + période + agent) |
 | R31 | Mission | Agents en charge | Ouvrir la liste des missions | Colonne **Agents** : chef de mission en tête (mention « chef ») puis les membres |
-| R32 | Mission | Ordre de mission (PDF) | Liste missions → **Joindre** un PDF (admin/chef) → **télécharger** → **Remplacer** → **Supprimer** ; tenter un non-PDF | PDF joint puis téléchargeable (ouverture navigateur) ; remplacement/suppression OK ; **non-PDF refusé** |
+| R32 | Mission | Ordres de mission (PDF) | Liste missions → **Joindre** 2 PDF à une mission (admin/chef) → **télécharger** chacun → **Supprimer** l'un ; tenter un non-PDF | Les **deux** PDF apparaissent, téléchargeables (ouverture navigateur) ; suppression individuelle OK ; **non-PDF refusé** |
+| R33 | Mission | Filtres de la liste | Filtrer par **poste**, **région**, **agent de mission**, **état** (seuls ou combinés) | Le compteur et la liste reflètent chaque filtre |
+| R34 | Import | Chef de poste obligatoire | Charger un canevas avec le **chef de poste vide** | **Anomalie bloquante** « Chef de poste » ; le chargement ne passe pas |
 
 ## 4. Critères d'acceptation
 
@@ -70,7 +72,7 @@ PV de recette — Application Missions & Parc DGCPT
 Version testée : ______   Date : ______   Environnement : ______
 Testeur(s) : __________________________________
 
-Cas exécutés : __ / 32      Réussis : __      Échoués : __
+Cas exécutés : __ / 34      Réussis : __      Échoués : __
 Anomalies ouvertes (id, sévérité, description) :
   - ____________________________________________
 Décision : [ ] Recette prononcée   [ ] Recette sous réserves   [ ] Refusée

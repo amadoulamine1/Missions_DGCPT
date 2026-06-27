@@ -50,9 +50,9 @@ annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spri
 
 - **Création** (admin/chef) : TPR (existant ou nouveau), objet, période (début → fin, fin ≥ début), **chef de mission** (désigné parmi les membres), **membres** (informaticiens, sélection multiple), **chef de poste facultatif** (figé sur la mission s'il est fourni). Génération du **N° de mission** (`MIS-AAAA-NNN`) puis d'un **canevas pré-estampillé**.
 - **Chevauchement de périodes autorisé** : un agent peut être membre de plusieurs missions dont les périodes se chevauchent (aucun contrôle bloquant, ni à la création ni à l'édition).
-- **Liste des missions** : affiche les **agents en charge** (chef de mission en tête — mention « chef » — puis les membres) et l'**ordre de mission** (cf. ci-dessous).
-- **Ordre de mission (PDF)** : document **facultatif**, **un par mission**, **joint** depuis la liste (admin/chef) puis **téléchargeable** par tout utilisateur connecté (ouverture dans le navigateur) ; **remplaçable** et **supprimable**. Seul le **PDF** est accepté ; le fichier est stocké en base.
-- **Renseignement via le canevas** : à l'import, le **chef de poste** (s'il était inconnu) et les **dates de mission** saisis dans le canevas sont reportés à la mission.
+- **Liste des missions** : **filtrable** par **poste**, **région**, **agent de mission** (informaticien membre) et **état**, avec recherche texte ; affiche les **agents en charge** (chef de mission en tête — mention « chef » — puis les membres) et les **ordres de mission** (cf. ci-dessous).
+- **Ordres de mission (PDF)** : documents **facultatifs**, **plusieurs possibles par mission**, **joints** depuis la liste (admin/chef) puis **téléchargeables** par tout utilisateur connecté (ouverture dans le navigateur) ; **supprimables** individuellement. Seul le **PDF** est accepté ; les fichiers sont stockés en base.
+- **Renseignement via le canevas** : à l'import, le **chef de poste** (s'il était inconnu) et les **dates de mission** saisis dans le canevas sont reportés à la mission. Le **chef de poste est obligatoire dans le canevas** : s'il est laissé vide, le **chargement est bloqué**.
 - **Édition** : objet, dates, statut, observations, membres, chef de mission.
 - **Téléchargement des canevas** : par mission (ZIP `Canevas-{codePoste}-{début}_{fin}.zip`, fichiers internes `…-{matricule}-{nom}.xlsx`) ou **en lot** depuis la liste (sélection multiple → un seul ZIP à plat ; admin/chef).
 - **Statut de consolidation** : *en consolidation* → *clôturée* (bouton **Clôturer**, réservé admin/chef).

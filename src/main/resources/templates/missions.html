@@ -26,6 +26,14 @@
             <option value="">Tous les postes</option>
             <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.nom}" th:selected="${fPoste != null and fPoste == p.id}"></option>
         </select>
+        <select name="region" aria-label="Filtrer par région">
+            <option value="">Toutes les régions</option>
+            <option th:each="r : ${regions}" th:value="${r}" th:text="${r}" th:selected="${fRegion == r}"></option>
+        </select>
+        <select name="agent" aria-label="Filtrer par agent de mission">
+            <option value="">Tous les agents</option>
+            <option th:each="a : ${agents}" th:value="${a.matricule}" th:text="${a.matricule + ' — ' + a.nomComplet}" th:selected="${fAgent == a.matricule}"></option>
+        </select>
         <select name="etat" aria-label="Filtrer par état">
             <option value="">Tous les états</option>
             <option value="Planifiée" th:selected="${fEtat == 'Planifiée'}">Planifiée</option>
@@ -41,13 +49,13 @@
         <thead><tr>
             <th scope="col" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" style="width:1%">
                 <input type="checkbox" id="selAll" onclick="toggleAll(this)" aria-label="Tout sélectionner"/></th>
-            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri='ref',sens=${(tri == 'ref' and sens != 'desc') ? 'desc' : 'asc'})}">N° mission</a><span th:if="${tri == 'ref'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col">Période</th>
             <th scope="col">Agents</th>
-            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='etat',sens=${(tri == 'etat' and sens != 'desc') ? 'desc' : 'asc'})}">État</a><span th:if="${tri == 'etat'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
-            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri='etat',sens=${(tri == 'etat' and sens != 'desc') ? 'desc' : 'asc'})}">État</a><span th:if="${tri == 'etat'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col" class="no-print">Ordre de mission</th>
         </tr></thead>
         <tbody>
@@ -60,20 +68,21 @@
                 <td><span class="badge" th:classappend="${m.etat == 'En cours' ? 'orange' : (m.etat == 'Terminée' ? 'green' : 'blue')}" th:text="${m.etat}"></span></td>
                 <td><span class="badge" th:classappend="${m.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${m.statut}"></span></td>
                 <td class="no-print ordre">
-                    <a th:if="${m.ordreNom != null}" class="filechip" th:href="@{/missions/{id}/ordre(id=${m.id})}" target="_blank" rel="noopener"
-                       th:title="${m.ordreNom}">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>PDF</a>
-                    <span th:if="${m.ordreNom == null}" class="muted">—</span>
+                    <span th:if="${m.ordres.isEmpty()}" class="muted">—</span>
+                    <span th:each="o : ${m.ordres}" class="ordre-item">
+                        <a class="filechip" th:href="@{/missions/{id}/ordre/{oid}(id=${m.id},oid=${o.id})}" target="_blank" rel="noopener" th:title="${o.nom}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="fn" th:text="${o.nom}">fichier.pdf</span></a>
+                        <form th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" method="post"
+                              th:action="@{/missions/{id}/ordre/{oid}/supprimer(id=${m.id},oid=${o.id})}" style="display:inline"
+                              onsubmit="return confirm('Supprimer cet ordre de mission ?');">
+                            <button class="btn small ghost" type="submit" title="Supprimer cet ordre de mission">✕</button>
+                        </form>
+                    </span>
                     <span th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" class="ordre-actions">
                         <form method="post" enctype="multipart/form-data" th:action="@{/missions/{id}/ordre(id=${m.id})}" style="display:inline">
-                            <label class="btn small secondary filebtn">
-                                <span th:text="${m.ordreNom == null ? 'Joindre' : 'Remplacer'}">Joindre</span>
+                            <label class="btn small secondary filebtn">Joindre
                                 <input type="file" name="fichier" accept="application/pdf,.pdf" hidden onchange="if(this.files.length){this.form.submit();}"/>
                             </label>
-                        </form>
-                        <form th:if="${m.ordreNom != null}" method="post" th:action="@{/missions/{id}/ordre/supprimer(id=${m.id})}" style="display:inline"
-                              onsubmit="return confirm('Supprimer l\'ordre de mission ?');">
-                            <button class="btn small ghost" type="submit" title="Supprimer l'ordre de mission">✕</button>
                         </form>
                     </span>
                 </td>
@@ -84,10 +93,10 @@
 
     <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
         <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"
-           th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
+           th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri=${tri},sens=${sens},page=${page.precedent})}">← Précédent</a>
         <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>
         <a class="btn small secondary" th:classappend="${page.dernier} ? 'disabled' : ''"
-           th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri=${tri},sens=${sens},page=${page.suivant})}">Suivant →</a>
+           th:href="@{/missions(q=${q},poste=${fPoste},region=${fRegion},agent=${fAgent},etat=${fEtat},tri=${tri},sens=${sens},page=${page.suivant})}">Suivant →</a>
     </div>
 
     <script th:inline="javascript" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}">
