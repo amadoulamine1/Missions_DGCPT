@@ -23,8 +23,15 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/favicon.ico").permitAll()
+                // Rapport annuel : document de pilotage (lecture) — ADMIN + MANAGER
+                .requestMatchers("/rapport-annuel/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
                 .requestMatchers("/referentiels/**").hasRole("ADMIN")
+                // Aide à l'import : ouverte ; l'import lui-même reste hors MANAGER (lecture seule)
+                .requestMatchers("/import/guide").authenticated()
+                .requestMatchers("/import", "/import/**").hasAnyRole("ADMIN", "CHEF_MISSION", "AGENT")
+                // Liste des agents : lecture pour ADMIN + MANAGER ; création/édition réservées à ADMIN
+                .requestMatchers(HttpMethod.GET, "/agents").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/agents/**").hasRole("ADMIN")
                 .requestMatchers("/postes/nouveau", "/postes/*/modifier").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/postes", "/postes/**").hasRole("ADMIN")

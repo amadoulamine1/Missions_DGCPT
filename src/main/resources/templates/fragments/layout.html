@@ -10,7 +10,7 @@
         <a th:href="@{/postes}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/postes')} ? 'active'"
            th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath,'/postes')} ? 'page' : null">
             <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 21v-4h6v4"/><path d="M9 7h.5M14.5 7h.5M9 11h.5M14.5 11h.5"/></svg><span>Postes</span></a>
-        <a th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/agents')} ? 'active'"
+        <a th:href="@{/agents}" th:if="${currentRole == 'ADMIN' or currentRole == 'MANAGER'}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/agents')} ? 'active'"
            th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath,'/agents')} ? 'page' : null">
             <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.5a3 3 0 0 1 0 5.6"/><path d="M17.5 20a5.5 5.5 0 0 0-2-4.4"/></svg><span>Agents</span></a>
         <a th:href="@{/parc}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/parc')} ? 'active'"
@@ -19,7 +19,11 @@
         <a th:href="@{/missions}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/missions')} ? 'active'"
            th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath,'/missions')} ? 'page' : null">
             <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M8.5 11l2 2 4-4"/></svg><span>Missions</span></a>
-        <a th:href="@{/import}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/import') and !#strings.startsWith(currentPath,'/import/guide')} ? 'active'"
+        <a th:href="@{/rapport-annuel}" th:if="${currentRole == 'ADMIN' or currentRole == 'MANAGER'}"
+           th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/rapport-annuel')} ? 'active'"
+           th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath,'/rapport-annuel')} ? 'page' : null">
+            <svg viewBox="0 0 24 24"><path d="M6 4h9l4 4v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M9 17v-4M12 17v-6M15 17v-2"/></svg><span>Rapport annuel</span></a>
+        <a th:href="@{/import}" th:if="${currentRole != 'MANAGER'}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/import') and !#strings.startsWith(currentPath,'/import/guide')} ? 'active'"
            th:attr="aria-current=${currentPath != null and #strings.startsWith(currentPath,'/import') and !#strings.startsWith(currentPath,'/import/guide')} ? 'page' : null">
             <svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 15.5V19h14v-3.5"/></svg><span>Importer</span></a>
         <a th:href="@{/import/guide}" th:classappend="${currentPath != null and #strings.startsWith(currentPath,'/import/guide')} ? 'active'"

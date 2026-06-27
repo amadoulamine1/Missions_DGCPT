@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Rapport annuel</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container wide dash"
+      th:with="mois=${ {'Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'} }">
+
+    <header class="dash-head reveal">
+        <div class="dash-hero">
+            <div>
+                <p class="eyebrow">DGCPT · Pilotage</p>
+                <h1 class="dash-title">Rapport annuel <span th:text="${r.annee}">2026</span></h1>
+                <p class="dash-sub">Revue des missions et du parc — tendance sur <strong th:text="${r.ans}">5</strong> ans
+                    et prévision <strong th:text="${r.annee + 1}">2027</strong>.</p>
+            </div>
+            <div class="hero-actions no-print">
+                <form method="get" th:action="@{/rapport-annuel}">
+                    <label class="muted">Année</label>
+                    <select name="annee" onchange="this.form.submit()" aria-label="Choisir l'année">
+                        <option th:each="y : ${r.anneesDisponibles}" th:value="${y}" th:text="${y}" th:selected="${y == r.annee}"></option>
+                    </select>
+                    <label class="muted">Fenêtre</label>
+                    <select name="ans" onchange="this.form.submit()" aria-label="Nombre d'années comparées">
+                        <option th:each="k : ${ {2,3,4,5} }" th:value="${k}" th:text="${k} + ' ans'" th:selected="${k == r.ans}"></option>
+                    </select>
+                </form>
+                <a class="btn secondary small" th:href="@{/rapport-annuel/export(annee=${r.annee},ans=${r.ans})}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Excel</a>
+                <button class="btn secondary small" type="button" onclick="window.print()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="15" width="10" height="6" rx="1"/></svg>PDF</button>
+            </div>
+        </div>
+        <div class="hero-rule"></div>
+    </header>
+
+    <!-- ===== Synthèse : KPI + écart N‑1 + prévision N+1 ===== -->
+    <section class="reveal" style="animation-delay:.05s">
+        <h2 class="flush" style="font-family:var(--serif)">Synthèse de l'année</h2>
+        <div class="ov-kpis" style="margin-top:.6rem">
+            <div class="mkpi" th:each="s : ${r.series}">
+                <span class="m-n" th:text="${s.valeurN} + ${s.unite}">0</span>
+                <span class="m-l" th:text="${s.libelle}">Indicateur</span>
+                <div class="kpi-foot">
+                    <span th:if="${s.delta != null}" class="delta"
+                          th:classappend="${s.ecartFavorable != null} ? (${s.ecartFavorable} ? 'ok' : 'bad') : ''">
+                        <span th:text="${s.sensEcart == 'up'} ? '↑' : (${s.sensEcart == 'down'} ? '↓' : '→')">↑</span>
+                        <span th:text="${(s.delta > 0 ? '+' : '') + s.delta}">+0</span>
+                        <span class="lbl">vs N‑1</span>
+                    </span>
+                    <span th:if="${s.delta == null}" class="delta">N‑1 indisponible</span>
+                    <span th:if="${s.prevision != null}" class="prev">Prévision <span th:text="${s.prevision.annee}">2027</span> :
+                        <b th:text="${s.prevision.valeur} + ${s.unite}">0</b></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Tendance pluriannuelle ===== -->
+    <section class="reveal" style="animation-delay:.1s">
+        <h2 class="flush" style="font-family:var(--serif)">Tendance sur <span th:text="${r.ans}">5</span> ans</h2>
+        <p class="cap">Une barre par année ; la barre <b>hachurée</b> est la <b>prévision</b> de l'année suivante
+            (extrapolation linéaire, indicative).</p>
+        <div class="cards">
+            <div class="card" th:each="s : ${r.series}">
+                <h3 class="ch-title" th:text="${s.libelle}">Indicateur</h3>
+                <div class="bars">
+                    <div class="bar-row" th:each="p : ${s.points}">
+                        <span th:text="${p.annee} + (${p.prevu} ? ' ✦' : '')">2026</span>
+                        <span class="bar-track"><span class="bar-fill gold" th:classappend="${p.prevu} ? 'forecast'"
+                              th:style="'width:' + (${s.max} > 0 ? ${p.valeur} * 100 / ${s.max} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${p.valeur} + ${s.unite}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Missions de l'année ===== -->
+    <section class="reveal" style="animation-delay:.15s">
+        <h2 class="flush" style="font-family:var(--serif)">Missions de l'année</h2>
+        <div class="charts">
+            <div class="card">
+                <h3 class="ch-title">Activité par mois</h3>
+                <p class="cap"><b th:text="${r.missionsAnnee.size()}">0</b> mission(s) menée(s),
+                    sur <b th:text="${r.postesCouverts}">0</b> poste(s).</p>
+                <div class="bars">
+                    <div class="bar-row" th:each="v,i : ${r.missionsParMois}">
+                        <span th:text="${mois[i.index]}">Jan</span>
+                        <span class="bar-track"><span class="bar-fill gold"
+                              th:style="'width:' + (${r.missionsParMoisMax} > 0 ? ${v} * 100 / ${r.missionsParMoisMax} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${v}">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="ch-title">Par poste</h3>
+                <p class="cap">Postes (TPR) couverts par les missions de l'année.</p>
+                <div class="bars" th:if="${!r.missionsParPoste.isEmpty()}">
+                    <div class="bar-row" th:each="sp : ${r.missionsParPoste}">
+                        <span class="ellipsis" th:text="${sp.nom}">Poste</span>
+                        <span class="bar-track"><span class="bar-fill gold"
+                              th:style="'width:' + (${r.missionsParPoste[0].total} > 0 ? ${sp.total} * 100 / ${r.missionsParPoste[0].total} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${sp.total}">0</span>
+                    </div>
+                </div>
+                <p class="muted" th:if="${r.missionsParPoste.isEmpty()}">Aucune mission cette année.</p>
+            </div>
+        </div>
+        <div class="card">
+            <h3 class="ch-title">Détail des missions</h3>
+            <table class="table">
+                <thead><tr><th>Référence</th><th>Objet</th><th>Poste</th><th>Période</th><th>Chef de mission</th><th>Relevés</th><th>État</th></tr></thead>
+                <tbody>
+                    <tr th:each="m : ${r.missionsAnnee}">
+                        <td class="tech" th:text="${m[0]}"></td><td th:text="${m[1]}"></td><td th:text="${m[2]}"></td>
+                        <td th:text="${m[3]}"></td><td th:text="${m[4]}"></td><td th:text="${m[5]}"></td><td th:text="${m[6]}"></td>
+                    </tr>
+                    <tr th:if="${r.missionsAnnee.isEmpty()}"><td colspan="7" class="empty">Aucune mission pour cette année.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== Parc au 31/12 ===== -->
+    <section class="reveal" style="animation-delay:.2s">
+        <h2 class="flush" style="font-family:var(--serif)">Parc au 31 décembre <span th:text="${r.annee}">2026</span></h2>
+        <div class="overview">
+            <article class="card ov-gauge">
+                <div class="gauge" th:style="'--p:' + ${r.parcDispo}" role="img" th:aria-label="|Disponibilité ${r.parcDispo} pour cent|">
+                    <div class="g-in"><div class="g-pct" th:text="${r.parcDispo} + '%'">0%</div><div class="g-lab">Dispo. 31/12</div></div>
+                </div>
+                <p class="g-detail" th:text="|${r.parcSvc} en service sur ${r.parcTaille} équipements ; ${r.nouveauTotal} ajouté(s) dans l'année|">—</p>
+            </article>
+            <div class="card">
+                <h3 class="ch-title">Par statut</h3>
+                <div class="bars">
+                    <div class="bar-row"><span><span class="dot ok"></span>En service</span><span class="bar-track"><span class="bar-fill green" th:style="'width:' + (${r.parcTaille} > 0 ? ${r.parcSvc} * 100 / ${r.parcTaille} : 0) + '%'"></span></span><span class="v" th:text="${r.parcSvc}">0</span></div>
+                    <div class="bar-row"><span><span class="dot down"></span>En panne</span><span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${r.parcTaille} > 0 ? ${r.parcPan} * 100 / ${r.parcTaille} : 0) + '%'"></span></span><span class="v" th:text="${r.parcPan}">0</span></div>
+                    <div class="bar-row"><span><span class="dot warn"></span>À changer</span><span class="bar-track"><span class="bar-fill orange" th:style="'width:' + (${r.parcTaille} > 0 ? ${r.parcChg} * 100 / ${r.parcTaille} : 0) + '%'"></span></span><span class="v" th:text="${r.parcChg}">0</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="card">
+                <h3 class="ch-title">Par type</h3>
+                <div class="legend">
+                    <span><span class="dot ok"></span>en service</span><span><span class="dot down"></span>en panne</span><span><span class="dot warn"></span>à changer</span>
+                </div>
+                <div class="bars" style="margin-top:.5rem">
+                    <div class="typeblock" th:each="t : ${r.parcParType}">
+                        <div class="bar-row"><span th:text="${t.libelle}">Type</span>
+                            <span class="bar-track">
+                                <span class="seg green" th:style="'width:' + (${t.total} > 0 ? ${t.enService} * 100 / ${t.total} : 0) + '%'"></span>
+                                <span class="seg red" th:style="'width:' + (${t.total} > 0 ? ${t.enPanne} * 100 / ${t.total} : 0) + '%'"></span>
+                                <span class="seg orange" th:style="'width:' + (${t.total} > 0 ? ${t.aChanger} * 100 / ${t.total} : 0) + '%'"></span>
+                            </span>
+                            <span class="v" th:text="${t.total}">0</span></div>
+                        <div class="scount"><b th:text="${t.enService}">0</b> en service · <b th:text="${t.enPanne}">0</b> en panne · <b th:text="${t.aChanger}">0</b> à changer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="ch-title">Par poste</h3>
+                <div class="bars" th:if="${!r.parcParPoste.isEmpty()}">
+                    <div class="bar-row" th:each="sp : ${r.parcParPoste}" th:title="|${sp.total} équipement(s) · ${sp.enPanne} en panne|">
+                        <span class="ellipsis" th:text="${sp.nom}">Poste</span>
+                        <span class="bar-track"><span class="bar-fill gold"
+                              th:style="'width:' + (${r.parcParPoste[0].total} > 0 ? ${sp.total} * 100 / ${r.parcParPoste[0].total} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${sp.total}">0</span>
+                    </div>
+                </div>
+                <p class="muted" th:if="${r.parcParPoste.isEmpty()}">Aucun matériel.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Incidents & maintenance ===== -->
+    <section class="reveal" style="animation-delay:.25s">
+        <h2 class="flush" style="font-family:var(--serif)">Incidents &amp; maintenance</h2>
+        <div class="charts">
+            <div class="card">
+                <h3 class="ch-title">Incidents par type</h3>
+                <p class="cap">Pannes et « à changer » relevés durant l'année. <b th:text="${r.reaffectations}">0</b> réaffectation(s).</p>
+                <div class="bars">
+                    <div class="bar-row" th:each="t : ${r.incidentsParType}">
+                        <span th:text="${t.libelle}">Type</span>
+                        <span class="bar-track"><span class="bar-fill red" th:style="'width:' + (${r.parcTaille} > 0 ? ${t.total} * 100 / ${r.parcTaille} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${t.total}">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="ch-title">Incidents par poste</h3>
+                <div class="bars" th:if="${!r.incidentsParPoste.isEmpty()}">
+                    <div class="bar-row" th:each="sp : ${r.incidentsParPoste}">
+                        <span class="ellipsis" th:text="${sp.nom}">Poste</span>
+                        <span class="bar-track"><span class="bar-fill red"
+                              th:style="'width:' + (${r.incidentsParPoste[0].total} > 0 ? ${sp.total} * 100 / ${r.incidentsParPoste[0].total} : 0) + '%'"></span></span>
+                        <span class="v" th:text="${sp.total}">0</span>
+                    </div>
+                </div>
+                <p class="muted" th:if="${r.incidentsParPoste.isEmpty()}">Aucun incident relevé cette année.</p>
+            </div>
+        </div>
+        <div class="card" th:if="${!r.incidentsListe.isEmpty()}">
+            <h3 class="ch-title">Équipements concernés</h3>
+            <table class="table">
+                <thead><tr><th>N° inventaire</th><th>Type</th><th>Nom</th><th>Poste</th><th>Statut relevé</th><th>Date</th></tr></thead>
+                <tbody>
+                    <tr th:each="l : ${r.incidentsListe}">
+                        <td class="tech" th:text="${l[0]}"></td><td th:text="${l[1]}"></td><td th:text="${l[2]}"></td>
+                        <td th:text="${l[3]}"></td><td th:text="${l[4]}"></td><td th:text="${l[5]}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== Activité des agents ===== -->
+    <section class="reveal no-print" style="animation-delay:.3s" th:if="${!r.activiteAgents.isEmpty()}">
+        <h2 class="flush" style="font-family:var(--serif)">Activité des agents</h2>
+        <div class="card">
+            <table class="table">
+                <thead><tr><th>Matricule</th><th>Agent</th><th>Missions de l'année</th></tr></thead>
+                <tbody>
+                    <tr th:each="a : ${r.activiteAgents}">
+                        <td class="tech" th:text="${a[0]}"></td><td th:text="${a[1]}"></td><td th:text="${a[2]}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

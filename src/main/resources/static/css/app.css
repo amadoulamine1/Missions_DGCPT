@@ -303,6 +303,18 @@ a.mkpi:hover{box-shadow:0 7px 20px rgba(20,24,31,.10);transform:translateY(-2px)
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .reveal{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
 
+/* ===== Rapport annuel : écarts N‑1 & prévision N+1 ===== */
+.kpi-foot{display:flex;flex-direction:column;gap:.3rem;margin-top:.55rem}
+.delta{display:inline-flex;align-items:center;gap:.25rem;font-size:.73rem;font-weight:700;
+  padding:.05rem .45rem;border-radius:var(--r-pill);background:#eef1f5;color:var(--muted);width:max-content}
+.delta.ok{background:#e9f6ea;color:#2e7d32}
+.delta.bad{background:#fcebe8;color:var(--st-down)}
+.delta .lbl{font-weight:500;color:var(--muted)}
+.prev{font-size:.74rem;color:var(--muted)}
+.prev b{color:var(--gold-dark);font-weight:700}
+.dash .bar-fill.forecast,.bar-fill.forecast,.dash .seg.forecast,.seg.forecast{
+  background:var(--gold-light);outline:1px dashed var(--gold-dark);outline-offset:-2px}
+
 @media (max-width:860px){.overview{grid-template-columns:1fr}.charts{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){
   .reveal,.dash .bar-fill,.dash .seg{animation:none!important;transform:none!important;opacity:1!important}

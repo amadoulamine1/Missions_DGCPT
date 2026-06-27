@@ -8,7 +8,7 @@
     <div class="toolbar">
         <h1 style="margin:0">Agents</h1>
         <span class="spacer"></span>
-        <a class="btn" th:href="@{/agents/nouveau}">+ Nouvel agent</a>
+        <a class="btn" th:href="@{/agents/nouveau}" th:if="${currentRole == 'ADMIN'}">+ Nouvel agent</a>
     </div>
 
     <div class="filters">
@@ -49,7 +49,7 @@
                     <div class="kv-line" th:if="${a.email != null and a.email != ''}"><span class="k">E-mail</span><span class="v" style="font-size:.8rem" th:text="${a.email}"></span></div>
                     <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">Poste</span><span class="v" th:text="${a.posteNom}"></span></div>
                 </div>
-                <div class="acard-foot">
+                <div class="acard-foot" th:if="${currentRole == 'ADMIN'}">
                     <a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                     <div class="kv-line" th:if="${a.email != null and a.email != ''}"><span class="k">E-mail</span><span class="v" style="font-size:.8rem" th:text="${a.email}"></span></div>
                     <div class="kv-line" th:if="${a.posteNom != null and a.posteNom != ''}"><span class="k">TPR</span><span class="v" th:text="${a.posteNom}"></span></div>
                 </div>
-                <div class="acard-foot">
+                <div class="acard-foot" th:if="${currentRole == 'ADMIN'}">
                     <a class="btn small secondary" th:href="@{/agents/{m}/modifier(m=${a.matricule})}">Modifier</a>
                 </div>
             </div>

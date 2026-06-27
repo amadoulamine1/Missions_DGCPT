@@ -126,11 +126,12 @@
         <h2>Accès rapides</h2>
         <div class="grid">
             <a class="tile" th:href="@{/postes}"><h3>Postes</h3><p>Postes régionaux, chefs, agents et matériel.</p></a>
-            <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
+            <a class="tile" th:href="@{/agents}" th:if="${currentRole == 'ADMIN' or currentRole == 'MANAGER'}"><h3>Agents</h3><p>Informaticiens et agents de poste.</p></a>
             <a class="tile" th:href="@{/parc}"><h3>Parc</h3><p>Inventaire complet du matériel.</p></a>
             <a class="tile" th:href="@{/missions}"><h3>Missions</h3><p>Missions et relevés datés.</p></a>
+            <a class="tile" th:href="@{/rapport-annuel}" th:if="${currentRole == 'ADMIN' or currentRole == 'MANAGER'}"><h3>Rapport annuel</h3><p>Revue annuelle, tendance et prévisions.</p></a>
             <a class="tile" th:href="@{/missions/nouvelle}" th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}"><h3>Nouvelle mission</h3><p>Créer une mission et son canevas pré-rempli.</p></a>
-            <a class="tile" th:href="@{/import}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
+            <a class="tile" th:href="@{/import}" th:if="${currentRole != 'MANAGER'}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
             <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
             <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
         </div>

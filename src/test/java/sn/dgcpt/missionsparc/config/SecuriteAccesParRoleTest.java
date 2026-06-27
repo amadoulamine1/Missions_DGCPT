@@ -35,9 +35,10 @@ class SecuriteAccesParRoleTest {
 
     @Autowired MockMvc mvc;
 
-    private static RequestPostProcessor admin() { return user("admin").roles("ADMIN"); }
-    private static RequestPostProcessor chef()  { return user("chef").roles("CHEF_MISSION"); }
-    private static RequestPostProcessor agent() { return user("agent").roles("AGENT"); }
+    private static RequestPostProcessor admin()   { return user("admin").roles("ADMIN"); }
+    private static RequestPostProcessor chef()    { return user("chef").roles("CHEF_MISSION"); }
+    private static RequestPostProcessor agent()   { return user("agent").roles("AGENT"); }
+    private static RequestPostProcessor manager() { return user("manager").roles("MANAGER"); }
 
     // ---------- non authentifié ----------
 
@@ -79,6 +80,32 @@ class SecuriteAccesParRoleTest {
         mvc.perform(get("/postes").with(agent())).andExpect(status().isNotFound());
         mvc.perform(get("/postes/5").with(agent())).andExpect(status().isNotFound());
         mvc.perform(get("/parc").with(agent())).andExpect(status().isNotFound());
+    }
+
+    // ---------- rôle MANAGER (pilotage, lecture seule) ----------
+
+    @Test
+    void manager_autorise_en_lecture() throws Exception {
+        mvc.perform(get("/rapport-annuel").with(manager())).andExpect(status().isNotFound());
+        mvc.perform(get("/parc").with(manager())).andExpect(status().isNotFound());
+        mvc.perform(get("/missions").with(manager())).andExpect(status().isNotFound());
+        mvc.perform(get("/postes").with(manager())).andExpect(status().isNotFound());
+        mvc.perform(get("/agents").with(manager())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void manager_refuse_sur_mutations_et_import() throws Exception {
+        mvc.perform(get("/utilisateurs").with(manager())).andExpect(status().isForbidden());
+        mvc.perform(get("/referentiels/logiciels").with(manager())).andExpect(status().isForbidden());
+        mvc.perform(get("/agents/nouveau").with(manager())).andExpect(status().isForbidden());
+        mvc.perform(get("/import").with(manager())).andExpect(status().isForbidden());
+        mvc.perform(post("/missions/3/cloturer").with(manager()).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post("/parc/5/affectation").with(manager()).with(csrf())).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void rapport_annuel_refuse_aux_agents() throws Exception {
+        mvc.perform(get("/rapport-annuel").with(agent())).andExpect(status().isForbidden());
     }
 
     // ---------- rôle CHEF_MISSION ----------
