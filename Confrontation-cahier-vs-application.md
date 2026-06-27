@@ -22,7 +22,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 ## 4. Incohérences mineures / cosmétique
 
 - **Rattachement créé hors formulaire** : un agent créé *via l'import* ou *via la désignation d'un chef* n'obtient sa ligne d'historique de rattachement qu'à sa première édition (les agents existants sont repris par le backfill de la migration V7).
-- **Performance** : pagination et tri **en mémoire** — sans enjeu au volume cible (~millier d'équipements).
+- **Performance** : le **Parc** est paginé et trié **côté base** (requête + `Pageable`) ; les autres listes (dont les Missions, dont l'état est dérivé des dates) restent en mémoire — sans enjeu au volume cible (~millier d'équipements).
 
 ## 5. Résolus
 

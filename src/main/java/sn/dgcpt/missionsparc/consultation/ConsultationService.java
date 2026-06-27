@@ -1,5 +1,7 @@
 package sn.dgcpt.missionsparc.consultation;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.dgcpt.missionsparc.consultation.dto.*;
@@ -125,6 +127,33 @@ public class ConsultationService {
         return (m.getNumeroInventaire() != null && m.getNumeroInventaire().toLowerCase().contains(s))
                 || (m.getNom() != null && m.getNom().toLowerCase().contains(s))
                 || (m.getModele() != null && m.getModele().toLowerCase().contains(s));
+    }
+
+    /** Liste paginée du parc, filtres + pagination/tri appliqués <b>côté base</b> (table volumineuse). */
+    public PageVue<MaterielVue> listerParcPage(String q, Integer posteId, String type, String statut, Pageable pageable) {
+        String texte = (q == null) ? "" : q.trim().toLowerCase();
+        String typeLib = (type == null || type.isBlank()) ? null : type.trim();
+        StatutMateriel st = null;
+        if (statut != null && !statut.isBlank()) {
+            try {
+                st = StatutMateriel.valueOf(statut.trim());
+            } catch (IllegalArgumentException e) {
+                return new PageVue<>(List.of(), 0, pageable.getPageSize(), 0, 1); // statut inconnu → aucun résultat
+            }
+        }
+        Page<Materiel> page = materielRepo.rechercher(posteId, st, typeLib, texte, pageable);
+        // Caractéristiques d'ordinateur (RAM/proc/disque) de la page seulement (pas tout le parc) : une requête.
+        List<String> numeros = page.getContent().stream()
+                .filter(m -> m.getType() == TypeMateriel.ORDINATEUR)
+                .map(Materiel::getNumeroInventaire).toList();
+        Map<String, Ordinateur> ords = numeros.isEmpty() ? Map.of()
+                : ordinateurRepo.findAllById(numeros).stream()
+                        .collect(Collectors.toMap(Ordinateur::getNumeroInventaire, o -> o, (a, b) -> a));
+        List<MaterielVue> contenu = page.getContent().stream()
+                .map(m -> versMaterielVue(m, ords.get(m.getNumeroInventaire())))
+                .toList();
+        return new PageVue<>(contenu, page.getNumber(), page.getSize(),
+                (int) page.getTotalElements(), Math.max(1, page.getTotalPages()));
     }
 
     // ---- Missions ----

@@ -1,5 +1,7 @@
 package sn.dgcpt.missionsparc.web;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -72,10 +74,8 @@ public class ConsultationController {
                        @RequestParam(required = false) String tri,
                        @RequestParam(required = false) String sens,
                        Model model) {
-        List<MaterielVue> tout = consultation.listerParc(q, poste, type, statut);
-        Comparator<MaterielVue> cmp = comparateurParc(tri);
-        if ("desc".equals(sens)) cmp = cmp.reversed();
-        PageVue<MaterielVue> p = Pagination.page(tout, page, 25, cmp);
+        PageVue<MaterielVue> p = consultation.listerParcPage(q, poste, type, statut,
+                PageRequest.of(Math.max(0, page), 25, triParc(tri, sens)));
         model.addAttribute("page", p);
         model.addAttribute("materiels", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
@@ -89,16 +89,18 @@ public class ConsultationController {
         return "parc";
     }
 
-    private Comparator<MaterielVue> comparateurParc(String tri) {
-        Comparator<String> n = Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER);
-        return switch (tri == null ? "" : tri) {
-            case "type" -> Comparator.comparing(MaterielVue::getType, n);
-            case "nom" -> Comparator.comparing(MaterielVue::getNom, n);
-            case "modele" -> Comparator.comparing(MaterielVue::getModele, n);
-            case "poste" -> Comparator.comparing(MaterielVue::getPosteNom, n);
-            case "statut" -> Comparator.comparing(MaterielVue::getStatut, n);
-            default -> Comparator.comparing(MaterielVue::getNumeroInventaire, n);
+    /** Tri du parc côté base : propriété d'entité (insensible à la casse, NULL en tête) selon la colonne. */
+    private Sort triParc(String tri, String sens) {
+        String prop = switch (tri == null ? "" : tri) {
+            case "type" -> "categorie.libelle";
+            case "nom" -> "nom";
+            case "modele" -> "modele";
+            case "poste" -> "poste.nom";
+            case "statut" -> "statut";
+            default -> "numeroInventaire";
         };
+        Sort.Direction dir = "desc".equals(sens) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return Sort.by(new Sort.Order(dir, prop).ignoreCase().nullsFirst());
     }
 
     private Comparator<PosteVue> comparateurPostes(String tri) {
