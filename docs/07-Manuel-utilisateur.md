@@ -32,6 +32,8 @@ Fiches séparées : **informaticiens** (effectuent les missions) et **agents de 
 5. **Consolidation** : le chef de mission rapproche les fichiers, **arbitre les conflits**, puis **valide l'intégration** (les n° sont attribués aux nouveaux matériels).
 6. **Clôturer** la mission une fois la consolidation terminée.
 
+> **Liste des missions** : chaque ligne indique les **agents en charge** (chef de mission en tête, mention « chef », puis les membres). On peut y **joindre un ordre de mission** au format **PDF** (un par mission, bouton **Joindre** / **Remplacer**, *admin / chef de mission*) ; le document se **télécharge** ensuite d'un clic (ouverture dans le navigateur) par tout utilisateur connecté, et peut être **supprimé**.
+
 ## 7. Référentiels et comptes (administrateur)
 
 - **Référentiels** : ajouter/renommer/supprimer logiciels et catégories de câble (suppression refusée si l'élément est utilisé).

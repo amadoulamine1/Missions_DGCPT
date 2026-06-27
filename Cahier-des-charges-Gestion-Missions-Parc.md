@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 13 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 14 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -61,7 +61,7 @@ Contient :
 - le **poste** où elle se déroule ;
 - le **chef de poste en fonction au moment de la mission**, figé dans la mission (même si le chef change plus tard, la mission garde le bon nom). Ce chef de poste peut être **inconnu à la création** de la mission : il est alors **renseigné plus tard via le fichier canevas** (à l'import).
 
-La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission.
+La mission porte aussi un **N° de mission** (référence générée à sa création et partagée par tous les fichiers du mode hors-ligne) et un **statut** : *en consolidation* tant que les fichiers des agents arrivent, *clôturée* une fois validée par le chef de mission. Un **ordre de mission** (document **PDF** facultatif, un par mission) peut y être **joint** puis téléchargé.
 
 Les **membres** sont choisis parmi les informaticiens (sélection multiple). Pour la **souplesse opérationnelle**, un même agent **peut** figurer sur plusieurs missions dont les **périodes se chevauchent** : aucun blocage n'est appliqué.
 
@@ -293,6 +293,14 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
     équipements concernés) ; **activité des agents** (missions par informaticien).
   - L'**état du parc au 31 décembre** d'une année est reconstitué à partir du **dernier relevé daté** de
     chaque équipement (statut observé), réutilisant la mécanique de l'inventaire à une date.
+
+### 9.16 Liste des missions : agents en charge et ordre de mission
+- **Agents en charge** : la **liste des missions** affiche, pour chaque mission, les **informaticiens en
+  charge** — le **chef de mission** en tête (mention « chef ») suivi des autres **membres**.
+- **Ordre de mission (PDF)** : un **document PDF facultatif**, à raison d'**un par mission**, peut être
+  **joint** depuis la liste (**Administrateur / Chef de mission**) ; il est ensuite **téléchargeable** par
+  tout utilisateur connecté (Manager compris). Il peut être **remplacé** ou **supprimé**. Seul le format
+  **PDF** est accepté ; le document est conservé en base (sauvegardé avec elle).
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

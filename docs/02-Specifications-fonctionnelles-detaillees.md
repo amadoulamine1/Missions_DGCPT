@@ -13,6 +13,7 @@ Réf. métier : *Cahier des charges v9*. Ce document décrit les fonctions telle
 | Désigner le chef d'un poste | ✓ | | | |
 | Créer / modifier un agent ; muter un agent | ✓ | | | |
 | Créer / éditer / clôturer une mission ; membres | ✓ | | ✓ | |
+| Joindre / remplacer / supprimer l'ordre de mission (PDF) | ✓ | | ✓ | |
 | Télécharger un canevas, téléverser un fichier rempli | ✓ | | ✓ | ✓ |
 | Valider / arbitrer la consolidation d'import | ✓ | | ✓ | |
 | Réaffecter un matériel à un agent | ✓ | | | |
@@ -49,6 +50,8 @@ annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spri
 
 - **Création** (admin/chef) : TPR (existant ou nouveau), objet, période (début → fin, fin ≥ début), **chef de mission** (désigné parmi les membres), **membres** (informaticiens, sélection multiple), **chef de poste facultatif** (figé sur la mission s'il est fourni). Génération du **N° de mission** (`MIS-AAAA-NNN`) puis d'un **canevas pré-estampillé**.
 - **Chevauchement de périodes autorisé** : un agent peut être membre de plusieurs missions dont les périodes se chevauchent (aucun contrôle bloquant, ni à la création ni à l'édition).
+- **Liste des missions** : affiche les **agents en charge** (chef de mission en tête — mention « chef » — puis les membres) et l'**ordre de mission** (cf. ci-dessous).
+- **Ordre de mission (PDF)** : document **facultatif**, **un par mission**, **joint** depuis la liste (admin/chef) puis **téléchargeable** par tout utilisateur connecté (ouverture dans le navigateur) ; **remplaçable** et **supprimable**. Seul le **PDF** est accepté ; le fichier est stocké en base.
 - **Renseignement via le canevas** : à l'import, le **chef de poste** (s'il était inconnu) et les **dates de mission** saisis dans le canevas sont reportés à la mission.
 - **Édition** : objet, dates, statut, observations, membres, chef de mission.
 - **Téléchargement des canevas** : par mission (ZIP `Canevas-{codePoste}-{début}_{fin}.zip`, fichiers internes `…-{matricule}-{nom}.xlsx`) ou **en lot** depuis la liste (sélection multiple → un seul ZIP à plat ; admin/chef).

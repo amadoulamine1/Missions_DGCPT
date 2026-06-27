@@ -54,6 +54,8 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R28 | Rôle Manager | Lecture seule | Se connecter en **Manager** | Voit tableau de bord, parc, missions, agents, **rapport annuel** ; import/comptes/édition **refusés** |
 | R29 | Canevas | Téléchargement | Fiche mission → Télécharger les canevas | ZIP `Canevas-{codePoste}-{début}_{fin}.zip` ; fichiers `…-{matricule}-{nom}.xlsx` |
 | R30 | Canevas | Téléchargement en lot | Liste missions → cocher 2–3 missions → « Télécharger la sélection » | **Un seul ZIP** réunissant tous les canevas, fichiers auto-identifiés (code poste + période + agent) |
+| R31 | Mission | Agents en charge | Ouvrir la liste des missions | Colonne **Agents** : chef de mission en tête (mention « chef ») puis les membres |
+| R32 | Mission | Ordre de mission (PDF) | Liste missions → **Joindre** un PDF (admin/chef) → **télécharger** → **Remplacer** → **Supprimer** ; tenter un non-PDF | PDF joint puis téléchargeable (ouverture navigateur) ; remplacement/suppression OK ; **non-PDF refusé** |
 
 ## 4. Critères d'acceptation
 
@@ -68,7 +70,7 @@ PV de recette — Application Missions & Parc DGCPT
 Version testée : ______   Date : ______   Environnement : ______
 Testeur(s) : __________________________________
 
-Cas exécutés : __ / 26      Réussis : __      Échoués : __
+Cas exécutés : __ / 32      Réussis : __      Échoués : __
 Anomalies ouvertes (id, sévérité, description) :
   - ____________________________________________
 Décision : [ ] Recette prononcée   [ ] Recette sous réserves   [ ] Refusée

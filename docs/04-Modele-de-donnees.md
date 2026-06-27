@@ -23,6 +23,7 @@ erDiagram
     MISSION }o--o{ AGENT : "membres (informaticiens)"
     MISSION }o--o| CATEGORIE_CABLE : "câblage"
     MISSION ||--o{ LOT_IMPORT : "consolide"
+    MISSION ||--o| ORDRE_MISSION : "ordre (PDF)"
     UTILISATEUR }o--o| AGENT : "rattaché à"
 ```
 
@@ -46,6 +47,7 @@ erDiagram
 | CategorieCable | `categorie_cable` | `id` | libellé (unique) |
 | Utilisateur | `utilisateur` | `id` | identifiant, mot de passe (BCrypt), rôle, actif, agent_matricule |
 | LotImport | `lot_import` | `id` | mission, fichier (BYTEA), statut (EN_ATTENTE/INTEGRE) |
+| OrdreMission | `ordre_mission` | `mission_id` | nom_fichier, type_mime, taille, contenu (BYTEA), date_ajout — un PDF par mission |
 
 ## 3. Migrations Flyway
 
@@ -67,6 +69,7 @@ erDiagram
 | **V14** | Référentiel logiciels : semis du logiciel **« AD »** (idempotent) |
 | **V15** | Mission : `chef_poste_fige_matricule` rendu **nullable** (chef de poste facultatif) |
 | **V16** | Utilisateur : contrainte `CHECK` du rôle étendue pour le **rôle MANAGER** (pilotage) |
+| **V17** | **Ordre de mission** : table `ordre_mission` (PDF en `BYTEA`, un par mission, `ON DELETE CASCADE`) |
 
 Le schéma est **géré exclusivement par Flyway** (`ddl-auto=none`).
 
