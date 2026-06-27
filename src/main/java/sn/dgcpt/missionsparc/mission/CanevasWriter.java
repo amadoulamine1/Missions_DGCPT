@@ -2,6 +2,7 @@ package sn.dgcpt.missionsparc.mission;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.DataValidation;
@@ -162,6 +163,10 @@ public class CanevasWriter {
             if (idxRef >= 0 && wb.getSheet("7-Autres matériels") != null) {
                 wb.setSheetOrder("7-Autres matériels", idxRef);
             }
+
+            // 8) Le N° d'inventaire est attribué par l'application : il ne doit pas être modifié
+            //    dans le canevas. On verrouille la colonne A de toutes les feuilles de matériel.
+            verrouillerNumeroInventaire(wb);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
@@ -418,6 +423,55 @@ public class CanevasWriter {
             case EN_PANNE -> "En panne";
             case A_CHANGER -> "À changer";
         };
+    }
+
+    /**
+     * Rend la colonne « N° inventaire » (A) non modifiable sur toutes les feuilles de matériel.
+     * Les 4 feuilles câblées sont déjà protégées par le modèle (cellules de saisie déverrouillées) :
+     * on y verrouille simplement la colonne A. L'onglet « 7-Autres matériels », généré par programme,
+     * n'est pas protégé : on le protège en laissant la saisie possible (colonnes B…) mais en
+     * verrouillant la colonne A.
+     */
+    private void verrouillerNumeroInventaire(Workbook wb) {
+        for (String nom : List.of("3-Ordinateurs", "4-Imprimantes", "5-Switchs et AP", "6-Scanners chèque")) {
+            Sheet s = wb.getSheet(nom);
+            if (s != null) verrouillerColonneA(s);
+        }
+        Sheet autres = wb.getSheet("7-Autres matériels");
+        if (autres != null) {
+            deverrouillerSaisie(autres, 1, 7);   // Type, Nom, Modèle, MAC, IP, Statut, Observation
+            verrouillerColonneA(autres);
+            autres.protectSheet("");              // active la protection (cellules verrouillées = lecture seule)
+        }
+    }
+
+    /** Verrouille les cellules de la colonne A (conserve l'apparence des données ; n'altère pas l'en-tête). */
+    private void verrouillerColonneA(Sheet s) {
+        Row r2 = s.getRow(1);
+        Cell modele = (r2 != null) ? r2.getCell(0) : null;
+        CellStyle verrou = s.getWorkbook().createCellStyle();
+        if (modele != null && modele.getCellStyle() != null) verrou.cloneStyleFrom(modele.getCellStyle());
+        verrou.setLocked(true);
+        s.setDefaultColumnStyle(0, verrou);       // cellules vides / lignes ajoutées par l'agent
+        for (Row row : s) {                       // cellules A existantes (sauf l'en-tête)
+            if (row.getRowNum() == 0) continue;
+            Cell c = row.getCell(0);
+            if (c != null) c.setCellStyle(verrou);
+        }
+    }
+
+    /** Déverrouille (saisie possible sous protection) les colonnes [colDeb..colFin], hors en-tête. */
+    private void deverrouillerSaisie(Sheet s, int colDeb, int colFin) {
+        CellStyle saisie = s.getWorkbook().createCellStyle();
+        saisie.setLocked(false);
+        for (int col = colDeb; col <= colFin; col++) s.setDefaultColumnStyle(col, saisie);
+        for (Row row : s) {
+            if (row.getRowNum() == 0) continue;
+            for (int col = colDeb; col <= colFin; col++) {
+                Cell c = row.getCell(col);
+                if (c != null) c.setCellStyle(saisie);
+            }
+        }
     }
 
     private Row ligne(Sheet s, int rowIdx) {
