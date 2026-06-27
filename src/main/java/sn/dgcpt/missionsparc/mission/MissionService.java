@@ -42,10 +42,11 @@ public class MissionService {
     private final ReferentielService referentiel;
     private final CanevasWriter canevasWriter;
     private final OrdreMissionRepository ordreRepo;
+    private final sn.dgcpt.missionsparc.audit.AuditService audit;
 
     public MissionService(MissionRepository missionRepo, PosteRepository posteRepo, AgentRepository agentRepo,
                           ChefPosteRepository chefPosteRepo, ReferentielService referentiel, CanevasWriter canevasWriter,
-                          OrdreMissionRepository ordreRepo) {
+                          OrdreMissionRepository ordreRepo, sn.dgcpt.missionsparc.audit.AuditService audit) {
         this.missionRepo = missionRepo;
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
@@ -53,6 +54,7 @@ public class MissionService {
         this.referentiel = referentiel;
         this.canevasWriter = canevasWriter;
         this.ordreRepo = ordreRepo;
+        this.audit = audit;
     }
 
     @Transactional
@@ -99,6 +101,8 @@ public class MissionService {
         Mission saved = missionRepo.save(m);
 
         if (chefPoste != null) historiserChefPoste(poste, chefPoste, debut);
+        audit.tracer(sn.dgcpt.missionsparc.audit.AuditService.MISSION_CREEE, saved.getReference(),
+                "Poste " + (poste.getCode() == null ? "" : poste.getCode()) + " · " + membres.size() + " membre(s)");
         return saved;
     }
 
@@ -156,6 +160,7 @@ public class MissionService {
         Mission m = missionRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Mission introuvable."));
         m.setStatut(StatutMission.CLOTUREE);
         missionRepo.save(m);
+        audit.tracer(sn.dgcpt.missionsparc.audit.AuditService.MISSION_CLOTUREE, m.getReference(), null);
     }
 
     @Transactional

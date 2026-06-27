@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sn.dgcpt.missionsparc.domain.AffectationMateriel;
 import sn.dgcpt.missionsparc.domain.Agent;
 import sn.dgcpt.missionsparc.domain.Materiel;
+import sn.dgcpt.missionsparc.audit.AuditService;
 import sn.dgcpt.missionsparc.repository.AffectationMaterielRepository;
 import sn.dgcpt.missionsparc.repository.AgentRepository;
 import sn.dgcpt.missionsparc.repository.MaterielRepository;
@@ -19,12 +20,14 @@ public class AffectationService {
     private final MaterielRepository materielRepo;
     private final AgentRepository agentRepo;
     private final AffectationMaterielRepository affectationRepo;
+    private final AuditService audit;
 
     public AffectationService(MaterielRepository materielRepo, AgentRepository agentRepo,
-                              AffectationMaterielRepository affectationRepo) {
+                              AffectationMaterielRepository affectationRepo, AuditService audit) {
         this.materielRepo = materielRepo;
         this.agentRepo = agentRepo;
         this.affectationRepo = affectationRepo;
+        this.audit = audit;
     }
 
     @Transactional
@@ -63,5 +66,8 @@ public class AffectationService {
         nouvelle.setDateDebut(d);
         nouvelle.setDateFin(null);
         affectationRepo.save(nouvelle);
+
+        audit.tracer(AuditService.MATERIEL_REAFFECTE, numero,
+                "Affecté à " + agent.getMatricule() + " (" + agent.getNom() + " " + agent.getPrenom() + ") au " + d);
     }
 }

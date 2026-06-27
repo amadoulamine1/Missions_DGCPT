@@ -58,6 +58,8 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R32 | Mission | Ordres de mission (PDF) | Liste missions → **Joindre** 2 PDF à une mission (admin/chef) → **télécharger** chacun → **Supprimer** l'un ; tenter un non-PDF | Les **deux** PDF apparaissent, téléchargeables (ouverture navigateur) ; suppression individuelle OK ; **non-PDF refusé** |
 | R33 | Mission | Filtres de la liste | Filtrer par **poste**, **région**, **agent de mission**, **état** (seuls ou combinés) | Le compteur et la liste reflètent chaque filtre |
 | R34 | Import | Chef de poste obligatoire | Charger un canevas avec le **chef de poste vide** | **Anomalie bloquante** « Chef de poste » ; le chargement ne passe pas |
+| R35 | Sécurité | Journal d'audit | Se connecter, clôturer une mission, ouvrir `/journal` (ADMIN) | Évènements **Connexion** et **Mission clôturée** tracés (date, utilisateur, cible) ; filtres action/utilisateur opérants |
+| R36 | Sécurité | Anti-force-brute | Saisir 5 fois un mauvais mot de passe puis le bon | Compte **verrouillé** : le bon mot de passe est refusé temporairement |
 
 ## 4. Critères d'acceptation
 
@@ -72,7 +74,7 @@ PV de recette — Application Missions & Parc DGCPT
 Version testée : ______   Date : ______   Environnement : ______
 Testeur(s) : __________________________________
 
-Cas exécutés : __ / 34      Réussis : __      Échoués : __
+Cas exécutés : __ / 36      Réussis : __      Échoués : __
 Anomalies ouvertes (id, sévérité, description) :
   - ____________________________________________
 Décision : [ ] Recette prononcée   [ ] Recette sous réserves   [ ] Refusée

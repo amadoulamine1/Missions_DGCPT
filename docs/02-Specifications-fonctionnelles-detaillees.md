@@ -19,6 +19,7 @@ Réf. métier : *Cahier des charges v9*. Ce document décrit les fonctions telle
 | Réaffecter un matériel à un agent | ✓ | | | |
 | Gérer les référentiels (logiciels, catégories de câble) | ✓ | | | |
 | Gérer les comptes utilisateurs | ✓ | | | |
+| Consulter le **journal d'audit** | ✓ | | | |
 
 Le **Manager** est un profil de **pilotage en lecture seule** : toutes les restitutions et le rapport
 annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spring Security) et la
@@ -79,6 +80,11 @@ annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spri
 
 - **Référentiels** (admin) : logiciels et catégories de câble — ajout, renommage, suppression (bloquée si l'élément est utilisé).
 - **Comptes** (admin) : création, modification, **réinitialisation** du mot de passe, activation/désactivation ; un compte chef de mission / agent est **rattaché à un agent informaticien** (identifiant = matricule, nom repris de l'agent) ; mot de passe **affichable** à la saisie.
+
+## 8 bis. Sécurité et traçabilité
+
+- **Journal d'audit** (admin) : trace horodatée des actions sensibles — **connexions** (réussies / refusées, avec IP) et **verrouillages**, **création / clôture de mission**, **réaffectation de matériel**, **création / modification de compte** et **réinitialisation de mot de passe**. Écran consultable et **filtrable** (par action, par utilisateur), paginé.
+- **Durcissement** : protection **anti-force-brute** (verrouillage temporaire après échecs répétés), **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy), **supervision** via Actuator (`/actuator/health`).
 
 ## 9. Règles de gestion transverses (rappel)
 

@@ -30,6 +30,7 @@ public class SecurityConfig {
                 // Rapport annuel : document de pilotage (lecture) — ADMIN + MANAGER
                 .requestMatchers("/rapport-annuel/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
+                .requestMatchers("/journal/**").hasRole("ADMIN")
                 .requestMatchers("/referentiels/**").hasRole("ADMIN")
                 // Aide à l'import : ouverte ; l'import lui-même reste hors MANAGER (lecture seule)
                 .requestMatchers("/import/guide").authenticated()

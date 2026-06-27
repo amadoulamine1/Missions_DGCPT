@@ -22,13 +22,15 @@ public class CompteService implements UserDetailsService {
     private final PasswordEncoder encoder;
     private final AgentRepository agentRepo;
     private final LoginAttemptService tentatives;
+    private final sn.dgcpt.missionsparc.audit.AuditService audit;
 
     public CompteService(UtilisateurRepository repo, PasswordEncoder encoder, AgentRepository agentRepo,
-                         LoginAttemptService tentatives) {
+                         LoginAttemptService tentatives, sn.dgcpt.missionsparc.audit.AuditService audit) {
         this.repo = repo;
         this.encoder = encoder;
         this.agentRepo = agentRepo;
         this.tentatives = tentatives;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +73,7 @@ public class CompteService implements UserDetailsService {
         if (repo.existsByUsername(u.getUsername()))
             throw new IllegalArgumentException("L'identifiant « " + u.getUsername() + " » existe déjà.");
         repo.save(u);
+        audit.tracer(sn.dgcpt.missionsparc.audit.AuditService.COMPTE_CREE, u.getUsername(), "Rôle " + u.getRole().name());
     }
 
     @Transactional
@@ -86,6 +89,8 @@ public class CompteService implements UserDetailsService {
             u.setNomComplet(f.getNomComplet());
         }
         repo.save(u);
+        audit.tracer(sn.dgcpt.missionsparc.audit.AuditService.COMPTE_MODIFIE, u.getUsername(),
+                "Rôle " + u.getRole().name() + (u.isActif() ? " · actif" : " · désactivé"));
     }
 
     /** Réinitialise le mot de passe à une valeur temporaire (renvoyée en clair à l'administrateur). */
@@ -96,6 +101,7 @@ public class CompteService implements UserDetailsService {
         u.setMotDePasse(encoder.encode(temp));
         u.setMotDePasseAChanger(true); // l'utilisateur devra changer ce mot de passe temporaire
         repo.save(u);
+        audit.tracer(sn.dgcpt.missionsparc.audit.AuditService.MDP_REINITIALISE, u.getUsername(), null);
         return temp;
     }
 

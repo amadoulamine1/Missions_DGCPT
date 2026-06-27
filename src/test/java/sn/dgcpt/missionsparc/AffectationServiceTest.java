@@ -33,7 +33,14 @@ class AffectationServiceTest {
     @Mock MaterielRepository materielRepo;
     @Mock AgentRepository agentRepo;
     @Mock AffectationMaterielRepository affectationRepo;
-    @InjectMocks AffectationService service;
+    private AffectationService service;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        // AuditService concret (non mockable sous JDK 25) : no-op via dépôt null (écriture best-effort).
+        service = new AffectationService(materielRepo, agentRepo, affectationRepo,
+                new sn.dgcpt.missionsparc.audit.AuditService(null));
+    }
 
     private Poste poste(int id) { Poste p = new Poste(); p.setId(id); p.setNom("P" + id); return p; }
 

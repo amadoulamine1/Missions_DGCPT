@@ -151,6 +151,7 @@
             <a class="tile" th:href="@{/import}" th:if="${currentRole != 'MANAGER'}"><h3>Importer</h3><p>Charger un canevas rempli hors-ligne.</p></a>
             <a class="tile" th:href="@{/import/guide}"><h3>Guide</h3><p>Mode d'emploi du canevas et de l'import.</p></a>
             <a class="tile" th:href="@{/utilisateurs}" th:if="${currentRole == 'ADMIN'}"><h3>Comptes</h3><p>Gestion des comptes utilisateurs.</p></a>
+            <a class="tile" th:href="@{/journal}" th:if="${currentRole == 'ADMIN'}"><h3>Journal d'audit</h3><p>Traçabilité des actions sensibles.</p></a>
         </div>
     </section>
 </main>

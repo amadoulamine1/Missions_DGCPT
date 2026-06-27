@@ -48,6 +48,7 @@ erDiagram
 | Utilisateur | `utilisateur` | `id` | identifiant, mot de passe (BCrypt), rôle, actif, agent_matricule |
 | LotImport | `lot_import` | `id` | mission, fichier (BYTEA), statut (EN_ATTENTE/INTEGRE) |
 | OrdreMission | `ordre_mission` | `id` | mission_id, nom_fichier, type_mime, taille, contenu (BYTEA), date_ajout — **plusieurs PDF par mission** |
+| AuditEvent | `audit_event` | `id` | date_heure, utilisateur, action, cible, detail — journal des actions sensibles |
 
 ## 3. Migrations Flyway
 
@@ -71,6 +72,7 @@ erDiagram
 | **V16** | Utilisateur : contrainte `CHECK` du rôle étendue pour le **rôle MANAGER** (pilotage) |
 | **V17** | **Ordre de mission** : table `ordre_mission` (PDF en `BYTEA`, `ON DELETE CASCADE`) |
 | **V18** | Ordre de mission : clé propre `id` (au lieu de `mission_id`) → **plusieurs ordres par mission** |
+| **V20** | **Journal d'audit** : table `audit_event` (actions sensibles horodatées) — *V19 non utilisée (Flyway tolère les trous)* |
 
 Le schéma est **géré exclusivement par Flyway** (`ddl-auto=none`).
 

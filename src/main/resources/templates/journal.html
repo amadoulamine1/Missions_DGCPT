@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Journal d'audit</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Sécurité &amp; traçabilité</p>
+            <h1>Journal d'audit</h1>
+        </div>
+    </header>
+
+    <p class="muted">Trace horodatée des actions sensibles : connexions, missions, réaffectations et gestion des comptes.</p>
+
+    <form method="get" th:action="@{/journal}" class="filterbar no-print">
+        <input type="text" name="user" th:value="${fUser}" placeholder="Filtrer par utilisateur…" aria-label="Filtrer par utilisateur"/>
+        <select name="action" aria-label="Filtrer par action">
+            <option value="">Toutes les actions</option>
+            <option th:each="a : ${actions}" th:value="${a}" th:text="${a}" th:selected="${fAction == a}"></option>
+        </select>
+        <button class="btn small" type="submit">Filtrer</button>
+        <a class="btn secondary small" th:href="@{/journal}">Réinitialiser</a>
+        <span class="count"><b th:text="${page.total}">0</b> évènement(s)</span>
+    </form>
+
+    <div class="table-scroll">
+    <table class="table sticky">
+        <thead><tr>
+            <th scope="col">Date &amp; heure</th>
+            <th scope="col">Utilisateur</th>
+            <th scope="col">Action</th>
+            <th scope="col">Cible</th>
+            <th scope="col">Détail</th>
+        </tr></thead>
+        <tbody>
+            <tr th:each="e : ${events}">
+                <td class="mono" th:text="${e.dateHeure}">—</td>
+                <td th:text="${#strings.isEmpty(e.utilisateur) ? '—' : e.utilisateur}">—</td>
+                <td><span class="badge" th:classappend="${e.action == 'Connexion' ? 'green' : (e.action == 'Connexion refusée' or e.action == 'Compte verrouillé' ? 'red' : 'gold')}" th:text="${e.action}">action</span></td>
+                <td class="mono" th:text="${#strings.isEmpty(e.cible) ? '—' : e.cible}">—</td>
+                <td th:text="${#strings.isEmpty(e.detail) ? '' : e.detail}"></td>
+            </tr>
+            <tr th:if="${page.vide}"><td colspan="5" class="empty">Aucun évènement.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="toolbar no-print" th:if="${page.totalPages > 1}" style="margin-top:.6rem">
+        <a class="btn small secondary" th:classappend="${page.premier} ? 'disabled' : ''"
+           th:href="@{/journal(action=${fAction},user=${fUser},page=${page.precedent})}">← Précédent</a>
+        <span class="muted" th:text="'Page ' + ${page.pageHumain} + ' / ' + ${page.totalPages}"></span>
+        <a class="btn small secondary" th:classappend="${page.dernier} ? 'disabled' : ''"
+           th:href="@{/journal(action=${fAction},user=${fUser},page=${page.suivant})}">Suivant →</a>
+    </div>
+</main>
+</body>
+</html>

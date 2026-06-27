@@ -61,6 +61,21 @@ Les priorités suivent la convention de la revue : **P1** = impact direct (perfo
 
 ---
 
+## Revue 2026-06 (suite) — améliorations livrées
+
+| Item | Domaine | État |
+|------|---------|------|
+| **Journal d'audit** (`audit_event`, V20) : connexions (réussies/refusées + IP), verrouillages, création/clôture de mission, réaffectation, gestion des comptes ; écran `/journal` filtrable et paginé (ADMIN) | Sécurité / traçabilité | ✅ |
+| **Anti-force-brute** : verrouillage temporaire (15 min) après 5 échecs (`LoginAttemptService` + écouteur d'événements) | Sécurité | ✅ |
+| **En-têtes de sécurité** : CSP (rendu serveur, sans origine externe), HSTS, Referrer-Policy, nosniff | Sécurité | ✅ |
+| **Supervision** : Spring Boot Actuator (`/actuator/health` ouvert + sonde DB ; reste réservé ADMIN) | Exploitation | ✅ |
+| **Tableau de bord — alertes** actionnables (missions en retard / échéances, matériel en panne / à changer) | Pilotage | ✅ |
+| **Parc paginé/trié côté base** (Spring Data `Pageable`) ; specs ordinateur chargées par page | Performance | ✅ |
+| **Tableaux denses scrollables** sur petit écran (`.table-scroll`) | Accessibilité / UX | ✅ |
+| **Tests** : génération du canevas POI (`CanevasWriterTest`), verrou (`LoginAttemptServiceTest`) | Qualité | ✅ |
+
+**Restant (non retenu pour l'instant)** : finalisation HTTPS + planification des sauvegardes (et test de restauration) ; notifications d'échéance ; pagination côté base des **Missions** (état dérivé des dates — faible volume, laissé en mémoire).
+
 ## Contraintes d'environnement à garder en tête
 
 - **JDK 25 / ByteBuddy** : Mockito ne peut pas mocker les classes concrètes (mock inline). Convention du
