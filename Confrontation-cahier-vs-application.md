@@ -12,8 +12,8 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ## 3. Robustesse / mise en production
 
-- **Sécurité durcie** : protection **CSRF réactivée** (formulaires Thymeleaf porteurs du jeton) ; profil `application-prod` (HTTPS, cookies sécurisés) ; **changement de mot de passe forcé** à la première connexion et après réinitialisation (cf. §5). Reste à faire côté exploitation : **déploiement HTTPS** effectif.
-- **Sauvegarde** : scripts `pg_dump` + rotation et procédure de restauration présents ; reste leur **planification opérationnelle** (tâche planifiée / cron) et un **test de restauration**.
+- **Sécurité durcie** : **CSRF**, **en-têtes de sécurité** (CSP/HSTS/Referrer-Policy), **anti-force-brute**, **journal d'audit**, **changement de mot de passe forcé**, **supervision** (`/actuator/health`). Profil `application-prod` **prêt pour HTTPS** (reverse-proxy via `forward-headers-strategy` ou keystore PKCS12) — reste l'**installation du certificat/proxy** sur site.
+- **Sauvegarde** : scripts `pg_dump` + rotation + restauration ; **planification fournie** (unités systemd + cron) et **script de test de restauration** (base jetable). Reste l'**activation** sur le serveur + la **copie hors-serveur** des dumps.
 - **Tests automatisés** — ~82 tests (dont **génération du canevas POI** et **verrou anti-force-brute**) : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **lecture du canevas + colonne logiciel « AD »** (`CanevasFixtureTest`), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — désignation du chef, clôture, **chevauchement autorisé** (`MissionServiceTest`),
   **rapport annuel** — agrégation par année, parc au 31/12, écarts N‑1 (`RapportAnnuelServiceTest`) et
   **prévision** par régression linéaire (`PrevisionTest`), **validation déclarative des formulaires** (`FormValidationTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`). **Intégration continue** (GitHub Actions : build + tests à chaque push). *Restent peu couverts* : exports PDF, génération du canevas en écriture (Apache POI).
@@ -64,4 +64,4 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ---
 
-**Restant, par priorité :** déploiement HTTPS + changement du compte initial · planification des sauvegardes (et test de restauration) · tests des exports PDF et de la génération du canevas · finitions (rattachement hors formulaire, pagination/tri côté base).
+**Restant, par priorité :** installation sur site du certificat/proxy HTTPS et activation des sauvegardes planifiées (copie hors-serveur) + changement du compte initial · finitions (rattachement hors formulaire, pagination/tri côté base des Missions).

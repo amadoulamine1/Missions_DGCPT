@@ -1,0 +1,10 @@
+[Unit]
+Description=Planifie la sauvegarde quotidienne DGCPT (01h00)
+
+[Timer]
+OnCalendar=*-*-* 01:00:00
+# Rattrape une exécution manquée (machine éteinte à l'heure prévue)
+Persistent=true
+
+[Install]
+WantedBy=timers.target

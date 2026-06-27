@@ -40,7 +40,8 @@
 
 ## Mise en œuvre opérationnelle (fournie)
 
-- **Sauvegardes PostgreSQL** : scripts `scripts/sauvegarde-postgres.sh` (dump compressé `pg_dump -F c` + rotation configurable, `RETENTION_JOURS=30` par défaut) et `scripts/restauration-postgres.sh` (restauration avec confirmation). Planifier la sauvegarde via **cron** (ex. quotidienne à 1h) et **copier les dumps hors-serveur** (stockage distant) pour couvrir la perte du serveur.
-- **Profil de production** : `application-prod.properties` (activable par `--spring.profiles.active=prod`) — secrets par variables d'environnement, journaux allégés, **gabarit HTTPS** (keystore PKCS12) et **cookies de session sécurisés** prêts à activer.
-- **Protection CSRF** : **activée** (les formulaires Thymeleaf injectent automatiquement le jeton). 
-- **Rappels** : changer le compte initial `admin/admin` dès la première connexion ; restreindre l'accès réseau au serveur intranet ; tester périodiquement une **restauration**.
+- **Sauvegardes PostgreSQL** : scripts `scripts/sauvegarde-postgres.sh` (dump compressé `pg_dump -F c` + rotation configurable, `RETENTION_JOURS=30` par défaut) et `scripts/restauration-postgres.sh` (restauration avec confirmation). **Planification fournie** : unités **systemd** (`scripts/systemd/dgcpt-sauvegarde.{service,timer}`, quotidienne à 1h, `Persistent=true`) ou ligne **cron**. **Copier les dumps hors-serveur** (stockage distant) pour couvrir la perte du serveur.
+- **Test de restauration** : script `scripts/test-restauration-postgres.sh` — restaure la dernière sauvegarde dans une **base jetable**, vérifie sa cohérence (tables + historique Flyway) puis la supprime, **sans toucher la production**. À planifier (ex. hebdomadaire).
+- **Profil de production** : `application-prod.properties` (activable par `--spring.profiles.active=prod`) — secrets par variables d'environnement, journaux allégés, **HTTPS** par reverse-proxy (`forward-headers-strategy`) **ou** keystore PKCS12, cookies de session (HttpOnly, SameSite=Lax, Secure une fois HTTPS).
+- **Durcissement applicatif** : **CSRF activée** ; **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy) ; **anti-force-brute** (verrouillage temporaire après échecs) ; **journal d'audit** (`/journal`) ; **supervision** `GET /actuator/health`.
+- **Rappels** : changer le compte initial `admin/admin` dès la première connexion ; restreindre l'accès réseau au serveur intranet ; lancer périodiquement le **test de restauration**.

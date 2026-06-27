@@ -1,0 +1,12 @@
+[Unit]
+Description=Sauvegarde quotidienne PostgreSQL DGCPT (Missions & Parc)
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+User=postgres
+# Secrets et paramètres via un fichier d'environnement (DB_PASSWORD, BACKUP_DIR, RETENTION_JOURS…) :
+#   /etc/dgcpt/sauvegarde.env  (chmod 600, propriétaire postgres)
+EnvironmentFile=-/etc/dgcpt/sauvegarde.env
+ExecStart=/opt/dgcpt/scripts/sauvegarde-postgres.sh
