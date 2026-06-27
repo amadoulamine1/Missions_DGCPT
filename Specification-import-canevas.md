@@ -24,7 +24,12 @@ Transformer un canevas rempli hors-ligne en données fiables dans la base, en :
 
 ## 3. Pré-requis : le canevas pré-estampillé
 
-Parce que le chef crée la mission en ligne d'abord, le téléchargement produit **un canevas par agent membre** (regroupés en ZIP). Chaque canevas est distribué avec :
+Parce que le chef crée la mission en ligne d'abord, le téléchargement produit **un canevas par agent
+membre** (regroupés en ZIP). Le **ZIP d'une mission** est nommé d'après le **code poste** et la **période** :
+`Canevas-{codePoste}-{début}_{fin}.zip` (ex. `Canevas-DKR-2026-06-01_2026-06-05.zip`) ; chaque fichier
+interne reprend ce nom suivi de l'**agent** : `…-{matricule}-{nom prénom}.xlsx`. Depuis la **liste des
+missions**, on peut aussi **sélectionner plusieurs missions** (cases à cocher) et tout télécharger en un
+**seul ZIP** (les fichiers, déjà auto-identifiés, sont regroupés à plat). Chaque canevas est distribué avec :
 
 - le **N° de mission** et le **code poste** déjà renseignés (en-tête) ;
 - l'en-tête de mission pré-remplie (objet, dates, chef de mission, chef de poste — ce dernier **facultatif** : s'il était inconnu à la création, l'agent le renseigne ici) ;

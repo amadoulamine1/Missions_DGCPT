@@ -51,6 +51,7 @@ annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spri
 - **Chevauchement de périodes autorisé** : un agent peut être membre de plusieurs missions dont les périodes se chevauchent (aucun contrôle bloquant, ni à la création ni à l'édition).
 - **Renseignement via le canevas** : à l'import, le **chef de poste** (s'il était inconnu) et les **dates de mission** saisis dans le canevas sont reportés à la mission.
 - **Édition** : objet, dates, statut, observations, membres, chef de mission.
+- **Téléchargement des canevas** : par mission (ZIP `Canevas-{codePoste}-{début}_{fin}.zip`, fichiers internes `…-{matricule}-{nom}.xlsx`) ou **en lot** depuis la liste (sélection multiple → un seul ZIP à plat ; admin/chef).
 - **Statut de consolidation** : *en consolidation* → *clôturée* (bouton **Clôturer**, réservé admin/chef).
 - **Statut temporel** dérivé des dates : Planifiée / En cours / Terminée.
 - **Fiche mission** : en-tête, relevé réseau (état câblage, catégorie de câble), membres, inventaire relevé, **export Excel des relevés**, accès à la **consolidation** et au **canevas pré-rempli**.

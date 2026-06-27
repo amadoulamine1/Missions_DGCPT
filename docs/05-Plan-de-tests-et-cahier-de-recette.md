@@ -52,6 +52,8 @@ Statuts attendus : **OK** si le résultat observé = attendu.
 | R26 | Robustesse | Page 404 | Ouvrir une URL inexistante | Page **404** habillée + lien retour |
 | R27 | Rapport annuel | Synthèse + tendance | Rapport annuel → choisir année + fenêtre (2–5 ans) | Indicateurs avec écart N‑1 et **prévision N+1** ; tendance affichée ; exports Excel/PDF |
 | R28 | Rôle Manager | Lecture seule | Se connecter en **Manager** | Voit tableau de bord, parc, missions, agents, **rapport annuel** ; import/comptes/édition **refusés** |
+| R29 | Canevas | Téléchargement | Fiche mission → Télécharger les canevas | ZIP `Canevas-{codePoste}-{début}_{fin}.zip` ; fichiers `…-{matricule}-{nom}.xlsx` |
+| R30 | Canevas | Téléchargement en lot | Liste missions → cocher 2–3 missions → « Télécharger la sélection » | **Un seul ZIP** réunissant tous les canevas, fichiers auto-identifiés (code poste + période + agent) |
 
 ## 4. Critères d'acceptation
 

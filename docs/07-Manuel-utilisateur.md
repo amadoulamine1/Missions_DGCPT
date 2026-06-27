@@ -26,7 +26,7 @@ Fiches séparées : **informaticiens** (effectuent les missions) et **agents de 
 ## 6. Workflow d'une mission (de bout en bout)
 
 1. **Créer la mission** (admin/chef) : TPR, objet, période, membres (informaticiens), chef de mission. Le **chef de poste est facultatif** (laissé vide s'il est inconnu, il sera renseigné via le canevas). Un même agent peut être membre de **missions aux périodes qui se chevauchent** (aucun blocage). L'application génère le **N° de mission**.
-2. **Télécharger le canevas pré-rempli** et le distribuer aux agents.
+2. **Télécharger le canevas pré-rempli** et le distribuer aux agents. Le ZIP est nommé par **code poste + période** (ex. `Canevas-DKR-2026-06-01_2026-06-05.zip`) et chaque fichier reprend ce nom suivi de l'agent. Pour plusieurs missions à la fois : depuis la **liste des missions**, cocher les missions voulues puis **« Télécharger la sélection »** (un seul ZIP). *(Admin / Chef de mission)*
 3. **Saisir hors-ligne** dans Excel (un fichier par agent possible). Respecter les champs obligatoires et le format des **MAC** (`AA:BB:CC:DD:EE:FF`). Laisser le **n° d'inventaire vide** pour un matériel nouveau. Le **chef de poste** et les **dates de mission** renseignés dans le canevas sont **reportés à la mission** à l'import. Logiciels relevés sur les ordinateurs : Aster, Antivirus, SicCDD, CIC, Sysbudget, **AD** (colonnes Oui/Non).
 4. **Recharger** chaque fichier (Importer) : l'application contrôle et affiche un **aperçu** (anomalies bloquantes à corriger, **avertissements** anti-doublon à vérifier).
 5. **Consolidation** : le chef de mission rapproche les fichiers, **arbitre les conflits**, puis **valide l'intégration** (les n° sont attribués aux nouveaux matériels).
