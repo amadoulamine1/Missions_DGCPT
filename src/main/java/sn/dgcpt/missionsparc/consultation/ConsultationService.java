@@ -8,6 +8,7 @@ import sn.dgcpt.missionsparc.repository.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class ConsultationService {
     private final AffectationMaterielRepository affectationRepo;
     private final CategorieMaterielRepository categorieMaterielRepo;
     private final LotImportRepository lotImportRepo;
+    private final OrdreMissionRepository ordreRepo;
 
     public ConsultationService(PosteRepository posteRepo, MaterielRepository materielRepo,
                                ChefPosteRepository chefPosteRepo, AgentRepository agentRepo,
@@ -37,7 +39,7 @@ public class ConsultationService {
                                OrdinateurRepository ordinateurRepo, ImprimanteRepository imprimanteRepo,
                                EquipementReseauRepository reseauRepo, ScannerChequeRepository scannerRepo,
                                AffectationMaterielRepository affectationRepo, CategorieMaterielRepository categorieMaterielRepo,
-                               LotImportRepository lotImportRepo) {
+                               LotImportRepository lotImportRepo, OrdreMissionRepository ordreRepo) {
         this.posteRepo = posteRepo;
         this.materielRepo = materielRepo;
         this.chefPosteRepo = chefPosteRepo;
@@ -51,6 +53,7 @@ public class ConsultationService {
         this.affectationRepo = affectationRepo;
         this.categorieMaterielRepo = categorieMaterielRepo;
         this.lotImportRepo = lotImportRepo;
+        this.ordreRepo = ordreRepo;
     }
 
     /** Libellés des types paramétrables actifs (chips de filtre du parc). */
@@ -137,7 +140,8 @@ public class ConsultationService {
         String cable = m.getCategorieCable() == null ? "" : m.getCategorieCable().getLibelle();
         List<ReleveVue> releves = releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
         List<AgentVue> membres = m.getMembres().stream().map(this::versAgentVue).toList();
-        return new MissionDetailVue(versMissionVue(m), chefMission, chefPoste, m.getEtatCablage(), cable, m.getObservations(), releves, membres);
+        String ordreNom = ordreRepo.findById(id).map(OrdreMission::getNomFichier).orElse(null);
+        return new MissionDetailVue(versMissionVue(m, ordreNom), chefMission, chefPoste, m.getEtatCablage(), cable, m.getObservations(), releves, membres);
     }
 
     public MaterielDetailVue detailMateriel(String numero) {
@@ -217,13 +221,16 @@ public class ConsultationService {
 
     public List<MissionVue> listerMissions(String q, Integer posteId, String etat) {
         String texte = (q == null) ? "" : q.trim().toLowerCase();
+        Map<Integer, String> ordres = ordreRepo.findAllMeta().stream()
+                .collect(Collectors.toMap(OrdreMissionRepository.OrdreMeta::getMissionId,
+                        OrdreMissionRepository.OrdreMeta::getNomFichier));
         return missionRepo.findAll().stream()
                 .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
                 .filter(m -> etat == null || etat.isBlank() || etatTemporel(m).equals(etat))
                 .filter(m -> texte.isEmpty()
                         || (m.getReference() != null && m.getReference().toLowerCase().contains(texte))
                         || (m.getObjet() != null && m.getObjet().toLowerCase().contains(texte)))
-                .map(this::versMissionVue)
+                .map(m -> versMissionVue(m, ordres.get(m.getId())))
                 .toList();
     }
 
@@ -324,9 +331,28 @@ public class ConsultationService {
     }
 
     private MissionVue versMissionVue(Mission m) {
+        return versMissionVue(m, null);
+    }
+
+    private MissionVue versMissionVue(Mission m, String ordreNom) {
         String poste = m.getPoste() == null ? "" : m.getPoste().getNom();
         return new MissionVue(m.getId(), m.getReference(), m.getObjet(), poste,
-                periode(m.getDateDebut(), m.getDateFin()), m.getStatut().name(), etatTemporel(m));
+                periode(m.getDateDebut(), m.getDateFin()), m.getStatut().name(), etatTemporel(m),
+                agentsLib(m), ordreNom);
+    }
+
+    /** Agents informaticiens en charge : chef de mission en tête (suffixé « chef »), puis les autres membres. */
+    private String agentsLib(Mission m) {
+        Agent chef = m.getChefMission();
+        String chefMat = (chef == null) ? null : chef.getMatricule();
+        List<String> noms = new ArrayList<>();
+        if (chef != null) noms.add(chef.getPrenom() + " " + chef.getNom() + " (chef)");
+        m.getMembres().stream()
+                .filter(a -> chefMat == null || !chefMat.equals(a.getMatricule()))
+                .sorted(Comparator.comparing(Agent::getNom, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Agent::getPrenom, String.CASE_INSENSITIVE_ORDER))
+                .forEach(a -> noms.add(a.getPrenom() + " " + a.getNom()));
+        return String.join(", ", noms);
     }
 
     /** État temporel dérivé des dates : Planifiée (à venir), En cours, Terminée. */

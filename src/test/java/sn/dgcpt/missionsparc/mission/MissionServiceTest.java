@@ -43,7 +43,7 @@ class MissionServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new MissionService(missionRepo, posteRepo, agentRepo, chefPosteRepo, null, null);
+        service = new MissionService(missionRepo, posteRepo, agentRepo, chefPosteRepo, null, null, null);
     }
 
     // ---------- fabriques ----------

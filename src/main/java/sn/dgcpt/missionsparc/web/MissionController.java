@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import sn.dgcpt.missionsparc.domain.Mission;
+import sn.dgcpt.missionsparc.domain.OrdreMission;
 import sn.dgcpt.missionsparc.mission.CreationMissionForm;
 import sn.dgcpt.missionsparc.mission.EditionMissionForm;
 import sn.dgcpt.missionsparc.mission.MissionService;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -106,6 +109,43 @@ public class MissionController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nom + ".zip\"")
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(data);
+    }
+
+    /** Joindre (ou remplacer) l'ordre de mission au format PDF. */
+    @PostMapping("/missions/{id}/ordre")
+    public String joindreOrdre(@PathVariable Integer id, @RequestParam("fichier") MultipartFile fichier, RedirectAttributes ra) {
+        try {
+            missionService.attacherOrdre(id, fichier);
+            ra.addFlashAttribute("message", "Ordre de mission attaché.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+        } catch (IOException e) {
+            ra.addFlashAttribute("erreur", "Impossible de lire le fichier envoyé.");
+        }
+        return "redirect:/missions";
+    }
+
+    /** Télécharger l'ordre de mission (PDF) : ouverture dans le navigateur. */
+    @GetMapping("/missions/{id}/ordre")
+    public ResponseEntity<byte[]> telechargerOrdre(@PathVariable Integer id) {
+        OrdreMission o = missionService.ordreMission(id).orElse(null);
+        if (o == null) return ResponseEntity.notFound().build();
+        String nom = o.getNomFichier() == null ? "ordre-mission.pdf" : o.getNomFichier();
+        String ascii = nom.replaceAll("[^\\x20-\\x7E]", "_").replace("\"", "");
+        String dispo = "inline; filename=\"" + ascii + "\"; filename*=UTF-8''"
+                + java.net.URLEncoder.encode(nom, StandardCharsets.UTF_8).replace("+", "%20");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, dispo)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(o.getContenu());
+    }
+
+    /** Supprimer l'ordre de mission attaché. */
+    @PostMapping("/missions/{id}/ordre/supprimer")
+    public String supprimerOrdre(@PathVariable Integer id, RedirectAttributes ra) {
+        missionService.supprimerOrdre(id);
+        ra.addFlashAttribute("message", "Ordre de mission supprimé.");
+        return "redirect:/missions";
     }
 
     /** Téléchargement en lot : les canevas de plusieurs missions dans un seul ZIP. */

@@ -17,6 +17,9 @@
         </div>
     </header>
 
+    <p th:if="${message}" class="alert ok no-print" th:text="${message}">ok</p>
+    <p th:if="${erreur}" class="alert err no-print" th:text="${erreur}">err</p>
+
     <form method="get" th:action="@{/missions}" class="filterbar no-print">
         <input type="text" name="q" th:value="${q}" placeholder="Rechercher (n°, objet)…" aria-label="Rechercher une mission"/>
         <select name="poste" aria-label="Filtrer par poste">
@@ -42,8 +45,10 @@
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='objet',sens=${(tri == 'objet' and sens != 'desc') ? 'desc' : 'asc'})}">Objet</a><span th:if="${tri == 'objet'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='poste',sens=${(tri == 'poste' and sens != 'desc') ? 'desc' : 'asc'})}">Poste</a><span th:if="${tri == 'poste'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col">Période</th>
+            <th scope="col">Agents</th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='etat',sens=${(tri == 'etat' and sens != 'desc') ? 'desc' : 'asc'})}">État</a><span th:if="${tri == 'etat'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
             <th scope="col"><a th:href="@{/missions(q=${q},poste=${fPoste},etat=${fEtat},tri='statut',sens=${(tri == 'statut' and sens != 'desc') ? 'desc' : 'asc'})}">Statut</a><span th:if="${tri == 'statut'}" th:text="${sens == 'desc' ? ' ▼' : ' ▲'}"></span></th>
+            <th scope="col" class="no-print">Ordre de mission</th>
         </tr></thead>
         <tbody>
             <tr th:each="m : ${missions}">
@@ -51,10 +56,29 @@
                     <input type="checkbox" class="sel-mission" th:value="${m.id}" th:attr="aria-label=|Sélectionner ${m.reference}|"/></td>
                 <td><a class="mono" th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.reference}"></a></td>
                 <td th:text="${m.objet}"></td><td th:text="${m.posteNom}"></td><td th:text="${m.periode}"></td>
+                <td class="agents" th:text="${#strings.isEmpty(m.agents) ? '—' : m.agents}">—</td>
                 <td><span class="badge" th:classappend="${m.etat == 'En cours' ? 'orange' : (m.etat == 'Terminée' ? 'green' : 'blue')}" th:text="${m.etat}"></span></td>
                 <td><span class="badge" th:classappend="${m.statut == 'CLOTUREE'} ? 'green' : 'gold'" th:text="${m.statut}"></span></td>
+                <td class="no-print ordre">
+                    <a th:if="${m.ordreNom != null}" class="filechip" th:href="@{/missions/{id}/ordre(id=${m.id})}" target="_blank" rel="noopener"
+                       th:title="${m.ordreNom}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>PDF</a>
+                    <span th:if="${m.ordreNom == null}" class="muted">—</span>
+                    <span th:if="${currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION'}" class="ordre-actions">
+                        <form method="post" enctype="multipart/form-data" th:action="@{/missions/{id}/ordre(id=${m.id})}" style="display:inline">
+                            <label class="btn small secondary filebtn">
+                                <span th:text="${m.ordreNom == null ? 'Joindre' : 'Remplacer'}">Joindre</span>
+                                <input type="file" name="fichier" accept="application/pdf,.pdf" hidden onchange="if(this.files.length){this.form.submit();}"/>
+                            </label>
+                        </form>
+                        <form th:if="${m.ordreNom != null}" method="post" th:action="@{/missions/{id}/ordre/supprimer(id=${m.id})}" style="display:inline"
+                              onsubmit="return confirm('Supprimer l\'ordre de mission ?');">
+                            <button class="btn small ghost" type="submit" title="Supprimer l'ordre de mission">✕</button>
+                        </form>
+                    </span>
+                </td>
             </tr>
-            <tr th:if="${page.vide}"><td th:colspan="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') ? 7 : 6}" class="empty">Aucune mission.</td></tr>
+            <tr th:if="${page.vide}"><td th:colspan="${(currentRole == 'ADMIN' or currentRole == 'CHEF_MISSION') ? 9 : 8}" class="empty">Aucune mission.</td></tr>
         </tbody>
     </table>
 

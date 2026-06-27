@@ -39,6 +39,7 @@ class ConsultationServiceTest {
     @Mock AffectationMaterielRepository affectationRepo;
     @Mock CategorieMaterielRepository categorieMaterielRepo;
     @Mock LotImportRepository lotImportRepo;
+    @Mock OrdreMissionRepository ordreRepo;
     @InjectMocks ConsultationService service;
 
     // ---------- fabriques ----------

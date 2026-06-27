@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/postes", "/postes/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/postes", "/postes/*").authenticated()
                 .requestMatchers("/missions/nouvelle", "/missions/*/modifier", "/missions/*/membres/**").hasAnyRole("ADMIN", "CHEF_MISSION")
+                // Ordre de mission : joindre / supprimer réservés à ADMIN + Chef (le téléchargement GET reste authentifié)
+                .requestMatchers(HttpMethod.POST, "/missions/*/ordre", "/missions/*/ordre/**").hasAnyRole("ADMIN", "CHEF_MISSION")
                 .requestMatchers(HttpMethod.POST, "/missions/*/consolidation/**").hasAnyRole("ADMIN", "CHEF_MISSION")
                 .requestMatchers(HttpMethod.POST, "/missions/*/cloturer").hasAnyRole("ADMIN", "CHEF_MISSION")
                 .requestMatchers(HttpMethod.POST, "/parc/*/affectation").hasRole("ADMIN")

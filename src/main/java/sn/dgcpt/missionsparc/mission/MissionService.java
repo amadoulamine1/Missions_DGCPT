@@ -2,14 +2,17 @@ package sn.dgcpt.missionsparc.mission;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import sn.dgcpt.missionsparc.domain.*;
 import sn.dgcpt.missionsparc.repository.AgentRepository;
 import sn.dgcpt.missionsparc.repository.ChefPosteRepository;
 import sn.dgcpt.missionsparc.repository.MissionRepository;
+import sn.dgcpt.missionsparc.repository.OrdreMissionRepository;
 import sn.dgcpt.missionsparc.repository.PosteRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.zip.ZipEntry;
@@ -38,15 +41,18 @@ public class MissionService {
     private final ChefPosteRepository chefPosteRepo;
     private final ReferentielService referentiel;
     private final CanevasWriter canevasWriter;
+    private final OrdreMissionRepository ordreRepo;
 
     public MissionService(MissionRepository missionRepo, PosteRepository posteRepo, AgentRepository agentRepo,
-                          ChefPosteRepository chefPosteRepo, ReferentielService referentiel, CanevasWriter canevasWriter) {
+                          ChefPosteRepository chefPosteRepo, ReferentielService referentiel, CanevasWriter canevasWriter,
+                          OrdreMissionRepository ordreRepo) {
         this.missionRepo = missionRepo;
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
         this.chefPosteRepo = chefPosteRepo;
         this.referentiel = referentiel;
         this.canevasWriter = canevasWriter;
+        this.ordreRepo = ordreRepo;
     }
 
     @Transactional
@@ -254,6 +260,44 @@ public class MissionService {
     @Transactional(readOnly = true)
     public String nomZipMission(Integer missionId) {
         return missionRepo.findById(missionId).map(this::baseNomMission).orElse("Canevas-mission");
+    }
+
+    // ---- Ordre de mission (PDF facultatif, un par mission) ----
+
+    /** Attache (ou remplace) l'ordre de mission au format PDF d'une mission. */
+    @Transactional
+    public void attacherOrdre(Integer missionId, MultipartFile fichier) throws IOException {
+        Mission m = missionRepo.findById(missionId).orElseThrow();
+        if (fichier == null || fichier.isEmpty()) {
+            throw new IllegalArgumentException("Veuillez sélectionner un fichier PDF.");
+        }
+        String nom = fichier.getOriginalFilename();
+        String type = fichier.getContentType();
+        boolean estPdf = "application/pdf".equalsIgnoreCase(type)
+                || (nom != null && nom.toLowerCase().endsWith(".pdf"));
+        if (!estPdf) {
+            throw new IllegalArgumentException("L'ordre de mission doit être un fichier PDF.");
+        }
+        OrdreMission o = ordreRepo.findById(missionId).orElseGet(OrdreMission::new);
+        o.setMissionId(m.getId());
+        o.setNomFichier((nom == null || nom.isBlank()) ? "ordre-mission.pdf" : nom);
+        o.setTypeMime("application/pdf");
+        o.setTaille(fichier.getSize());
+        o.setContenu(fichier.getBytes());
+        o.setDateAjout(Instant.now());
+        ordreRepo.save(o);
+    }
+
+    /** Ordre de mission complet (contenu compris) pour le téléchargement ; vide si absent. */
+    @Transactional(readOnly = true)
+    public Optional<OrdreMission> ordreMission(Integer missionId) {
+        return ordreRepo.findById(missionId);
+    }
+
+    /** Supprime l'ordre de mission attaché (sans effet s'il n'existe pas). */
+    @Transactional
+    public void supprimerOrdre(Integer missionId) {
+        ordreRepo.deleteById(missionId);
     }
 
     private AgentOption option(Agent a) {
