@@ -179,10 +179,8 @@ public class ConsultationController {
                            Model model) {
         // Tri par défaut : N° de mission décroissant (missions les plus récentes en premier)
         if (tri == null && sens == null) { tri = "ref"; sens = "desc"; }
-        List<MissionVue> tout = consultation.listerMissions(q, poste, region, agent, etat);
-        Comparator<MissionVue> cmp = comparateurMissions(tri);
-        if ("desc".equals(sens)) cmp = cmp.reversed();
-        PageVue<MissionVue> p = Pagination.page(tout, page, 25, cmp);
+        PageVue<MissionVue> p = consultation.listerMissionsPage(q, poste, region, agent, etat,
+                PageRequest.of(Math.max(0, page), 25, triMissions(tri, sens)));
         model.addAttribute("page", p);
         model.addAttribute("missions", p.getContenu());
         model.addAttribute("postes", consultation.listerPostes());
@@ -198,15 +196,22 @@ public class ConsultationController {
         return "missions";
     }
 
-    private Comparator<MissionVue> comparateurMissions(String tri) {
-        Comparator<String> n = Comparator.nullsFirst(String.CASE_INSENSITIVE_ORDER);
-        return switch (tri == null ? "" : tri) {
-            case "objet" -> Comparator.comparing(MissionVue::getObjet, n);
-            case "poste" -> Comparator.comparing(MissionVue::getPosteNom, n);
-            case "etat" -> Comparator.comparing(MissionVue::getEtat, n);
-            case "statut" -> Comparator.comparing(MissionVue::getStatut, n);
-            default -> Comparator.comparing(MissionVue::getReference, n);
+    /** Tri des missions côté base. L'« état » (dérivé des dates) est trié par une expression CASE. */
+    private Sort triMissions(String tri, String sens) {
+        Sort.Direction dir = "desc".equals(sens) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        if ("etat".equals(tri)) {
+            // Planifiée(0) < En cours(1) < Terminée(2), par rapport à la date du jour
+            return org.springframework.data.jpa.domain.JpaSort.unsafe(dir,
+                    "(case when m.dateDebut > current_date then 0 "
+                  + "when m.dateFin is null or m.dateFin >= current_date then 1 else 2 end)");
+        }
+        String prop = switch (tri == null ? "" : tri) {
+            case "objet" -> "objet";
+            case "poste" -> "poste.nom";
+            case "statut" -> "statut";
+            default -> "reference";
         };
+        return Sort.by(new Sort.Order(dir, prop).ignoreCase());
     }
 
     @GetMapping("/missions/{id}")

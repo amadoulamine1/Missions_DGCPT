@@ -21,7 +21,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ## 4. Incohérences mineures / cosmétique
 
-- **Performance** : le **Parc** est paginé et trié **côté base** (requête + `Pageable`) ; les autres listes (dont les Missions, dont l'état est dérivé des dates) restent en mémoire — sans enjeu au volume cible (~millier d'équipements).
+- **Performance** : le **Parc** et les **Missions** sont paginés et triés **côté base** (requête + `Pageable` ; l'état temporel dérivé des missions est exprimé en prédicats/CASE SQL). Les autres listes (Postes, Agents — faible volume) restent en mémoire — sans enjeu au volume cible.
 
 ## 5. Résolus
 
@@ -60,8 +60,8 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 - **Durcissement & supervision** — **anti-force-brute** (verrouillage temporaire après 5 échecs), **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy), **Actuator** (`/actuator/health` ouvert, reste réservé ADMIN), tableaux denses **scrollables** sur mobile.
 - **Journal d'audit** (admin) — table `audit_event` (migration **V20**) : connexions (réussies/refusées, IP) et verrouillages, création/clôture de mission, réaffectation, gestion des comptes ; écran filtrable et paginé (`/journal`).
 - **Tableau de bord — alertes** — missions en retard / à échéance, matériel en panne / à changer, cliquables.
-- **Parc paginé côté base** — filtres + pagination/tri en SQL (Spring Data) sur la table la plus volumineuse.
+- **Parc et Missions paginés côté base** — filtres + pagination/tri en SQL (Spring Data) ; pour les missions, l'**état temporel dérivé** est traduit en prédicats de dates (filtre) et en expression `CASE` (tri).
 
 ---
 
-**Restant, par priorité :** installation sur site du certificat/proxy HTTPS et activation des sauvegardes planifiées (copie hors-serveur) + changement du compte initial · pagination/tri côté base des **Missions** (laissée en mémoire — état dérivé des dates, faible volume).
+**Restant (hors code, côté terrain) :** installation sur site du certificat/proxy HTTPS, activation des sauvegardes planifiées (copie hors-serveur) et changement du compte initial `admin/admin`.

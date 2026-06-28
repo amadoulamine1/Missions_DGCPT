@@ -287,6 +287,24 @@ public class ConsultationService {
                 .toList();
     }
 
+    /** Liste paginée des missions, filtres + pagination/tri appliqués <b>côté base</b> (état dérivé inclus). */
+    public PageVue<MissionVue> listerMissionsPage(String q, Integer posteId, String region, String agentMat,
+                                                  String etat, Pageable pageable) {
+        String texte = (q == null) ? "" : q.trim().toLowerCase();
+        String reg = (region == null || region.isBlank()) ? null : region.trim();
+        String ag = (agentMat == null || agentMat.isBlank()) ? null : agentMat.trim();
+        String et = (etat == null || etat.isBlank()) ? null : etat.trim();
+        Page<Mission> page = missionRepo.rechercher(posteId, reg, ag, et, LocalDate.now(), texte, pageable);
+        Map<Integer, List<OrdreLien>> ordres = ordreRepo.findAllMeta().stream()
+                .collect(Collectors.groupingBy(OrdreMissionRepository.OrdreMeta::getMissionId,
+                        Collectors.mapping(o -> new OrdreLien(o.getId(), o.getNomFichier()), Collectors.toList())));
+        List<MissionVue> contenu = page.getContent().stream()
+                .map(m -> versMissionVue(m, ordres.getOrDefault(m.getId(), List.of())))
+                .toList();
+        return new PageVue<>(contenu, page.getNumber(), page.getSize(),
+                (int) page.getTotalElements(), Math.max(1, page.getTotalPages()));
+    }
+
     public List<ReleveVue> relevesDeMission(Integer id) {
         return releveRepo.findByMission_Id(id).stream().map(this::versReleveVue).toList();
     }
