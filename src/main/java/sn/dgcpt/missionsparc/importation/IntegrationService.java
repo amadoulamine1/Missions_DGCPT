@@ -54,12 +54,15 @@ public class IntegrationService {
     private final CategorieCableRepository categorieRepo;
     private final CategorieMaterielRepository categorieMaterielRepo;
 
+    private final sn.dgcpt.missionsparc.agent.RattachementService rattachement;
+
     public IntegrationService(PosteRepository posteRepo, AgentRepository agentRepo, MissionRepository missionRepo,
                               MaterielRepository materielRepo, OrdinateurRepository ordinateurRepo,
                               ImprimanteRepository imprimanteRepo, EquipementReseauRepository reseauRepo,
                               ScannerChequeRepository scannerRepo, AffectationMaterielRepository affectationRepo,
                               ReleveMaterielRepository releveRepo, LogicielRepository logicielRepo,
-                              CategorieCableRepository categorieRepo, CategorieMaterielRepository categorieMaterielRepo) {
+                              CategorieCableRepository categorieRepo, CategorieMaterielRepository categorieMaterielRepo,
+                              sn.dgcpt.missionsparc.agent.RattachementService rattachement) {
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
         this.missionRepo = missionRepo;
@@ -73,6 +76,7 @@ public class IntegrationService {
         this.logicielRepo = logicielRepo;
         this.categorieRepo = categorieRepo;
         this.categorieMaterielRepo = categorieMaterielRepo;
+        this.rattachement = rattachement;
     }
 
     @Transactional
@@ -177,7 +181,9 @@ public class IntegrationService {
             a.setTypeAgent(type);
             a.setPoste(type == TypeAgent.POSTE ? poste : null);
             log.warn("Import (création à la volée) : agent {} inconnu « {} » créé (nom/prénom à compléter) — à valider par un administrateur.", type, mat);
-            return agentRepo.save(a);
+            Agent saved = agentRepo.save(a);
+            rattachement.synchroniser(saved, LocalDate.now()); // historique de rattachement pour un agent de poste créé à la volée
+            return saved;
         });
     }
 
@@ -203,6 +209,7 @@ public class IntegrationService {
         if (!vide(l.getTelephone())) a.setTelephone(l.getTelephone().trim());
         if (!vide(l.getEmail())) a.setEmail(l.getEmail().trim());
         agentRepo.save(a);
+        if (nouveau) rattachement.synchroniser(a, LocalDate.now()); // rattachement pour un agent de poste nouvellement créé
     }
 
     private StatutMateriel parseStatut(String v) {

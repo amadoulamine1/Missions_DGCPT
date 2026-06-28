@@ -44,7 +44,8 @@ class MissionServiceTest {
     @BeforeEach
     void setUp() {
         service = new MissionService(missionRepo, posteRepo, agentRepo, chefPosteRepo, null, null, null,
-                new sn.dgcpt.missionsparc.audit.AuditService(null));
+                new sn.dgcpt.missionsparc.audit.AuditService(null),
+                new sn.dgcpt.missionsparc.agent.RattachementService(null));
     }
 
     // ---------- fabriques ----------

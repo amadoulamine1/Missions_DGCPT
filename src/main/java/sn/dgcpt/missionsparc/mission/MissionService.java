@@ -43,10 +43,12 @@ public class MissionService {
     private final CanevasWriter canevasWriter;
     private final OrdreMissionRepository ordreRepo;
     private final sn.dgcpt.missionsparc.audit.AuditService audit;
+    private final sn.dgcpt.missionsparc.agent.RattachementService rattachement;
 
     public MissionService(MissionRepository missionRepo, PosteRepository posteRepo, AgentRepository agentRepo,
                           ChefPosteRepository chefPosteRepo, ReferentielService referentiel, CanevasWriter canevasWriter,
-                          OrdreMissionRepository ordreRepo, sn.dgcpt.missionsparc.audit.AuditService audit) {
+                          OrdreMissionRepository ordreRepo, sn.dgcpt.missionsparc.audit.AuditService audit,
+                          sn.dgcpt.missionsparc.agent.RattachementService rattachement) {
         this.missionRepo = missionRepo;
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
@@ -55,6 +57,7 @@ public class MissionService {
         this.canevasWriter = canevasWriter;
         this.ordreRepo = ordreRepo;
         this.audit = audit;
+        this.rattachement = rattachement;
     }
 
     @Transactional
@@ -327,7 +330,9 @@ public class MissionService {
             a.setPrenom((fprenom == null || fprenom.isBlank()) ? "-" : fprenom.trim());
             a.setTypeAgent(TypeAgent.POSTE);
             a.setPoste(poste);
-            return agentRepo.save(a);
+            Agent saved = agentRepo.save(a);
+            rattachement.synchroniser(saved, LocalDate.now()); // rattachement pour un chef de poste créé à la volée
+            return saved;
         });
     }
 

@@ -27,11 +27,14 @@ public class ChefPosteService {
     private final PosteRepository posteRepo;
     private final AgentRepository agentRepo;
     private final ChefPosteRepository chefPosteRepo;
+    private final sn.dgcpt.missionsparc.agent.RattachementService rattachement;
 
-    public ChefPosteService(PosteRepository posteRepo, AgentRepository agentRepo, ChefPosteRepository chefPosteRepo) {
+    public ChefPosteService(PosteRepository posteRepo, AgentRepository agentRepo, ChefPosteRepository chefPosteRepo,
+                            sn.dgcpt.missionsparc.agent.RattachementService rattachement) {
         this.posteRepo = posteRepo;
         this.agentRepo = agentRepo;
         this.chefPosteRepo = chefPosteRepo;
+        this.rattachement = rattachement;
     }
 
     @Transactional
@@ -75,7 +78,9 @@ public class ChefPosteService {
             a.setPrenom((f.getChefPrenom() == null || f.getChefPrenom().isBlank()) ? "-" : f.getChefPrenom().trim());
             a.setTypeAgent(TypeAgent.POSTE);
             a.setPoste(poste);
-            return agentRepo.save(a);
+            Agent saved = agentRepo.save(a);
+            rattachement.synchroniser(saved, LocalDate.now()); // rattachement pour un chef de poste créé à la volée
+            return saved;
         });
     }
 

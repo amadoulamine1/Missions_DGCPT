@@ -14,14 +14,13 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 - **Sécurité durcie** : **CSRF**, **en-têtes de sécurité** (CSP/HSTS/Referrer-Policy), **anti-force-brute**, **journal d'audit**, **changement de mot de passe forcé**, **supervision** (`/actuator/health`). Profil `application-prod` **prêt pour HTTPS** (reverse-proxy via `forward-headers-strategy` ou keystore PKCS12) — reste l'**installation du certificat/proxy** sur site.
 - **Sauvegarde** : scripts `pg_dump` + rotation + restauration ; **planification fournie** (unités systemd + cron) et **script de test de restauration** (base jetable). Reste l'**activation** sur le serveur + la **copie hors-serveur** des dumps.
-- **Tests automatisés** — ~82 tests (dont **génération du canevas POI** et **verrou anti-force-brute**) : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **lecture du canevas + colonne logiciel « AD »** (`CanevasFixtureTest`), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — désignation du chef, clôture, **chevauchement autorisé** (`MissionServiceTest`),
+- **Tests automatisés** — ~85 tests (dont **génération du canevas POI**, **verrou anti-force-brute** et **historisation du rattachement**) : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **lecture du canevas + colonne logiciel « AD »** (`CanevasFixtureTest`), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — désignation du chef, clôture, **chevauchement autorisé** (`MissionServiceTest`),
   **rapport annuel** — agrégation par année, parc au 31/12, écarts N‑1 (`RapportAnnuelServiceTest`) et
   **prévision** par régression linéaire (`PrevisionTest`), **validation déclarative des formulaires** (`FormValidationTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`). **Intégration continue** (GitHub Actions : build + tests à chaque push). *Restent peu couverts* : exports PDF, génération du canevas en écriture (Apache POI).
   - *Note JDK 25* : Mockito ne peut pas instrumenter les **classes concrètes** (inline mock) ; mocker uniquement des **interfaces** (dépôts) ou recourir à des **doublures manuelles** (sous-classes) pour les services concrets.
 
 ## 4. Incohérences mineures / cosmétique
 
-- **Rattachement créé hors formulaire** : un agent créé *via l'import* ou *via la désignation d'un chef* n'obtient sa ligne d'historique de rattachement qu'à sa première édition (les agents existants sont repris par le backfill de la migration V7).
 - **Performance** : le **Parc** est paginé et trié **côté base** (requête + `Pageable`) ; les autres listes (dont les Missions, dont l'état est dérivé des dates) restent en mémoire — sans enjeu au volume cible (~millier d'équipements).
 
 ## 5. Résolus
@@ -56,6 +55,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 - **Rapport annuel** (§9.15) — revue annuelle missions + parc (réservée ADMIN/Manager) : synthèse avec **écarts N‑1** et **prévision N+1** (régression linéaire), **tendance sur ≤ 5 ans**, parc au 31/12 reconstitué via le dernier relevé daté, incidents, activité des agents ; **exports Excel/PDF**.
 - **Filtres, agents en charge & ordres de mission** (§9.16) — la **liste des missions** se filtre par **poste, région, agent de mission et état** ; elle affiche les informaticiens en charge (chef de mission en tête) ; une mission peut porter **plusieurs ordres de mission PDF** facultatifs, **joignables** depuis la liste (ADMIN / Chef), **téléchargeables** par tout utilisateur connecté et **supprimables** un par un. Stockage en base (table `ordre_mission`, BYTEA — migrations **V17/V18**) ; seul le **PDF** est accepté.
 - **Chef de poste obligatoire dans le canevas** — facultatif à la création de la mission, mais **bloquant à l'import** s'il est laissé vide (contrôle `ControleImport`) ; surligné en rouge dans le canevas (mise en forme conditionnelle).
+- **Rattachement créé hors formulaire** — un agent de poste créé **à la volée** (import, désignation d'un chef, création de mission) obtient désormais sa ligne d'historique de **rattachement** immédiatement (service `RattachementService` centralisé), et plus seulement à sa première édition.
 - **Guide de remplissage du canevas** — document `Guide-remplissage-canevas.md` (onglets, champs obligatoires, formats, processus d'import).
 - **Durcissement & supervision** — **anti-force-brute** (verrouillage temporaire après 5 échecs), **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy), **Actuator** (`/actuator/health` ouvert, reste réservé ADMIN), tableaux denses **scrollables** sur mobile.
 - **Journal d'audit** (admin) — table `audit_event` (migration **V20**) : connexions (réussies/refusées, IP) et verrouillages, création/clôture de mission, réaffectation, gestion des comptes ; écran filtrable et paginé (`/journal`).
@@ -64,4 +64,4 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ---
 
-**Restant, par priorité :** installation sur site du certificat/proxy HTTPS et activation des sauvegardes planifiées (copie hors-serveur) + changement du compte initial · finitions (rattachement hors formulaire, pagination/tri côté base des Missions).
+**Restant, par priorité :** installation sur site du certificat/proxy HTTPS et activation des sauvegardes planifiées (copie hors-serveur) + changement du compte initial · pagination/tri côté base des **Missions** (laissée en mémoire — état dérivé des dates, faible volume).

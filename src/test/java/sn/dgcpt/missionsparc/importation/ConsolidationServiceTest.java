@@ -71,7 +71,7 @@ class ConsolidationServiceTest {
     /** Compte les intégrations et renvoie 1 (une ligne intégrée) par appel. */
     private static final class FakeIntegration extends IntegrationService {
         int appels = 0;
-        FakeIntegration() { super(null, null, null, null, null, null, null, null, null, null, null, null, null); }
+        FakeIntegration() { super(null, null, null, null, null, null, null, null, null, null, null, null, null, null); }
         @Override public int integrer(CanevasImporte canevas) { appels++; return 1; }
     }
 
