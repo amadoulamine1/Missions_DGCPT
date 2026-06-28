@@ -91,4 +91,5 @@ Dans les deux cas, activer le cookie sécurisé une fois l'accès en https :
 - [ ] `DB_PASSWORD` fort, jamais en clair dans un fichier versionné.
 - [ ] Accès réseau **restreint** à l'intranet (pare-feu).
 - [ ] Sauvegardes planifiées **actives** + copie hors-serveur.
+- [ ] **Journalisation fichier** active (profil `prod` ; `LOG_FILE` sous Windows) + dossier de logs accessible en écriture.
 - [ ] Journal d'audit consulté (`/journal`) ; supervision branchée sur `/actuator/health`.
