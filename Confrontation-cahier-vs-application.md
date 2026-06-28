@@ -21,7 +21,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ## 4. Incohérences mineures / cosmétique
 
-- **Performance** : le **Parc** et les **Missions** sont paginés et triés **côté base** (requête + `Pageable` ; l'état temporel dérivé des missions est exprimé en prédicats/CASE SQL). Les autres listes (Postes, Agents — faible volume) restent en mémoire — sans enjeu au volume cible.
+- **Performance** : le **Parc** et les **Missions** sont paginés et triés **côté base** (requête + `Pageable` ; l'état temporel dérivé des missions est exprimé en prédicats/CASE SQL). Les listes **Postes** et **Agents** restent paginées en mémoire (faible volume, vues en cartes/liste) mais sans **N+1** (comptage du matériel par poste en une requête ; postes des agents pré-chargés). Le compteur d'échéances du menu est mis en cache (≤ 1 requête/minute).
 
 ## 5. Résolus
 

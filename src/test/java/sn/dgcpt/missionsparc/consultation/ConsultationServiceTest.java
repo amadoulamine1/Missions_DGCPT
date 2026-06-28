@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import sn.dgcpt.missionsparc.consultation.dto.InventaireDateLigne;
 import sn.dgcpt.missionsparc.consultation.dto.MaterielVue;
 import sn.dgcpt.missionsparc.consultation.dto.MissionVue;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -125,30 +128,20 @@ class ConsultationServiceTest {
     }
 
     @Test
-    void listerMissions_derive_l_etat_temporel_des_dates() {
+    void listerMissionsPage_derive_l_etat_temporel_des_dates() {
         LocalDate today = LocalDate.now();
-        when(missionRepo.findAll()).thenReturn(List.of(
-                mission(1, today.plusDays(5), today.plusDays(10)),   // à venir
-                mission(2, today.minusDays(2), today.plusDays(2)),   // en cours
-                mission(3, today.minusDays(10), today.minusDays(5)))); // terminée
+        // Le filtrage est désormais côté base (requête mockée) ; on vérifie ici la dérivation de l'état affiché.
+        when(missionRepo.rechercher(any(), any(), any(), any(), any(), any(), any())).thenReturn(
+                new PageImpl<>(List.of(
+                        mission(1, today.plusDays(5), today.plusDays(10)),   // à venir
+                        mission(2, today.minusDays(2), today.plusDays(2)),   // en cours
+                        mission(3, today.minusDays(10), today.minusDays(5))))); // terminée
 
-        List<MissionVue> res = service.listerMissions(null, null, null, null, null);
+        List<MissionVue> res = service.listerMissionsPage(null, null, null, null, null, PageRequest.of(0, 25)).getContenu();
 
         assertThat(res).filteredOn(v -> v.getId() == 1).extracting(MissionVue::getEtat).containsExactly("Planifiée");
         assertThat(res).filteredOn(v -> v.getId() == 2).extracting(MissionVue::getEtat).containsExactly("En cours");
         assertThat(res).filteredOn(v -> v.getId() == 3).extracting(MissionVue::getEtat).containsExactly("Terminée");
-    }
-
-    @Test
-    void listerMissions_filtre_par_etat_temporel() {
-        LocalDate today = LocalDate.now();
-        when(missionRepo.findAll()).thenReturn(List.of(
-                mission(1, today.plusDays(5), today.plusDays(10)),
-                mission(2, today.minusDays(10), today.minusDays(5))));
-
-        List<MissionVue> res = service.listerMissions(null, null, null, null, "Terminée");
-
-        assertThat(res).extracting(MissionVue::getId).containsExactly(2);
     }
 
     // ---------- inventaire à une date (snapshot etat_observe) ----------

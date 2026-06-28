@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(controllers = SecuriteAccesParRoleTest.NoopController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class))
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, sn.dgcpt.missionsparc.web.EcheanceCompteur.class})
 class SecuriteAccesParRoleTest {
 
     /** Contrôleur vide : présence d'un bean web sans mapper aucune des URL réelles testées. */
@@ -36,7 +36,7 @@ class SecuriteAccesParRoleTest {
     static class NoopController { }
 
     @Autowired MockMvc mvc;
-    /** Requise par GlobalModelAdvice (@ControllerAdvice chargé dans la tranche web) pour les notifications. */
+    /** GlobalModelAdvice (@ControllerAdvice de la tranche web) → EcheanceCompteur (importé) → MissionRepository. */
     @MockBean MissionRepository missionRepo;
 
     private static RequestPostProcessor admin()   { return user("admin").roles("ADMIN"); }

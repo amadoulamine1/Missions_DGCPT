@@ -33,7 +33,7 @@ public class AgentService {
 
     @Transactional(readOnly = true)
     public List<AgentLigne> lister() {
-        return agentRepo.findAll().stream()
+        return agentRepo.findAllAvecPoste().stream()
                 .map(a -> new AgentLigne(
                         a.getMatricule(),
                         a.getNom() + " " + a.getPrenom(),

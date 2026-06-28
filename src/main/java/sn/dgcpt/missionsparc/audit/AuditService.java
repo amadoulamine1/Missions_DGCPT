@@ -19,7 +19,9 @@ import java.util.List;
 
 /**
  * Journal d'audit : enregistre les actions sensibles et offre leur consultation.
- * L'écriture est best-effort (une défaillance d'audit ne doit pas faire échouer l'action métier).
+ * L'écriture est best-effort (une défaillance d'audit ne doit pas faire échouer l'action métier) et
+ * <b>synchrone par choix</b> : un journal d'audit doit être durable, un envoi asynchrone risquerait de
+ * perdre des évènements (file non vidée à l'arrêt) ; le coût d'un simple INSERT indexé est négligeable.
  */
 @Service
 public class AuditService {

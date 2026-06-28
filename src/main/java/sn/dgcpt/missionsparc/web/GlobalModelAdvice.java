@@ -6,22 +6,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import sn.dgcpt.missionsparc.domain.StatutMission;
-import sn.dgcpt.missionsparc.repository.MissionRepository;
-
-import java.time.LocalDate;
 
 /** Expose l'utilisateur connecté, son rôle, la page courante et les notifications à toutes les vues. */
 @ControllerAdvice
 public class GlobalModelAdvice {
 
-    /** Fenêtre d'anticipation des échéances de mission (jours). */
-    private static final int JOURS_ECHEANCE = 7;
+    private final EcheanceCompteur echeances;
 
-    private final MissionRepository missionRepo;
-
-    public GlobalModelAdvice(MissionRepository missionRepo) {
-        this.missionRepo = missionRepo;
+    public GlobalModelAdvice(EcheanceCompteur echeances) {
+        this.echeances = echeances;
     }
 
     private Authentication auth() {
@@ -58,6 +51,6 @@ public class GlobalModelAdvice {
     public long nbEcheances() {
         String role = currentRole();
         if (!"ADMIN".equals(role) && !"CHEF_MISSION".equals(role)) return 0;
-        return missionRepo.countAEcheance(StatutMission.CLOTUREE, LocalDate.now().plusDays(JOURS_ECHEANCE));
+        return echeances.compter();
     }
 }

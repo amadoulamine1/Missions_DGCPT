@@ -74,7 +74,15 @@ Les priorités suivent la convention de la revue : **P1** = impact direct (perfo
 | **Tableaux denses scrollables** sur petit écran (`.table-scroll`) | Accessibilité / UX | ✅ |
 | **Tests** : génération du canevas POI (`CanevasWriterTest`), verrou (`LoginAttemptServiceTest`) | Qualité | ✅ |
 
-**Restant (non retenu pour l'instant)** : finalisation HTTPS + planification des sauvegardes (et test de restauration) ; notifications d'échéance ; pagination côté base des **Missions** (état dérivé des dates — faible volume, laissé en mémoire).
+**Réserves de la dernière revue — traitées :**
+- *Code mort* : `ConsultationService.listerMissions(filtres)` (en mémoire) supprimée ; test repointé sur `listerMissionsPage`.
+- *N+1 Postes/Agents* : comptage du matériel par poste en **une requête** ; postes des agents **pré-chargés** (fetch-join). Pagination de ces petites listes laissée en mémoire (proportionné).
+- *Compteur d'échéances du menu* : mis en **cache** (≤ 1 requête/minute), partagé.
+- *Audit synchrone* : **conservé à dessein** (durabilité ; l'asynchrone risquerait de perdre des évènements) — documenté.
+- *Trou Flyway V19* : **laissé** (renuméroter une migration appliquée est un anti-pattern Flyway).
+- *Tri `JpaSort.unsafe` (état des missions)* : nécessaire (tri dérivé), **vérifié en réel** et commenté.
+
+**Reste (hors code, terrain)** : installation HTTPS sur site ; copie des sauvegardes hors-serveur ; changement du compte initial.
 
 ## Contraintes d'environnement à garder en tête
 

@@ -15,6 +15,10 @@ public interface MaterielRepository extends JpaRepository<Materiel, String> {
     long countByNumeroInventaireStartingWith(String prefixe);
     List<Materiel> findByPoste_Id(Integer posteId);
     long countByPoste_Id(Integer posteId);
+
+    /** Nombre de matériels par poste, en une seule requête (évite le N+1 de la liste des postes). */
+    @Query("select m.poste.id, count(m) from Materiel m where m.poste is not null group by m.poste.id")
+    List<Object[]> comptesParPoste();
     /** Clé naturelle des types génériques (famille AUTRE) : MAC portée par le matériel de base. */
     Optional<Materiel> findByMac(String mac);
 

@@ -67,7 +67,12 @@ public class ConsultationService {
     // ---- Postes ----
 
     public List<PosteVue> listerPostes() {
-        return posteRepo.findAll().stream().map(this::versPosteVue).toList();
+        Map<Integer, Long> comptes = materielRepo.comptesParPoste().stream()
+                .collect(Collectors.toMap(r -> (Integer) r[0], r -> (Long) r[1]));
+        return posteRepo.findAll().stream()
+                .map(p -> new PosteVue(p.getId(), p.getCode(), p.getNom(), p.getRegion(),
+                        comptes.getOrDefault(p.getId(), 0L)))
+                .toList();
     }
 
     public PosteDetailVue detailPoste(Integer id) {
@@ -158,10 +163,6 @@ public class ConsultationService {
 
     // ---- Missions ----
 
-    public List<MissionVue> listerMissions() {
-        return missionRepo.findAll().stream().map(this::versMissionVue).toList();
-    }
-
     public MissionDetailVue detailMission(Integer id) {
         Mission m = missionRepo.findById(id).orElseThrow();
         String chefMission = m.getChefMission() == null ? "" : m.getChefMission().getMatricule() + " — " + m.getChefMission().getPrenom() + " " + m.getChefMission().getNom();
@@ -247,25 +248,6 @@ public class ConsultationService {
                     a.getPoste() == null ? "" : a.getPoste().getNom(), affecteA,
                     a.getDateDebut() == null ? "" : a.getDateDebut().toString(), etat);
         }).toList();
-    }
-
-    public List<MissionVue> listerMissions(String q, Integer posteId, String region, String agentMat, String etat) {
-        String texte = (q == null) ? "" : q.trim().toLowerCase();
-        String reg = (region == null) ? "" : region.trim();
-        String ag = (agentMat == null) ? "" : agentMat.trim();
-        Map<Integer, List<OrdreLien>> ordres = ordreRepo.findAllMeta().stream()
-                .collect(Collectors.groupingBy(OrdreMissionRepository.OrdreMeta::getMissionId,
-                        Collectors.mapping(o -> new OrdreLien(o.getId(), o.getNomFichier()), Collectors.toList())));
-        return missionRepo.findAll().stream()
-                .filter(m -> posteId == null || (m.getPoste() != null && posteId.equals(m.getPoste().getId())))
-                .filter(m -> reg.isEmpty() || (m.getPoste() != null && reg.equalsIgnoreCase(m.getPoste().getRegion())))
-                .filter(m -> ag.isEmpty() || m.getMembres().stream().anyMatch(a -> ag.equalsIgnoreCase(a.getMatricule())))
-                .filter(m -> etat == null || etat.isBlank() || etatTemporel(m).equals(etat))
-                .filter(m -> texte.isEmpty()
-                        || (m.getReference() != null && m.getReference().toLowerCase().contains(texte))
-                        || (m.getObjet() != null && m.getObjet().toLowerCase().contains(texte)))
-                .map(m -> versMissionVue(m, ordres.getOrDefault(m.getId(), List.of())))
-                .toList();
     }
 
     /** Régions distinctes des postes (pour le filtre des missions). */
