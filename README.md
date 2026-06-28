@@ -2,6 +2,8 @@
 
 Application de gestion des missions d'inventaire et du parc informatique des postes régionaux de la Direction Générale de la Comptabilité Publique et du Trésor (DGCPT).
 
+> Documentation : dossier [`docs/`](docs/README.md) · historique des évolutions : [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Contexte
 
 Des agents informaticiens de la Direction Informatique effectuent des missions sur les postes régionaux pour relever l'état du câblage réseau et inventorier le matériel (ordinateurs, imprimantes, switchs, access points, scanners de chèque). L'application centralise ces relevés, historise les changements (chefs de poste, affectations) et permet de reconstituer l'inventaire d'un poste ou de tout le parc à une date donnée.
