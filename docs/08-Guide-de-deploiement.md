@@ -57,6 +57,9 @@ Deux options (cf. `06 §5`) :
 Dans les deux cas, activer le cookie sécurisé une fois l'accès en https :
 `server.servlet.session.cookie.secure=true`.
 
+> **Configuration complète et durcie** (Nginx **et** Apache, HTTPS forcé, TLS durci, en-têtes de
+> sécurité, pare-feu, vérifications) : voir **[11 — Guide de déploiement sécurisé](11-Guide-de-deploiement-securise.md)**.
+
 ## 6. Exécuter comme service
 
 - **Linux (systemd)** : unité `app.service` (`ExecStart=java -jar /opt/dgcpt/app.jar --spring.profiles.active=prod`,
