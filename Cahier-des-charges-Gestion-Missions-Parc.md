@@ -1,6 +1,6 @@
 # Cahier des charges — Application de gestion des missions et du parc informatique
 
-*Version 14 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
+*Version 15 — cadrage initial enrichi des évolutions de réalisation (voir §9).*
 
 ## 1. Contexte et objectif
 
@@ -303,6 +303,20 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
   depuis la liste (**Administrateur / Chef de mission**) ; chacun est **téléchargeable** par tout
   utilisateur connecté (Manager compris) et **supprimable** individuellement. Seul le format **PDF** est
   accepté ; les documents sont conservés en base (sauvegardés avec elle).
+
+### 9.17 Durcissement, supervision, exploitation et alertes
+- **Sécurité durcie** : protection **anti-force-brute** (verrouillage temporaire après plusieurs échecs de
+  connexion), **en-têtes de sécurité HTTP** (CSP, HSTS, Referrer-Policy, anti-MIME/clickjacking), et
+  **journal d'audit** des actions sensibles (connexions réussies/refusées et verrouillages, création/clôture
+  de mission, réaffectation de matériel, gestion des comptes) consultable par l'administrateur (`/journal`).
+- **Pilotage proactif** : **panneau d'alertes** du tableau de bord (missions en retard / à échéance, matériel
+  en panne / à changer) et **notification d'échéance** (badge présent sur toutes les pages).
+- **Supervision** : sonde de santé **`/actuator/health`** (état applicatif + base) pour la supervision réseau.
+- **Performance** : grandes listes (**Parc**, **Missions**) filtrées/paginées **côté base** ; suppression des
+  requêtes en cascade (N+1) des listes de postes et d'agents.
+- **Exploitation** : profil de production **prêt pour HTTPS** (reverse-proxy ou keystore), **journalisation
+  sur fichier avec rotation**, **sauvegardes planifiées** (Linux et Windows) avec **test de restauration** ;
+  guides de **déploiement**, **déploiement sécurisé** (Nginx/Apache), **explication du code** et **mise à jour**.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

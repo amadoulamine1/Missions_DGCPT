@@ -11,7 +11,7 @@ La **Direction Générale de la Comptabilité Publique et du Trésor (DGCPT)** d
 | Phase | Document | Objet |
 |---|---|---|
 | Cadrage | [01 — Note de cadrage](01-Note-de-cadrage.md) | Contexte, objectifs, périmètre, acteurs, risques, planning |
-| Spécifications | [Cahier des charges](../Cahier-des-charges-Gestion-Missions-Parc.md) | Expression du besoin (référence métier, v14) |
+| Spécifications | [Cahier des charges](../Cahier-des-charges-Gestion-Missions-Parc.md) | Expression du besoin (référence métier, v15) |
 | Spécifications | [02 — Spécifications fonctionnelles détaillées](02-Specifications-fonctionnelles-detaillees.md) | Cas d'usage, écrans, règles de gestion, matrice des droits |
 | Études techniques | [03 — Dossier d'architecture technique](03-Dossier-architecture-technique.md) | Stack, architecture en couches, sécurité, hors-ligne, déploiement |
 | Études techniques | [04 — Modèle de données](04-Modele-de-donnees.md) | Entités, relations, tables, migrations, historisations |
@@ -29,7 +29,7 @@ La **Direction Générale de la Comptabilité Publique et du Trésor (DGCPT)** d
 
 ## État du projet
 
-Application **réalisée et fonctionnelle** couvrant l'ensemble du périmètre métier (postes, agents, parc, missions, hors-ligne et consolidation, historisations, restitutions, tableau de bord, référentiels, comptes). Reste, côté mise en production : durcissement opérationnel (HTTPS, sauvegardes planifiées) et enrichissement de la couverture de tests.
+Application **réalisée et fonctionnelle** couvrant l'ensemble du périmètre métier (postes, agents, parc, missions, hors-ligne et consolidation, historisations, restitutions, tableau de bord, référentiels, comptes). **Durcie pour la production** : 4 rôles, anti-force-brute, en-têtes de sécurité, journal d'audit, supervision (`/actuator/health`), pagination côté base, journalisation fichier, sauvegardes planifiées + test de restauration, guides de déploiement (dont sécurisé Nginx/Apache). Reste, **côté terrain** : installation du certificat/proxy HTTPS, copie des sauvegardes hors-serveur, changement du compte initial.
 
 ## Pile technique (résumé)
 

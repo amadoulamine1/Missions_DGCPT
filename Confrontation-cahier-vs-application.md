@@ -1,6 +1,6 @@
 # Confrontation cahier des charges ⇄ application réalisée
 
-*État au 27/06/2026 — cahier de référence : **v14**. Écarts entre le cahier des charges et l'application livrée, vérifiés dans le code.*
+*État au 28/06/2026 — cahier de référence : **v15**. Écarts entre le cahier des charges et l'application livrée, vérifiés dans le code.*
 
 ## 1. Globalement conforme
 
@@ -12,11 +12,12 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 
 ## 3. Robustesse / mise en production
 
-- **Sécurité durcie** : **CSRF**, **en-têtes de sécurité** (CSP/HSTS/Referrer-Policy), **anti-force-brute**, **journal d'audit**, **changement de mot de passe forcé**, **supervision** (`/actuator/health`). Profil `application-prod` **prêt pour HTTPS** (reverse-proxy via `forward-headers-strategy` ou keystore PKCS12) — reste l'**installation du certificat/proxy** sur site.
-- **Sauvegarde** : scripts `pg_dump` + rotation + restauration ; **planification fournie** (unités systemd + cron) et **script de test de restauration** (base jetable). Reste l'**activation** sur le serveur + la **copie hors-serveur** des dumps.
-- **Tests automatisés** — ~85 tests (dont **génération du canevas POI**, **verrou anti-force-brute** et **historisation du rattachement**) : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **lecture du canevas + colonne logiciel « AD »** (`CanevasFixtureTest`), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — désignation du chef, clôture, **chevauchement autorisé** (`MissionServiceTest`),
+- **Sécurité durcie** : **CSRF**, **en-têtes de sécurité** (CSP/HSTS/Referrer-Policy), **anti-force-brute**, **journal d'audit**, **changement de mot de passe forcé**, **supervision** (`/actuator/health`). Profil `application-prod` **prêt pour HTTPS** (reverse-proxy via `forward-headers-strategy` ou keystore PKCS12 ; **guide Nginx/Apache** dans `docs/11`) — reste l'**installation du certificat/proxy** sur site.
+- **Journalisation** : en production, logs techniques **sur fichier avec rotation** (`logging.file.name`, surchargeable par `LOG_FILE` ; 10 Mo/jour, 30 jours, 500 Mo) en plus de la console.
+- **Sauvegarde** : scripts `pg_dump` + rotation + restauration ; **planification fournie** (systemd + cron sous Linux ; **script PowerShell + tâche planifiée** sous Windows) et **script de test de restauration** (base jetable). Reste, sur le serveur cible, l'**activation** et la **copie hors-serveur** des dumps.
+- **Tests automatisés** — ~84 tests (dont **génération du canevas POI**, **verrou anti-force-brute** et **historisation du rattachement**) : pipeline d'import (`ImportIntegrationTest`, Testcontainers), **lecture du canevas + colonne logiciel « AD »** (`CanevasFixtureTest`), **consolidation des conflits** (`ConsolidationServiceTest`), **contrôles d'import + filet anti-doublon, onglet générique** (`ControleImportTest`), **restitutions parc/missions + inventaire daté** (`ConsultationServiceTest`), **règles métier des missions** — désignation du chef, clôture, **chevauchement autorisé** (`MissionServiceTest`),
   **rapport annuel** — agrégation par année, parc au 31/12, écarts N‑1 (`RapportAnnuelServiceTest`) et
-  **prévision** par régression linéaire (`PrevisionTest`), **validation déclarative des formulaires** (`FormValidationTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`). **Intégration continue** (GitHub Actions : build + tests à chaque push). *Restent peu couverts* : exports PDF, génération du canevas en écriture (Apache POI).
+  **prévision** par régression linéaire (`PrevisionTest`), **validation déclarative des formulaires** (`FormValidationTest`), **sécurité par rôle** des URL (`SecuriteAccesParRoleTest`), réaffectation/mutation (`AffectationServiceTest`), export statistiques (`StatsExporterTest`), **génération du canevas POI** (`CanevasWriterTest`), **anti-force-brute** (`LoginAttemptServiceTest`), **rattachement** (`RattachementServiceTest`). **Intégration continue** (GitHub Actions : build + tests à chaque push). *Reste peu couvert* : impression PDF (côté navigateur, pas de génération serveur à tester).
   - *Note JDK 25* : Mockito ne peut pas instrumenter les **classes concrètes** (inline mock) ; mocker uniquement des **interfaces** (dépôts) ou recourir à des **doublures manuelles** (sous-classes) pour les services concrets.
 
 ## 4. Incohérences mineures / cosmétique
@@ -60,6 +61,8 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 - **Durcissement & supervision** — **anti-force-brute** (verrouillage temporaire après 5 échecs), **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy), **Actuator** (`/actuator/health` ouvert, reste réservé ADMIN), tableaux denses **scrollables** sur mobile.
 - **Journal d'audit** (admin) — table `audit_event` (migration **V20**) : connexions (réussies/refusées, IP) et verrouillages, création/clôture de mission, réaffectation, gestion des comptes ; écran filtrable et paginé (`/journal`).
 - **Tableau de bord — alertes** — missions en retard / à échéance, matériel en panne / à changer, cliquables.
+- **Notifications d'échéance** — badge dans le menu (toutes pages, ADMIN/Chef) : missions non clôturées dont la fin est atteinte ou proche (≤ 7 j) ; compteur mis en cache.
+- **Documentation de déploiement** — guides `08` (déploiement), `09` (explication du code), `10` (mise à jour), `11` (déploiement sécurisé Nginx/Apache) ; journalisation fichier en prod.
 - **Parc et Missions paginés côté base** — filtres + pagination/tri en SQL (Spring Data) ; pour les missions, l'**état temporel dérivé** est traduit en prédicats de dates (filtre) et en expression `CASE` (tri).
 
 ---
