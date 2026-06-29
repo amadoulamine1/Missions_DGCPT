@@ -151,6 +151,12 @@ public class CanevasWriter {
             mefcStatut(wb.getSheet("5-Switchs et AP"), 6, 7);
             mefcStatut(wb.getSheet("6-Scanners chèque"), 4, 5);
 
+            // Ordinateurs : une ligne est « saisie » dès qu'une valeur figure entre A et R (colonne AD
+            // comprise). Les champs obligatoires vides — Nom machine (B), MAC ethernet (D), Affecté à (F),
+            // Agent traitant (G) — sont alors surlignés en rouge (le modèle ne les déclenchait que jusqu'à L).
+            Sheet ord = wb.getSheet("3-Ordinateurs");
+            for (int col : new int[]{1, 3, 5, 6}) mefcObligatoire(ord, col, 17);
+
             // Correctif colonne « AD » (M) : insérée a posteriori dans le modèle, elle était restée
             // verrouillée et sans bordures. On lui recopie le style de la colonne « Sysbudget » (L)
             // — bordures du tableau + cellule déverrouillée (la liste Oui/Non couvre déjà H..M).
@@ -397,11 +403,20 @@ public class CanevasWriter {
 
     /** Surligne en rouge la colonne « statut » (vide sur une ligne saisie) d'un onglet matériel. */
     private void mefcStatut(Sheet s, int colStatut, int dernCol) {
+        mefcObligatoire(s, colStatut, dernCol);
+    }
+
+    /**
+     * Surligne en rouge une colonne <b>obligatoire</b> vide dès que la ligne est « saisie », c.-à-d. qu'au
+     * moins une cellule entre A et {@code dernCol} porte une valeur. La plage doit couvrir toutes les
+     * colonnes de saisie (AD comprise) pour que renseigner n'importe quel champ rende les obligatoires requis.
+     */
+    private void mefcObligatoire(Sheet s, int col, int dernCol) {
         if (s == null) return;
-        String col = CellReference.convertNumToColString(colStatut);
+        String c = CellReference.convertNumToColString(col);
         String last = CellReference.convertNumToColString(dernCol);
-        String formule = "AND(LEN(TRIM(" + col + "2))=0,COUNTA($A2:$" + last + "2)>0)";
-        regleFond(s.getSheetConditionalFormatting(), col + "2:" + col + "501", formule, IndexedColors.ROSE);
+        String formule = "AND(LEN(TRIM(" + c + "2))=0,COUNTA($A2:$" + last + "2)>0)";
+        regleFond(s.getSheetConditionalFormatting(), c + "2:" + c + "501", formule, IndexedColors.ROSE);
     }
 
     /** Marque un champ d'en-tête obligatoire : « * » sur le libellé (col. A) et fond rouge si la valeur (col. B) est vide. */

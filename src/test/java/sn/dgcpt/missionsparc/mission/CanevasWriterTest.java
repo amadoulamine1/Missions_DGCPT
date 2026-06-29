@@ -86,7 +86,24 @@ class CanevasWriterTest {
                     wb.getSheet("3-Ordinateurs").getRow(1).getCell(12); // ligne 2, colonne M
             assertThat(ad).as("cellule AD (M2) matérialisée").isNotNull();
             assertThat(ad.getCellStyle().getLocked()).as("AD déverrouillée").isFalse();
+
+            // « Ligne saisie » qui inclut AD (jusqu'à R) : renseigner AD rend les obligatoires requis (surlignés).
+            assertThat(mefcInclutAD(wb.getSheet("3-Ordinateurs")))
+                    .as("une règle de mise en forme conditionnelle déclenche sur $A2:$R2 (AD inclus)").isTrue();
         }
+    }
+
+    /** Vrai si une règle de MFC de la feuille utilise la plage « ligne saisie » étendue à la colonne R (AD). */
+    private boolean mefcInclutAD(Sheet s) {
+        var scf = s.getSheetConditionalFormatting();
+        for (int i = 0; i < scf.getNumConditionalFormattings(); i++) {
+            var cf = scf.getConditionalFormattingAt(i);
+            for (int j = 0; j < cf.getNumberOfRules(); j++) {
+                String f = cf.getRule(j).getFormula1();
+                if (f != null && f.contains("$A2:$R2")) return true;
+            }
+        }
+        return false;
     }
 
     // ---------- fabriques & helpers ----------
