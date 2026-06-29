@@ -151,6 +151,11 @@ public class CanevasWriter {
             mefcStatut(wb.getSheet("5-Switchs et AP"), 6, 7);
             mefcStatut(wb.getSheet("6-Scanners chèque"), 4, 5);
 
+            // Correctif colonne « AD » (M) : insérée a posteriori dans le modèle, elle était restée
+            // verrouillée et sans bordures. On lui recopie le style de la colonne « Sysbudget » (L)
+            // — bordures du tableau + cellule déverrouillée (la liste Oui/Non couvre déjà H..M).
+            aligneStyleColonne(wb.getSheet("3-Ordinateurs"), 11, 12);
+
             // 6) Onglet générique des types paramétrables (famille AUTRE)
             fillAutres(wb, m);
 
@@ -443,6 +448,26 @@ public class CanevasWriter {
             deverrouillerSaisie(autres, 1, 7);   // Type, Nom, Modèle, MAC, IP, Statut, Observation
             verrouillerColonneA(autres);
             autres.protectSheet("");              // active la protection (cellules verrouillées = lecture seule)
+        }
+    }
+
+    /**
+     * Recopie le style d'une colonne de référence sur une colonne cible (cellules existantes + style de
+     * colonne par défaut), en laissant la cellule <b>déverrouillée</b>. Sert à réparer une colonne ajoutée
+     * a posteriori (AD) qui avait perdu les bordures du tableau et restait verrouillée.
+     */
+    private void aligneStyleColonne(Sheet s, int colSource, int colCible) {
+        if (s == null) return;
+        Row r2 = s.getRow(1);
+        Cell ref = (r2 != null) ? r2.getCell(colSource) : null;
+        if (ref == null || ref.getCellStyle() == null) return;
+        CellStyle style = s.getWorkbook().createCellStyle();
+        style.cloneStyleFrom(ref.getCellStyle());
+        style.setLocked(false);
+        s.setDefaultColumnStyle(colCible, style);   // cellules vides / lignes ajoutées par l'agent
+        for (Row row : s) {                          // matérialise chaque cellule (bordures du tableau visibles)
+            if (row.getRowNum() == 0) continue;
+            row.getCell(colCible, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).setCellStyle(style);
         }
     }
 

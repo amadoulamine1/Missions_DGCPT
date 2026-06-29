@@ -79,6 +79,13 @@ class CanevasWriterTest {
             // y compris « 7-Autres matériels » (protégée par programme).
             assertThat(wb.getSheet("3-Ordinateurs").getProtect()).as("3-Ordinateurs protégée").isTrue();
             assertThat(wb.getSheet("7-Autres matériels").getProtect()).as("7-Autres protégée").isTrue();
+
+            // Colonne « AD » (M = index 12) réparée : cellule de saisie déverrouillée (sinon Excel
+            // refuse de modifier Oui/Non sur la feuille protégée).
+            org.apache.poi.ss.usermodel.Cell ad =
+                    wb.getSheet("3-Ordinateurs").getRow(1).getCell(12); // ligne 2, colonne M
+            assertThat(ad).as("cellule AD (M2) matérialisée").isNotNull();
+            assertThat(ad.getCellStyle().getLocked()).as("AD déverrouillée").isFalse();
         }
     }
 
