@@ -36,6 +36,8 @@ public class AuditService {
     public static final String COMPTE_CREE = "Compte créé";
     public static final String COMPTE_MODIFIE = "Compte modifié";
     public static final String MDP_REINITIALISE = "Mot de passe réinitialisé";
+    public static final String EXPORT_DONNEES = "Export des données";
+    public static final String IMPORT_DONNEES = "Import des données";
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 

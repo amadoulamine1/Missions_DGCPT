@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Données — Export / Import</title><link rel="stylesheet" th:href="@{/css/app.css}"/></head>
+<body>
+<nav class="topbar" th:replace="~{fragments/layout :: nav}"></nav>
+<main class="container">
+    <header class="page-head">
+        <div>
+            <p class="eyebrow">Administration</p>
+            <h1>Export / import des données</h1>
+        </div>
+    </header>
+
+    <p th:if="${message}" class="alert ok" th:text="${message}">ok</p>
+    <p th:if="${erreur}" class="alert err" th:text="${erreur}">err</p>
+
+    <p class="muted">Sauvegarde complète de la base (schéma + données) au format PostgreSQL « custom ».
+        Réservé à l'administrateur ; chaque opération est tracée dans le <a th:href="@{/journal}">journal d'audit</a>.</p>
+
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+        <div class="card">
+            <h2 class="flush">Exporter</h2>
+            <p class="muted mt-sm">Télécharge un fichier <code>.dump</code> restaurable, horodaté. À conserver
+                dans un emplacement sûr (hors serveur).</p>
+            <form method="post" th:action="@{/donnees/export}" class="mt-1">
+                <button class="btn" type="submit">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Exporter la base</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 class="flush">Importer</h2>
+            <p class="alert warn mt-sm" style="margin-top:.6rem">
+                <strong>Attention :</strong> l'import <strong>remplace toutes les données actuelles</strong> par
+                celles du fichier. Exportez d'abord une sauvegarde. L'opération est atomique (en cas d'échec, la
+                base reste inchangée) et devrait être faite hors période d'activité.</p>
+            <form method="post" th:action="@{/donnees/import}" enctype="multipart/form-data" class="mt-1"
+                  onsubmit="return confirm('Remplacer TOUTES les données actuelles par le contenu de ce fichier ?');">
+                <div class="form-row"><label>Fichier de sauvegarde (.dump)</label>
+                    <input type="file" name="fichier" accept=".dump,application/octet-stream" required/></div>
+                <button class="btn secondary" type="submit">Importer et remplacer</button>
+            </form>
+        </div>
+    </div>
+
+    <p class="muted mt-1" style="font-size:.85rem">Pour de très grosses bases, préférer les scripts serveur
+        (<code>scripts/sauvegarde-postgres.*</code> / <code>restauration-postgres.sh</code>) — cf. guide d'exploitation.</p>
+</main>
+</body>
+</html>

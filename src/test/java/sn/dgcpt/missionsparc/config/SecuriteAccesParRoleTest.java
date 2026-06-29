@@ -73,6 +73,8 @@ class SecuriteAccesParRoleTest {
     void agent_refuse_sur_les_zones_administrateur() throws Exception {
         mvc.perform(get("/utilisateurs").with(agent())).andExpect(status().isForbidden());
         mvc.perform(get("/agents").with(agent())).andExpect(status().isForbidden());
+        mvc.perform(get("/journal").with(agent())).andExpect(status().isForbidden());
+        mvc.perform(get("/donnees").with(agent())).andExpect(status().isForbidden());
         mvc.perform(get("/referentiels/logiciels").with(agent())).andExpect(status().isForbidden());
         mvc.perform(get("/postes/nouveau").with(agent())).andExpect(status().isForbidden());
         mvc.perform(get("/missions/nouvelle").with(agent())).andExpect(status().isForbidden());

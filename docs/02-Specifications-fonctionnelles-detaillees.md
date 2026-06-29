@@ -20,6 +20,7 @@ Réf. métier : *Cahier des charges v9*. Ce document décrit les fonctions telle
 | Gérer les référentiels (logiciels, catégories de câble) | ✓ | | | |
 | Gérer les comptes utilisateurs | ✓ | | | |
 | Consulter le **journal d'audit** | ✓ | | | |
+| **Exporter / importer** la base de données | ✓ | | | |
 
 Le **Manager** est un profil de **pilotage en lecture seule** : toutes les restitutions et le rapport
 annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spring Security) et la
@@ -83,7 +84,8 @@ annuel, sans aucune modification ni import. L'accès est filtré par rôle (Spri
 
 ## 8 bis. Sécurité et traçabilité
 
-- **Journal d'audit** (admin) : trace horodatée des actions sensibles — **connexions** (réussies / refusées, avec IP) et **verrouillages**, **création / clôture de mission**, **réaffectation de matériel**, **création / modification de compte** et **réinitialisation de mot de passe**. Écran consultable et **filtrable** (par action, par utilisateur), paginé.
+- **Journal d'audit** (admin) : trace horodatée des actions sensibles — **connexions** (réussies / refusées, avec IP) et **verrouillages**, **création / clôture de mission**, **réaffectation de matériel**, **création / modification de compte**, **réinitialisation de mot de passe**, **export / import de la base**. Écran consultable et **filtrable** (par action, par utilisateur), paginé.
+- **Export / import des données** (admin) : écran `/donnees` pour **exporter** une sauvegarde complète de la base (format PostgreSQL « custom », horodatée, téléchargeable) et **importer** un fichier de sauvegarde (restauration **atomique** qui **remplace** les données ; confirmation requise). S'appuie sur `pg_dump`/`pg_restore` ; chaque opération est **tracée** dans le journal d'audit.
 - **Durcissement** : protection **anti-force-brute** (verrouillage temporaire après échecs répétés), **en-têtes de sécurité** (CSP, HSTS, Referrer-Policy), **supervision** via Actuator (`/actuator/health`).
 
 ## 9. Règles de gestion transverses (rappel)

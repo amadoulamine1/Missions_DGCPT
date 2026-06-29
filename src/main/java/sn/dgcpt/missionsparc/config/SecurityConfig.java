@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/rapport-annuel/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
                 .requestMatchers("/journal/**").hasRole("ADMIN")
+                .requestMatchers("/donnees/**").hasRole("ADMIN")
                 .requestMatchers("/referentiels/**").hasRole("ADMIN")
                 // Aide à l'import : ouverte ; l'import lui-même reste hors MANAGER (lecture seule)
                 .requestMatchers("/import/guide").authenticated()

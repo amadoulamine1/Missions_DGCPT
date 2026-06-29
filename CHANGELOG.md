@@ -20,6 +20,8 @@ Catégories : **Ajouté**, **Modifié**, **Corrigé**, **Sécurité**, **Exploit
 - **Tableau de bord — panneau d'alertes** actionnables (missions en retard / à échéance, matériel en panne
   / à changer) et **notification d'échéance** (badge présent sur toutes les pages, ADMIN/Chef).
 - **Supervision** : Spring Boot **Actuator** (`/actuator/health` ouvert + sonde PostgreSQL ; reste réservé ADMIN).
+- **Export / import de la base** (ADMIN, écran `/donnees`) : export d'une sauvegarde complète (`pg_dump`,
+  format custom) et import/restauration **atomique** (`pg_restore --single-transaction`) ; opérations tracées.
 - **Tests** : génération du canevas POI (`CanevasWriterTest`), verrou (`LoginAttemptServiceTest`),
   historisation du rattachement (`RattachementServiceTest`).
 
