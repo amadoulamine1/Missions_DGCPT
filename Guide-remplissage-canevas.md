@@ -3,10 +3,11 @@
 Ce guide explique comment renseigner le **fichier canevas** (`.xlsx`) téléchargé pour une mission, avant
 de le **recharger** dans l'application pour consolidation et intégration au parc.
 
-> **Règle d'or** : les champs suivis d'un **astérisque (`*`)** sont **obligatoires**. Tant qu'ils sont
-> vides sur une ligne saisie, leur cellule apparaît en **rouge** (mise en forme conditionnelle).
-> Un format d'adresse **MAC** invalide apparaît en **orange**. Tant qu'une anomalie **bloquante**
-> subsiste, **le chargement ne passe pas**.
+> **Règle d'or** : les champs suivis d'un **astérisque (`*`)** sont **obligatoires**. Une ligne devient
+> « saisie » dès que **n'importe quelle** cellule y est renseignée — y compris une case **Oui/Non** comme
+> **AD** : les obligatoires encore vides apparaissent alors en **rouge** (mise en forme conditionnelle) et
+> **bloquent** le chargement tant qu'ils ne sont pas complétés. Un format d'adresse **MAC** invalide
+> apparaît en **orange**. Tant qu'une anomalie **bloquante** subsiste, **le chargement ne passe pas**.
 
 ---
 

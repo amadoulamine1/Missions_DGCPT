@@ -36,6 +36,11 @@ Catégories : **Ajouté**, **Modifié**, **Corrigé**, **Sécurité**, **Exploit
 - **Rattachement agent↔TPR créé à la volée** (import, désignation d'un chef, création de mission) :
   la ligne d'historique est désormais ouverte immédiatement, et plus seulement à la première édition.
 - Suppression de code mort (`listerMissions` en mémoire) après passage au SQL.
+- **Canevas — colonne « AD »** (Ordinateurs) : insérée a posteriori, elle était **verrouillée** (Excel
+  refusait Oui/Non sur la feuille protégée) et **sans bordures** → déverrouillée et alignée sur le style
+  du tableau.
+- **Canevas — « ligne saisie »** : renseigner **AD** (ou tout champ jusqu'à la colonne R) rend désormais
+  les champs **obligatoires** vides requis (surlignés en rouge + bloquants à l'import).
 
 ### Exploitation
 - **Journalisation sur fichier avec rotation** en production (`logging.file.name`, surchargeable par `LOG_FILE` ;
