@@ -17,7 +17,7 @@ service, sauvegardes, recette et checklist de sécurité.
 | JDK | 17+ | exécution du JAR (compatible JDK 21/25) |
 | PostgreSQL | 12+ | base dédiée `missions_parc` |
 | Maven | 3.9+ | **build uniquement** (poste de build/CI) |
-| Reverse-proxy *(option)* | nginx / Apache | terminaison TLS — voir **Mode B** (§6) |
+| Reverse-proxy *(option)* | nginx / Apache | terminaison TLS — voir **Mode B** (§7) |
 
 Le schéma est créé **automatiquement par Flyway** au premier démarrage (`ddl-auto=none`).
 
@@ -70,7 +70,7 @@ Mode A (sans Nginx)                       Mode B (avec Nginx/Apache)
 Navigateur ──HTTPS──> App (keystore)      Navigateur ──HTTPS──> Proxy ──HTTP(127.0.0.1)──> App
 ```
 
-| Critère | Mode A — Sans proxy | Mode B — Avec proxy |
+| Critère | Mode A — Sans Nginx (§6) | Mode B — Avec Nginx/Apache (§7) |
 |---|---|---|
 | Composants à installer | aucun (juste le JAR) | Nginx ou Apache en plus |
 | Terminaison TLS | par l'application (keystore PKCS12) | par le proxy |
@@ -85,11 +85,11 @@ Navigateur ──HTTPS──> App (keystore)      Navigateur ──HTTPS──> 
 
 ---
 
-## 5 bis. Mode A — Sans Nginx (application autonome)
+## 6. Mode A — Sans Nginx (application autonome)
 
 L'application écoute directement et porte le certificat. **Pas besoin de reverse-proxy pour faire du HTTPS.**
 
-### A.1 — Générer le keystore PKCS12
+### 6.1 — Générer le keystore PKCS12
 
 Le HTTPS de Spring Boot s'appuie sur un **keystore PKCS12** (`.p12`). Deux cas :
 
@@ -113,7 +113,7 @@ keytool -genkeypair -alias dgcpt -keyalg RSA -keysize 2048 \
 > Sous **Windows**, utilisez un chemin comme `C:\dgcpt\keystore.p12`. Protégez le fichier (lecture
 > réservée au compte de service) ; le mot de passe passe par `SSL_KEYSTORE_PASSWORD`, jamais en clair.
 
-### A.2 — Activer le HTTPS dans le profil `prod`
+### 6.2 — Activer le HTTPS dans le profil `prod`
 
 Le bloc « Option B » est déjà présent (commenté) dans `application-prod.properties` — le **décommenter** :
 
@@ -135,13 +135,13 @@ Puis lancer (avec `SSL_KEYSTORE_PASSWORD` en plus des `DB_*`). L'app est accessi
 > simple en intranet), ou rediriger 443→8443 au pare-feu. Sous Windows, 443 est utilisable directement
 > si aucun autre service ne l'occupe.
 
-### A.3 — Limite : pas de redirection HTTP→HTTPS automatique
+### 6.3 — Limite : pas de redirection HTTP→HTTPS automatique
 
 En mode autonome, l'application **n'écoute que le port HTTPS** : une visite en `http://…` n'est pas
 redirigée. En intranet, **publiez l'URL `https://`** (favori, portail). Forcer la redirection 80→443
 sans proxy demande d'ajouter un connecteur HTTP secondaire — c'est précisément un avantage du **Mode B**.
 
-### A.4 — Pare-feu (Mode A)
+### 6.4 — Pare-feu (Mode A)
 
 ```bash
 # Linux (ufw)
@@ -154,7 +154,7 @@ New-NetFirewallRule -DisplayName "DGCPT HTTPS" -Direction Inbound -Protocol TCP 
 
 ---
 
-## 6. Mode B — Avec Nginx ou Apache (reverse-proxy, durci)
+## 7. Mode B — Avec Nginx ou Apache (reverse-proxy, durci)
 
 Le proxy termine le TLS et relaie vers l'application, qui **n'écoute que sur `127.0.0.1`**.
 
@@ -168,7 +168,7 @@ Navigateur ──HTTPS(443)──>  Reverse-proxy (Nginx ou Apache)  ──HTTP(
 L'application **ne doit jamais être joignable directement** depuis le réseau : seul le proxy l'atteint
 en local.
 
-### 6.1 — Préparer l'application
+### 7.1 — Préparer l'application
 
 Dans `application-prod.properties` (ou variables d'environnement) :
 
@@ -184,7 +184,7 @@ server.error.whitelabel.enabled=false         # ne pas divulguer la version du s
 > Le proxy ci-dessous **complète** (Permissions-Policy, HSTS même sur les erreurs, masquage de version)
 > sans réémettre de CSP. *(Variante : tout centraliser au proxy et le retirer de l'app — pas les deux.)*
 
-### 6.2 — Certificat TLS
+### 7.2 — Certificat TLS
 
 - **Intranet** : certificat émis par l'**autorité interne** (AD CS / PKI d'entreprise) — à privilégier
   pour la confiance navigateur sans avertissement.
@@ -200,7 +200,7 @@ chmod 600 /etc/ssl/dgcpt/dgcpt.key
 
 Paramètres Diffie-Hellman (Nginx, suites DHE) : `openssl dhparam -out /etc/ssl/dgcpt/dhparam.pem 2048`.
 
-### 6.3 — Nginx — configuration complète
+### 7.3 — Nginx — configuration complète
 
 `/etc/nginx/sites-available/dgcpt.conf` :
 
@@ -271,7 +271,7 @@ nginx -t && systemctl reload nginx
 > avec les `proxy_set_header` `Host`/`X-Forwarded-*` et `client_max_body_size 100m`). Les directives TLS
 > durcies et en-têtes ci-dessus sont recommandées en production.
 
-### 6.4 — Apache (httpd) — configuration complète
+### 7.4 — Apache (httpd) — configuration complète
 
 Modules requis : `mod_ssl mod_proxy mod_proxy_http mod_headers mod_rewrite`.
 ```bash
@@ -332,7 +332,7 @@ Activer + recharger :
 a2ensite dgcpt && apachectl configtest && systemctl reload apache2
 ```
 
-### 6.5 — Récapitulatif des paramètres de sécurité (Mode B)
+### 7.5 — Récapitulatif des paramètres de sécurité
 
 | Paramètre | Où | Valeur |
 |---|---|---|
@@ -350,7 +350,7 @@ a2ensite dgcpt && apachectl configtest && systemctl reload apache2
 | **Masquage des versions** | proxy | `server_tokens off` / `ServerTokens Prod` |
 | **Supervision protégée** | proxy | `/actuator/**` bloqué sauf `/health` |
 
-### 6.6 — Pare-feu (Mode B)
+### 7.6 — Pare-feu (Mode B)
 
 Ouvrir **80** (redirection) et **443** ; **bloquer 8080** depuis l'extérieur (l'app n'écoute de toute
 façon que sur `127.0.0.1`).
@@ -367,7 +367,7 @@ New-NetFirewallRule -DisplayName "DGCPT HTTPS" -Direction Inbound -Protocol TCP 
 New-NetFirewallRule -DisplayName "DGCPT HTTP redirect" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow
 ```
 
-### 6.7 — Vérification TLS
+### 7.7 — Vérification TLS
 
 ```bash
 # 1. Redirection HTTP -> HTTPS (301)
@@ -384,14 +384,14 @@ curl -s https://dgcpt.intranet/actuator/health      # {"status":"UP"}
 ```
 Audit complémentaire : **SSL Labs** (si exposé) ou `testssl.sh` en interne (note A attendue).
 
-### 6.8 — Renouvellement du certificat
+### 7.8 — Renouvellement du certificat
 
 - **Let's Encrypt** : `certbot renew` (tâche planifiée) recharge le proxy automatiquement.
 - **CA interne** : suivre l'échéance ; remplacer `.crt`/`.key` puis `reload` du proxy.
 
 ---
 
-## 7. Exécuter comme service
+## 8. Exécuter comme service
 
 - **Linux (systemd)** — `/etc/systemd/system/dgcpt.service` :
 
@@ -416,14 +416,14 @@ systemctl daemon-reload && systemctl enable --now dgcpt
 - **Windows** : exécuter le JAR au démarrage (tâche planifiée « au démarrage » ou service via **NSSM**).
   Définir `LOG_FILE` (ex. `C:\ProgramData\DGCPT\logs\app.log`) et les `DB_*` au niveau du service.
 
-## 8. Sauvegardes (à activer)
+## 9. Sauvegardes (à activer)
 
 - **Linux** : `scripts/systemd/dgcpt-sauvegarde.{service,timer}` → `systemctl enable --now dgcpt-sauvegarde.timer`.
 - **Windows** : `scripts/installer-sauvegarde-planifiee.ps1` (tâche quotidienne 01h00).
 - **Copier les dumps hors-serveur** et lancer périodiquement le **test de restauration**
   (`scripts/test-restauration-postgres.sh`).
 
-## 9. Recette de mise en service (smoke test)
+## 10. Recette de mise en service (smoke test)
 
 | # | Vérification | Attendu |
 |---|---|---|
@@ -433,11 +433,15 @@ systemctl daemon-reload && systemctl enable --now dgcpt
 | 4 | Connexion `admin/admin` | redirection vers le tableau de bord |
 | 5 | **Changer** le mot de passe initial | imposé à la première connexion |
 | 6 | Charger une page liste (Parc / Missions) | données + pagination OK |
-| 7 | Export de base (`/donnees`, ADMIN) | dump téléchargé (proxy `client_max_body_size` OK) |
+| 7 | Export de base (`/donnees`, ADMIN) | dump téléchargé sans coupure (Mode B : `proxy_read_timeout` suffisant) |
 | 8 | Lancer une sauvegarde test | dump produit, restaurable |
 | 9 | *(Mode B)* App non joignable en direct | `curl http://<ip>:8080/` doit échouer |
 
-## 10. Checklist sécurité avant ouverture
+> L'**import** de base (téléversement du `.dump`) transite par le proxy : vérifier que
+> `client_max_body_size` (Nginx) / `LimitRequestBody` (Apache) couvrent bien la **limite de 100 Mo** de
+> l'application, sinon le proxy renvoie une erreur **413** avant que l'app ne traite la requête.
+
+## 11. Checklist sécurité avant ouverture
 
 - [ ] **HTTPS effectif** (keystore en Mode A, certificat au proxy en Mode B) + cookie `Secure` activé.
 - [ ] *(Mode B)* App liée à `127.0.0.1` ; redirection **HTTP→HTTPS** active ; **8080 non exposé** ;

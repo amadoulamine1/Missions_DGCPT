@@ -69,7 +69,7 @@ vues reçoivent des **DTO** (`*Vue`), jamais les entités.
 - **Production** : profil dédié — **HTTPS** par reverse-proxy (`forward-headers-strategy`) **ou** keystore
   PKCS12, cookies de session sécurisés (`HttpOnly`, `SameSite`, `Secure`), supervision `/actuator/health`
   réservée à l'ADMIN (sauf `/health`). Compte `admin/admin` initial à changer ; accès réseau restreint à
-  l'intranet. Configuration durcie détaillée dans `08-Guide-de-deploiement.md` (§6, reverse-proxy).
+  l'intranet. Configuration durcie détaillée dans `08-Guide-de-deploiement.md` (§7, reverse-proxy).
 
 ## 5. Mode hors-ligne
 
