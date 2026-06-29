@@ -20,8 +20,7 @@ La **Direction Générale de la Comptabilité Publique et du Trésor (DGCPT)** d
 | Exploitation | [06 — Guide d'installation et d'exploitation](06-Guide-installation-exploitation.md) | Pré-requis, build, déploiement, sauvegardes |
 | Exploitation | [Politique de sauvegarde et de sécurité](../Politique-sauvegarde-securite.md) | Sécurité et sauvegardes |
 | Utilisation | [07 — Manuel utilisateur](07-Manuel-utilisateur.md) | Prise en main par rôle, workflows |
-| Déploiement | [08 — Guide de déploiement](08-Guide-de-deploiement.md) | Mise en production : build, config, HTTPS, service, recette, checklist sécurité |
-| Déploiement | [11 — Guide de déploiement sécurisé](11-Guide-de-deploiement-securise.md) | Reverse-proxy **Nginx & Apache**, HTTPS forcé, TLS durci, en-têtes, pare-feu, vérifications |
+| Déploiement | [08 — Guide de déploiement](08-Guide-de-deploiement.md) | Mise en production : build, config, **HTTPS avec ou sans Nginx** (autonome via keystore **ou** reverse-proxy **Nginx/Apache** durci), service, sauvegardes, recette, checklist sécurité |
 | Développement | [09 — Guide d'explication du code](09-Guide-d-explication-du-code.md) | Organisation des packages, cycle d'une requête, flux métier, conventions |
 | Maintenance | [10 — Guide de mise à jour](10-Guide-de-mise-a-jour.md) | Mise à jour, migrations Flyway, dépendances, dépannage |
 | Qualité | [Confrontation cahier ⇄ application](../Confrontation-cahier-vs-application.md) | Écarts résiduels et points de vigilance |

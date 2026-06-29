@@ -64,7 +64,7 @@ Aucun écart fonctionnel structurant. Les chantiers du cadrage sont réalisés, 
 - **Correctifs canevas — colonne « AD »** — la colonne AD des Ordinateurs (ajoutée a posteriori) était verrouillée (Excel refusait Oui/Non) et sans bordures → **déverrouillée + style du tableau recopié** ; de plus, renseigner AD rend la **ligne « saisie »** (obligatoires vides surlignés et bloquants, plage MFC étendue à la colonne R).
 - **Tableau de bord — alertes** — missions en retard / à échéance, matériel en panne / à changer, cliquables.
 - **Notifications d'échéance** — badge dans le menu (toutes pages, ADMIN/Chef) : missions non clôturées dont la fin est atteinte ou proche (≤ 7 j) ; compteur mis en cache.
-- **Documentation de déploiement** — guides `08` (déploiement), `09` (explication du code), `10` (mise à jour), `11` (déploiement sécurisé Nginx/Apache) ; journalisation fichier en prod.
+- **Documentation de déploiement** — guides `08` (déploiement : HTTPS avec/sans Nginx, reverse-proxy durci Nginx/Apache), `09` (explication du code), `10` (mise à jour) ; journalisation fichier en prod.
 - **Parc et Missions paginés côté base** — filtres + pagination/tri en SQL (Spring Data) ; pour les missions, l'**état temporel dérivé** est traduit en prédicats de dates (filtre) et en expression `CASE` (tri).
 
 ---

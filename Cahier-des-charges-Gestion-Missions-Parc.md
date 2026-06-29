@@ -316,7 +316,8 @@ Section ajoutée pendant le développement, en complément du cadrage initial.
   requêtes en cascade (N+1) des listes de postes et d'agents.
 - **Exploitation** : profil de production **prêt pour HTTPS** (reverse-proxy ou keystore), **journalisation
   sur fichier avec rotation**, **sauvegardes planifiées** (Linux et Windows) avec **test de restauration** ;
-  guides de **déploiement**, **déploiement sécurisé** (Nginx/Apache), **explication du code** et **mise à jour**.
+  guide de **déploiement** unifié (HTTPS avec/sans Nginx, reverse-proxy durci Nginx/Apache),
+  guides d'**explication du code** et de **mise à jour**.
 
 ### 9.5 Pistes d'évolution
 Les chantiers structurants du cadrage sont réalisés (authentification et rôles, consolidation et arbitrage des conflits, inventaire à une date, restitutions et exports). Évolutions possibles ultérieurement :

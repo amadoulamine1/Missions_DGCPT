@@ -54,8 +54,10 @@ Catégories : **Ajouté**, **Modifié**, **Corrigé**, **Sécurité**, **Exploit
 - Profil de production **prêt pour HTTPS** (reverse-proxy `forward-headers-strategy` ou keystore PKCS12).
 
 ### Doc
-- Nouveaux guides : **08** déploiement, **09** explication du code, **10** mise à jour,
-  **11** déploiement sécurisé (reverse-proxy Nginx/Apache, HTTPS forcé, TLS durci, en-têtes, pare-feu).
+- Nouveaux guides : **08** déploiement, **09** explication du code, **10** mise à jour. Le guide **08**
+  est **unifié** (déploiement + déploiement sécurisé fusionnés) : HTTPS **avec ou sans Nginx** — mode
+  autonome (keystore PKCS12) **ou** reverse-proxy **Nginx/Apache** durci (HTTPS forcé, TLS durci,
+  en-têtes, pare-feu, vérifications).
 - Passe de cohérence générale (cahier §9.17, dossier d'architecture, confrontation, README, index).
 
 ---

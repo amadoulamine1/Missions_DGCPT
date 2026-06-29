@@ -69,7 +69,7 @@ vues reçoivent des **DTO** (`*Vue`), jamais les entités.
 - **Production** : profil dédié — **HTTPS** par reverse-proxy (`forward-headers-strategy`) **ou** keystore
   PKCS12, cookies de session sécurisés (`HttpOnly`, `SameSite`, `Secure`), supervision `/actuator/health`
   réservée à l'ADMIN (sauf `/health`). Compte `admin/admin` initial à changer ; accès réseau restreint à
-  l'intranet. Configuration durcie détaillée dans `11-Guide-de-deploiement-securise.md`.
+  l'intranet. Configuration durcie détaillée dans `08-Guide-de-deploiement.md` (§6, reverse-proxy).
 
 ## 5. Mode hors-ligne
 
@@ -97,7 +97,7 @@ Tables à période (`date_debut` / `date_fin`) : `chef_poste`, `rattachement_age
   planifiée PowerShell (Windows) + **test de restauration** (base jetable).
 
 Guides : [06 installation/exploitation](06-Guide-installation-exploitation.md),
-[08 déploiement](08-Guide-de-deploiement.md), [11 déploiement sécurisé](11-Guide-de-deploiement-securise.md),
+[08 déploiement](08-Guide-de-deploiement.md) (HTTPS avec/sans Nginx, reverse-proxy durci),
 [10 mise à jour](10-Guide-de-mise-a-jour.md).
 
 ## 9. Performance & observabilité
