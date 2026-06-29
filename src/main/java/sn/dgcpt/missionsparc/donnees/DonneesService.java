@@ -42,7 +42,7 @@ public class DonneesService {
         try {
             ProcessBuilder pb = new ProcessBuilder(cmd).redirectError(err);
             pb.environment().put("PGPASSWORD", c.password);
-            Process p = pb.start();
+            Process p = demarrer(pb, "pg_dump");
             byte[] dump = p.getInputStream().readAllBytes();      // stdout = dump binaire
             int code = p.waitFor();
             if (code != 0) {
@@ -70,7 +70,7 @@ public class DonneesService {
                     fichier.getAbsolutePath()));
             ProcessBuilder pb = new ProcessBuilder(cmd).redirectError(err);
             pb.environment().put("PGPASSWORD", c.password);
-            Process p = pb.start();
+            Process p = demarrer(pb, "pg_restore");
             p.getInputStream().readAllBytes(); // vider stdout
             int code = p.waitFor();
             if (code != 0) {
@@ -119,12 +119,72 @@ public class DonneesService {
         return new Conn(host, port, db, user, password);
     }
 
-    /** Chemin de l'exécutable PostgreSQL (dossier app.pg-bin + nom, suffixe .exe sous Windows). */
+    /**
+     * Chemin de l'exécutable PostgreSQL. Priorité : (1) dossier configuré {@code app.pg-bin} / {@code PG_BIN} ;
+     * (2) sous Windows, détection automatique de l'installation standard (le dossier {@code bin} de PostgreSQL
+     * y est rarement dans le {@code PATH}) ; (3) sinon, recherche dans le {@code PATH} (cas typique Linux).
+     */
     private String pg(String nom) {
-        String bin = env.getProperty("app.pg-bin", "");
         boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
         String exe = windows ? nom + ".exe" : nom;
-        return bin.isBlank() ? exe : Paths.get(bin, exe).toString();
+
+        String bin = env.getProperty("app.pg-bin", "");
+        if (!bin.isBlank()) {
+            return Paths.get(bin, exe).toString();          // (1) dossier explicitement configuré
+        }
+        if (windows) {
+            String detecte = detecterBinWindows(exe);       // (2) installation standard la plus récente
+            if (detecte != null) {
+                return detecte;
+            }
+        }
+        return exe;                                          // (3) PATH
+    }
+
+    /** Cherche {@code <ProgramFiles>\PostgreSQL\<version>\bin\<exe>} et retourne la version la plus récente. */
+    private String detecterBinWindows(String exe) {
+        String[] racines = {
+                System.getenv("ProgramFiles"), System.getenv("ProgramFiles(x86)"),
+                "C:\\Program Files", "C:\\Program Files (x86)"
+        };
+        String meilleur = null;
+        int meilleureVersion = -1;
+        for (String racine : racines) {
+            if (racine == null || racine.isBlank()) continue;
+            File[] versions = new File(racine, "PostgreSQL").listFiles(File::isDirectory);
+            if (versions == null) continue;
+            for (File v : versions) {
+                File candidat = new File(v, "bin" + File.separator + exe);
+                if (!candidat.isFile()) continue;
+                int num = numeroMajeur(v.getName());
+                if (num > meilleureVersion) {
+                    meilleureVersion = num;
+                    meilleur = candidat.getAbsolutePath();
+                }
+            }
+        }
+        return meilleur;
+    }
+
+    /** Numéro de version majeure d'un dossier d'installation PostgreSQL (« 18 » → 18) ; -1 si non numérique. */
+    private int numeroMajeur(String nom) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : nom.toCharArray()) {
+            if (Character.isDigit(ch)) sb.append(ch); else break;
+        }
+        return sb.isEmpty() ? -1 : Integer.parseInt(sb.toString());
+    }
+
+    /** Démarre le processus en convertissant l'absence de binaire en message d'erreur actionnable. */
+    private Process demarrer(ProcessBuilder pb, String outil) throws IOException {
+        try {
+            return pb.start();
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Outil PostgreSQL « " + outil + " » introuvable. Installez les outils clients PostgreSQL, "
+                    + "ou indiquez leur dossier via la propriété app.pg-bin (variable d'environnement PG_BIN), "
+                    + "par ex. C:\\Program Files\\PostgreSQL\\18\\bin.", e);
+        }
     }
 
     private String lire(File f) {

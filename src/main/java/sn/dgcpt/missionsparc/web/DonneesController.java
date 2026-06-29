@@ -29,12 +29,20 @@ public class DonneesController {
 
     /** Télécharge une sauvegarde complète de la base (format custom restaurable). */
     @PostMapping("/donnees/export")
-    public ResponseEntity<byte[]> exporter() throws Exception {
-        byte[] dump = donnees.exporter();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + donnees.nomFichierExport() + "\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(dump);
+    public Object exporter(RedirectAttributes ra) {
+        try {
+            byte[] dump = donnees.exporter();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + donnees.nomFichierExport() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(dump);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+            return "redirect:/donnees";
+        } catch (Exception e) {
+            ra.addFlashAttribute("erreur", "Export impossible : " + e.getMessage());
+            return "redirect:/donnees";
+        }
     }
 
     /** Restaure la base à partir d'un fichier de sauvegarde téléversé. Remplace les données. */

@@ -41,6 +41,10 @@ Catégories : **Ajouté**, **Modifié**, **Corrigé**, **Sécurité**, **Exploit
   du tableau.
 - **Canevas — « ligne saisie »** : renseigner **AD** (ou tout champ jusqu'à la colonne R) rend désormais
   les champs **obligatoires** vides requis (surlignés en rouge + bloquants à l'import).
+- **Export / import de la base sous Windows** : `pg_dump` / `pg_restore` étaient introuvables (« CreateProcess
+  error=2 ») quand le dossier `bin` de PostgreSQL n'était pas dans le `PATH` et `PG_BIN` non défini →
+  **détection automatique** de l'installation standard (`C:\Program Files\PostgreSQL\<version>\bin`, version la
+  plus récente). L'**export** affiche désormais un message clair en cas d'échec au lieu d'une page d'erreur.
 
 ### Exploitation
 - **Journalisation sur fichier avec rotation** en production (`logging.file.name`, surchargeable par `LOG_FILE` ;
